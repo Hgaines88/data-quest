@@ -72,8 +72,9 @@ Your Gold tables should correctly answer:
    - **Trade-offs**: what you'd handle differently for a real client, such as
      schema drift, data volume, cost, access control, or monitoring.
    - **Retrospective**: what was hardest to get right.
-3. A screenshot of your tables/pipeline in Databricks, since we may not be able
-   to access your live workspace when we review.
+3. **Screenshots** of your **pipeline**, your **tables**, and the **output for
+   each of the three questions** above, since we may not be able to access your
+   live workspace when we review.
 
 ## Bonus
 
