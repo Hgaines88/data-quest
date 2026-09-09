@@ -71,6 +71,10 @@ Your Gold tables should correctly answer:
      re-running ingestion safely).
    - **Trade-offs**: what you'd handle differently for a real client, such as
      schema drift, data volume, cost, access control, or monitoring.
+   - **AI usage**: where and how you used AI (drafting code, debugging,
+     explaining a concept, etc.), and how you validated or corrected its output.
+     We encourage using AI as part of your workflow here, same as you would on
+     the job; we just want to know how you used it.
    - **Retrospective**: what was hardest to get right.
 3. **Screenshots** of your **pipeline**, your **tables**, and the **output for
    each of the three questions** above, since we may not be able to access your
@@ -107,12 +111,14 @@ contact info to your programmatic requests?
 you compliant with BLS's policy.
 
 **Q: Can I use AI to assist me?**
-We (obviously) love AI, and you absolutely may use it as a reference tool.
-However:
+Yes, and we encourage it, use it the way you would on the job: to draft code,
+debug, or explain something you're unfamiliar with. Two things matter more than
+whether you used it:
 1. You must understand every line of code you submit; we'll ask you to explain
    your logic in the interview.
-2. Please be open about usage. Tell us something like: "I used Claude to draft
-   the pipeline scaffold, but had to fix the expectations logic myself."
+2. Document how you used it in `PROCESS.md`'s AI usage section, e.g. "I used
+   Claude to draft the pipeline scaffold, but had to fix the expectations logic
+   myself."
 
 **Q: Do I have to use specific tools?**
 Beyond developing in Databricks and building your pipeline as a Spark Declarative
