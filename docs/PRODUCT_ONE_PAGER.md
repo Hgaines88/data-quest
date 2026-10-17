@@ -85,6 +85,25 @@ The product is successful when:
 5. A read-only analyst can use the intended experience but cannot modify data or access unauthorized layers.
 6. A reviewer can understand the architecture, reproduce the workflow, inspect the evidence, and explain the limits of every major claim.
 
+## Required analytical foundation
+
+Before the stakeholder experience is built, I will complete and validate the
+three assessment-required Gold outputs:
+
+1. `gold_population_summary_2013_2018`
+2. `gold_bls_best_year_by_series`
+3. `gold_bls_q01_population`
+
+Each result will have equivalent Spark SQL and PySpark implementations, one
+validated primary pipeline path, an independently checked representative value,
+and dedicated screenshot evidence. The exact statistical, quarterly-period,
+tie, join, and missing-match semantics are defined in
+`docs/REQUIRED_GOLD_CONTRACTS.md`.
+
+The executive overview, trend exploration, population context, methodology, and
+Genie experience are downstream consumers of governed Gold data. They do not
+substitute for the three required deliverables.
+
 ## Design principles
 
 1. **Evidence before presentation.** The pipeline and Gold results must be validated before dashboard design begins.

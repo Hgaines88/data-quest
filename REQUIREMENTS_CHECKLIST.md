@@ -236,9 +236,11 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Depends on:** DQ-14
 
 - [ ] Filter annual US population to 2013 through 2018 inclusive.
+- [ ] Confirm exactly one normalized US population row exists for each of the six requested years.
 - [ ] Compute mean and standard deviation in Spark SQL.
 - [ ] Compute the same result with the PySpark DataFrame API.
-- [ ] State and justify whether sample or population standard deviation is used.
+- [ ] Use and document population standard deviation (`stddev_pop`) because the requested six-year range is the complete finite set being summarized.
+- [ ] Publish the inclusive bounds, year count, mean, standard deviation, and standard-deviation semantics in `gold_population_summary_2013_2018`.
 - [ ] Compare both implementations using an appropriate numeric tolerance.
 - [ ] Select and document the primary implementation feeding the Gold table.
 
@@ -249,11 +251,13 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-12, DQ-13
 
-- [ ] Sum `value` by `series_id` and year across all available quarters or periods as required.
+- [ ] Filter to quarterly periods `Q01` through `Q04`; explicitly exclude `Q05` because it is an annual average, not an additional quarter.
+- [ ] Sum quarterly `value` by `series_id` and year.
 - [ ] Select the largest annual sum for every series in Spark SQL.
 - [ ] Implement the same logic with the PySpark DataFrame API.
-- [ ] Define deterministic tie behavior rather than returning an arbitrary year.
+- [ ] Break ties deterministically by selecting the earliest tied year.
 - [ ] Include the human-readable series label.
+- [ ] Reconcile the expected series inventory and visibly flag a series with no quarterly observations rather than silently omitting it.
 - [ ] Compare both implementations and designate the primary Gold-table version.
 
 **Done when:** Each series has a deterministic best year, annual sum, and readable label, with equivalent SQL and PySpark results.
@@ -265,6 +269,7 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 
 - [ ] Filter BLS observations to `series_id = PRS30006032` and `period = Q01`.
 - [ ] Join population by year while preserving BLS years without a population match.
+- [ ] Use the filtered BLS observations as the left side of the join and expose an explicit population-match indicator or equivalent visible missing-value behavior.
 - [ ] Implement the result in Spark SQL.
 - [ ] Implement the same result with the PySpark DataFrame API.
 - [ ] Compare both implementations and designate the primary Gold-table version.
@@ -282,6 +287,7 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 - [ ] Add invariants for expected year bounds, uniqueness, ordering assumptions, and join cardinality.
 - [ ] Independently spot-check representative results against source records or a simple calculation.
 - [ ] Document any intentional representational differences.
+- [ ] Confirm the three contracts in `docs/REQUIRED_GOLD_CONTRACTS.md` are complete before beginning dashboard or Genie implementation.
 
 **Done when:** Equivalent implementations are demonstrated, not merely assumed.
 
