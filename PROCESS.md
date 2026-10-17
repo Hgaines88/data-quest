@@ -118,6 +118,22 @@ AI assistance was used to organize an enhanced review protocol after I decided n
 
 I adopted the protocol because correctness must be supported by multiple independent forms of evidence. I will apply it to DQ-05 and every remaining issue, document why any gate is not applicable, and retest the exact commit after rebases or conflict resolution.
 
+### 2026-10-16: Policy-compliant BLS discovery
+
+AI assistance was used to draft tests and implementation for converting an HTML directory listing into a safe, deterministic source inventory. I reviewed the behavior in two layers: a pure parser that rejects links outside the exact configured directory, and a request function that sends an identifying `User-Agent`, applies a timeout, uses bounded retries for transient failures, and fails immediately with policy guidance for HTTP 403 or 429 responses.
+
+The tests were written before the HTTP implementation and initially failed because the new request API did not exist. After implementation and self-review, 13 controlled tests passed without network access. A separate live integration check then discovered the 12 files observed during source profiling. The live check listed files only; it did not download them or write to Databricks. The code contains no hardcoded BLS filenames, and the committed configuration retains a placeholder rather than personal contact information.
+
+### 2026-10-17: DQ-05 enhanced quality review
+
+I rebased DQ-05 onto the product-design and quality-protocol changes on `main`, preserved both sides of the `PROCESS.md` conflict, and reviewed the final discovery implementation against `docs/QUALITY_ASSURANCE_PROTOCOL.md`.
+
+The adversarial review found that the parser rejected relative and non-HTTP directory URLs, but the public network-fetch function did not perform the same validation before calling its opener. I added shared pre-request URL validation, including rejection of embedded credentials, queries, and fragments. I expanded the controlled suite from 13 to 19 tests to cover that boundary as well as HTTP 429, other client errors, decode failures, and invalid retry settings.
+
+The final local suite passed all 19 tests, Python compilation succeeded, and `git diff --check` reported no whitespace errors. With explicit authorization, a live check used the contact email from local Git configuration only in the BLS `User-Agent`; it was not printed or committed. The reviewed code discovered the same 12 source files recorded in the source profile.
+
+This evidence proves safe and deterministic directory discovery for the observed provider listing. It does not prove file download integrity, Volume landing, manifest state transitions, or ingestion idempotency; those remain DQ-06 through DQ-09 responsibilities.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
