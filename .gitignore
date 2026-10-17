@@ -1,0 +1,34 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.databrickscfg
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Databricks local state and generated bundles
+.databricks/
+dist/
+build/
+*.egg-info/
+
+# Local source data and generated artifacts
+local_data/
+downloads/
+artifacts/
+
+# Notebook, editor, and operating-system files
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store
+
