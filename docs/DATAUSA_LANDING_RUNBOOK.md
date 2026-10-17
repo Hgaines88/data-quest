@@ -35,3 +35,16 @@ Invalid UTF-8, malformed JSON, a missing envelope field or required column, an
 invalid record, or a partial page fails before promotion and manifest
 publication. Promotion failure also prevents manifest publication. The previous
 committed state therefore remains authoritative.
+
+## Observed validation evidence
+
+On 2026-10-17, the first live run (`20261017T223018Z-29527a8b`) published one
+new `population.json` object. It contained 1,401 bytes, 11 records spanning
+2013–2024, and the four expected columns. Its displayed SHA-256 prefix was
+`daa4d0576778`.
+
+The immediate rerun (`20261017T223605Z-09cb497b`) classified the response as
+unchanged, promoted zero objects, and published zero manifest transitions. The
+final reconciliation retained the original run ID. Screenshots are indexed in
+`docs/screenshots/README.md`, and the exported result rows are indexed in
+`docs/evidence/README.md`.

@@ -129,11 +129,11 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-02, DQ-06
 
-- [ ] Call the assigned Data USA endpoint with timeout and explicit status checking.
-- [ ] Validate that the response is JSON and contains the expected response envelope and data records.
-- [ ] Store the unmodified response as JSON in the same Volume under a separate source path.
-- [ ] Capture request URL, ingestion time, size, and digest in the ingestion manifest or equivalent metadata.
-- [ ] Make repeated runs idempotent.
+- [x] Call the assigned Data USA endpoint with timeout and explicit status checking.
+- [x] Validate that the response is JSON and contains the expected response envelope and data records.
+- [x] Store the unmodified response as JSON in the same Volume under a separate source path.
+- [x] Capture request URL, ingestion time, size, and digest in the ingestion manifest or equivalent metadata.
+- [x] Make repeated runs idempotent.
 
 **Done when:** A reproducible raw population artifact and its provenance are present in the Volume.
 
