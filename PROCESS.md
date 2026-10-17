@@ -115,6 +115,37 @@ A temporary file containing `Rearc Data Quest Volume check\n` was written to the
 
 The **Jobs & Pipelines** interface was inspected manually and exposed the expected pipeline creation controls. No pipeline was created during this environment check.
 
+### 2026-10-17: BLS Volume landing and no-change rerun
+
+I executed `notebooks/01_land_bls.py` from the Databricks Git folder at commit
+`419c396`. The first live run used ID
+`20261017T194929Z-b3618da4`, discovered 12 BLS files, and began with zero current
+manifest objects. It classified all 12 as new, promoted all 12 verified objects,
+and published 12 manifest transitions. The final reconciliation independently
+matched the 12 active manifest paths to the 12 discovered paths and recomputed
+the full byte count and SHA-256 digest of every referenced Volume object.
+
+I then immediately repeated the discovery and landing with run ID
+`20261017T195437Z-5c5229ba`. It again discovered 12 files and loaded 12 current
+manifest objects. All 12 were classified as unchanged; the run promoted zero
+objects and published zero manifest transitions. New, changed, removed, and
+reused-version counts were also zero. The final reconciliation again verified
+all 12 physical objects. Every active row retained the original first-run ID,
+providing additional evidence that the no-change run did not replace manifest
+state.
+
+This proves the observed BLS inventory can be downloaded with the compliant
+client, landed in the target managed Volume, described by the Delta manifest,
+and rerun without rewriting or republishing unchanged content. It does not prove
+concurrent-writer safety or behavior against a future real provider change;
+those boundaries remain covered by the single-writer operating rule and
+controlled change-contract tests.
+
+Evidence is stored in `docs/screenshots/dq07_first_run_reconciliation.png`,
+`docs/screenshots/dq07_no_change_counts_publication.png`,
+`docs/screenshots/dq07_no_change_counts_unchanged.png`, and
+`docs/screenshots/dq07_no_change_reconciliation.png`.
+
 ## Source documentation notes
 
 - BLS productivity time-series directory: <https://download.bls.gov/pub/time.series/pr/>
@@ -238,11 +269,11 @@ tests plus 11 subtests, including partial downloads, policy failures, redirect
 boundaries, invalid content lengths, unsafe paths, promotion failures, no-change
 runs, atomic Spark append behavior, and post-landing evidence checks.
 
-These local tests prove the deterministic contracts and controlled failure
-paths. They do not yet prove that the live BLS bytes can be written and
-reconciled through the target Databricks Volume. DQ-07 remains incomplete until
-`notebooks/01_land_bls.py` passes both the first-run and immediate no-change
-rerun procedure in `docs/BLS_LANDING_RUNBOOK.md`.
+The local tests prove deterministic contracts and controlled failure paths. I
+then ran the exact committed notebook in Databricks and completed both the
+first-run and immediate no-change rerun procedure in
+`docs/BLS_LANDING_RUNBOOK.md`. The observed live results and their remaining
+claim boundaries are recorded in the validation log above.
 
 ## Retrospective
 
