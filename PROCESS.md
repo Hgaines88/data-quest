@@ -64,6 +64,15 @@ The primary stakeholder is a Director of Economic Strategy at a national consult
 
 The intended experience contains five sections: an executive overview, productivity and labor-cost trends, population context, definitions and methodology, and a bounded ask-the-data experience. Dashboards and Genie will consume governed Gold objects. They will not query raw provider artifacts directly or present population co-movement as evidence of causation.
 
+The three required Gold outputs are a delivery gate before that broader
+experience. I will use population standard deviation for the complete 2013–2018
+range; sum only `Q01` through `Q04` for each series' annual result because `Q05`
+is an annual average; select the earliest year when annual sums tie; and preserve
+unmatched BLS years in the Q01 population left join. Every question will be
+implemented in both Spark SQL and PySpark and reconciled before one version is
+selected as the primary pipeline path. The full contract is recorded in
+`docs/REQUIRED_GOLD_CONTRACTS.md`.
+
 The product vision, UML-style component and sequence views, and conceptual data model are maintained in:
 
 - `docs/PRODUCT_ONE_PAGER.md`
@@ -138,6 +147,22 @@ The diagrams and logical objects are plans rather than proof of implementation. 
 AI assistance was used to organize an enhanced review protocol after I decided not to make project quality dependent on a paid Copilot review subscription. The protocol incorporates requirements traceability, risk classification, normal and failure-path testing, automated checks, adversarial diff review, live integration evidence, data reconciliation, security and operational review, documentation, and an explainability gate.
 
 I adopted the protocol because correctness must be supported by multiple independent forms of evidence. I will apply it to DQ-05 and every remaining issue, document why any gate is not applicable, and retest the exact commit after rebases or conflict resolution.
+
+### 2026-10-17: Required Gold semantics and dashboard boundary
+
+AI assistance was used to audit the product vision and issue plan against the
+three analytical questions in the assessment. The audit found that the overall
+Gold and evidence plan was complete but that the Question 2 wording did not yet
+explicitly exclude `Q05`, which the source profile identifies as an annual
+average.
+
+I approved an explicit contract that uses `Q01` through `Q04`, population
+standard deviation for the complete requested six-year range, earliest-year tie
+handling, and a left join that preserves unmatched BLS years. I also required
+both SQL and PySpark implementations, reconciliation, independent spot checks,
+and dedicated screenshots before the optional dashboard or Genie work begins.
+This is a documented implementation decision, not evidence that the Gold tables
+have already been built or validated.
 
 ### 2026-10-16: Policy-compliant BLS discovery
 

@@ -165,10 +165,14 @@ The period description belongs to an observation. It is not part of the stable s
 
 Gold objects should be narrow, documented, and stable enough to function as the dashboard and Genie semantic contract.
 
+The binding calculation and validation rules are maintained in
+`docs/REQUIRED_GOLD_CONTRACTS.md`. In particular, Question 2 uses `Q01` through
+`Q04` and excludes the `Q05` annual average.
+
 | Gold contract | Required interpretation | Stakeholder use |
 | --- | --- | --- |
-| Population summary | Mean and explicitly selected sample or population standard deviation for 2013–2018 | Understand the assigned population range and variability |
-| Series annual result | Deterministically selected largest annual result with readable provider label | Identify the year associated with each series' highest annual calculation |
+| Population summary | Mean and population standard deviation for the complete 2013–2018 range | Understand the assigned population range and variability |
+| Series annual result | Deterministically selected largest `Q01`–`Q04` annual sum, with earliest-year tie handling and readable provider label | Identify the year associated with each series' highest annual quarterly sum |
 | Series-population context | Q01 observation for `PRS30006032` with population where available and unmatched years preserved | Explore parallel historical context without claiming causality |
 
 ## Data-model decisions still open
@@ -177,7 +181,7 @@ Gold objects should be narrow, documented, and stable enough to function as the 
 - Whether removed source objects use tombstones, `is_active`, or a separate event history.
 - Decimal precision for BLS values and tolerances used for cross-implementation comparisons.
 - Whether BLS lookup entities remain separate Silver tables or are additionally exposed through a denormalized series dimension.
-- Whether Gold annual values are stored for every year or only the selected maximum-year result.
+- Whether an additional dashboard-only trend view stores every annual `Q01`–`Q04` sum; the required best-year Gold object stores only the deterministic selected result.
 - Which time-series and indexed-comparison Gold views the stakeholder dashboard requires beyond the three assigned questions.
 - Whether Data USA's response supplies additional geographic attributes worth preserving outside the current national grain.
 - Which objects become physical tables versus governed views.
