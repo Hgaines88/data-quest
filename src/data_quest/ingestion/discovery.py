@@ -7,7 +7,7 @@ import re
 import time
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
-from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
+from urllib.parse import SplitResult, unquote, urljoin, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 
@@ -62,6 +62,7 @@ def fetch_directory_html(
 ) -> str:
     """Retrieve a directory page with identifying and bounded request behavior."""
 
+    _validate_directory_url(directory_url)
     _validate_request_options(
         user_agent=user_agent,
         timeout_seconds=timeout_seconds,
@@ -138,9 +139,7 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
     ingestion run appear successful while discovering nothing.
     """
 
-    base = urlsplit(directory_url)
-    if base.scheme not in {"http", "https"} or not base.netloc:
-        raise ValueError("directory_url must be an absolute HTTP(S) URL")
+    base = _validate_directory_url(directory_url)
 
     directory_path = _normalized_directory_path(base.path)
     canonical_base = urlunsplit(
@@ -199,6 +198,19 @@ def _normalized_directory_path(path: str) -> str:
     if not normalized.endswith("/"):
         normalized = f"{normalized}/"
     return normalized
+
+
+def _validate_directory_url(directory_url: str) -> SplitResult:
+    """Return a parsed absolute HTTP directory URL with no ambiguous components."""
+
+    parsed = urlsplit(directory_url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError("directory_url must be an absolute HTTP(S) URL")
+    if parsed.username or parsed.password:
+        raise ValueError("directory_url must not contain embedded credentials")
+    if parsed.query or parsed.fragment:
+        raise ValueError("directory_url must not contain a query or fragment")
+    return parsed
 
 
 def _validate_request_options(

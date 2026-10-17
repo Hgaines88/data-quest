@@ -102,6 +102,22 @@ class DiscoverFileLinksTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "absolute HTTP"):
             discover_file_links('<a href="pr.series">Series</a>', "./relative/")
 
+    def test_rejects_ambiguous_directory_url_components(self) -> None:
+        for invalid_url, message in [
+            (f"{BASE_URL}?sort=name", "query or fragment"),
+            (f"{BASE_URL}#listing", "query or fragment"),
+            (
+                "https://user:password@download.bls.gov/pub/time.series/pr/",
+                "embedded credentials",
+            ),
+        ]:
+            with self.subTest(directory_url=invalid_url):
+                with self.assertRaisesRegex(ValueError, message):
+                    discover_file_links(
+                        '<a href="pr.series">Series</a>',
+                        invalid_url,
+                    )
+
 
 class FetchDirectoryHtmlTests(unittest.TestCase):
     def test_public_discovery_entry_point_fetches_and_parses(self) -> None:
@@ -147,9 +163,38 @@ class FetchDirectoryHtmlTests(unittest.TestCase):
 
         opener.assert_not_called()
 
+    def test_rejects_non_http_directory_before_network_access(self) -> None:
+        opener = Mock()
+
+        for invalid_url in ["./relative/", "file:///tmp/provider-listing.html"]:
+            with self.subTest(directory_url=invalid_url):
+                with self.assertRaisesRegex(ValueError, "absolute HTTP"):
+                    fetch_directory_html(
+                        invalid_url,
+                        USER_AGENT,
+                        opener=opener,
+                    )
+
+        opener.assert_not_called()
+
     def test_explains_403_without_retrying(self) -> None:
         opener = Mock(
             side_effect=HTTPError(BASE_URL, 403, "Forbidden", Message(), None)
+        )
+
+        with self.assertRaisesRegex(SourcePolicyError, "BLS access policy"):
+            fetch_directory_html(
+                BASE_URL,
+                USER_AGENT,
+                max_attempts=3,
+                opener=opener,
+            )
+
+        self.assertEqual(opener.call_count, 1)
+
+    def test_explains_429_without_retrying(self) -> None:
+        opener = Mock(
+            side_effect=HTTPError(BASE_URL, 429, "Too Many Requests", Message(), None)
         )
 
         with self.assertRaisesRegex(SourcePolicyError, "BLS access policy"):
@@ -198,6 +243,46 @@ class FetchDirectoryHtmlTests(unittest.TestCase):
             )
 
         self.assertEqual(opener.call_count, 1)
+
+    def test_reports_other_client_error_without_retrying(self) -> None:
+        opener = Mock(
+            side_effect=HTTPError(BASE_URL, 400, "Bad Request", Message(), None)
+        )
+
+        with self.assertRaisesRegex(SourceRequestError, "HTTP 400"):
+            fetch_directory_html(
+                BASE_URL,
+                USER_AGENT,
+                max_attempts=3,
+                opener=opener,
+            )
+
+        self.assertEqual(opener.call_count, 1)
+
+    def test_reports_response_decode_failure(self) -> None:
+        opener = Mock(return_value=FakeResponse(b"source", charset="unknown-charset"))
+
+        with self.assertRaisesRegex(SourceRequestError, "could not be decoded"):
+            fetch_directory_html(BASE_URL, USER_AGENT, opener=opener)
+
+    def test_rejects_invalid_retry_configuration_before_network_access(self) -> None:
+        invalid_options = [
+            ({"timeout_seconds": 0}, "timeout_seconds"),
+            ({"max_attempts": 0}, "max_attempts"),
+            ({"backoff_seconds": -0.1}, "backoff_seconds"),
+        ]
+
+        for options, message in invalid_options:
+            opener = Mock()
+            with self.subTest(options=options):
+                with self.assertRaisesRegex(ValueError, message):
+                    fetch_directory_html(
+                        BASE_URL,
+                        USER_AGENT,
+                        opener=opener,
+                        **options,
+                    )
+            opener.assert_not_called()
 
     def test_retries_a_transient_network_failure_then_succeeds(self) -> None:
         opener = Mock(
