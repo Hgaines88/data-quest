@@ -4,6 +4,7 @@ This document translates the assignment into a Kanban-ready implementation plan.
 
 ## Working agreements
 
+- Apply `docs/QUALITY_ASSURANCE_PROTOCOL.md` to every pull request beginning with DQ-05.
 - Understand and be able to explain every submitted line of code.
 - Record meaningful AI assistance, validation, and corrections as work proceeds.
 - Prefer small, reviewable commits tied to one card.
