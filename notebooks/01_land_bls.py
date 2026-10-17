@@ -51,6 +51,8 @@ dbutils.widgets.text("catalog", "workspace", "Unity Catalog catalog")
 dbutils.widgets.text("schema", "rearc_data_quest", "Project schema")
 dbutils.widgets.text("volume", "raw_landing", "Raw managed Volume")
 
+# COMMAND ----------
+
 contact_email = dbutils.widgets.get("contact_email").strip()
 catalog = dbutils.widgets.get("catalog").strip()
 schema = dbutils.widgets.get("schema").strip()
