@@ -44,6 +44,28 @@ Until that transaction commits, the previous manifest and the immutable bytes it
 references remain authoritative. The complete contract and its current evidence
 limits are recorded in `docs/INGESTION_MANIFEST_CONTRACT.md`.
 
+The BLS landing implementation deliberately re-downloads every file in the
+current source inventory so it can calculate its own byte count and SHA-256
+digest. Provider ETags and modification timestamps are retained for provenance,
+but I do not assume they are present or reliable enough to establish content
+identity. On a no-change rerun, the temporary bytes are discarded: the immutable
+raw object is not rewritten, no manifest event is appended, and downstream work
+does not receive a new version to process.
+
+I use content-addressed immutable paths so a failed run cannot overwrite bytes
+referenced by the last committed manifest. The Databricks notebook stages and
+verifies the complete inventory, promotes every new or changed object, verifies
+the promoted bytes again, and appends all manifest transitions with one Delta
+write. It then independently reconciles the active manifest paths against the
+discovered inventory and recomputes the size and digest of every referenced
+object.
+
+This assessment implementation is intentionally single-writer. Concurrent runs
+could race between checking and promoting the same content-addressed path or
+publish competing manifest snapshots. In a production client environment I
+would add orchestration-level mutual exclusion or a transactional run-control
+table before permitting parallel schedules.
+
 ### Planned data flow
 
 The planned flow is:
@@ -92,6 +114,37 @@ The project schema was created idempotently and independently confirmed by filte
 A temporary file containing `Rearc Data Quest Volume check\n` was written to the managed Volume, read back, and compared with the expected content using an assertion. The test file was removed, and the removal operation returned `True`. This proves that the current identity and serverless notebook environment can create, read, verify, and remove a file at the planned landing path. It does not yet prove that the external data sources can be reached or that the ingestion design is idempotent; those are separate cards.
 
 The **Jobs & Pipelines** interface was inspected manually and exposed the expected pipeline creation controls. No pipeline was created during this environment check.
+
+### 2026-10-17: BLS Volume landing and no-change rerun
+
+I executed `notebooks/01_land_bls.py` from the Databricks Git folder at commit
+`419c396`. The first live run used ID
+`20261017T194929Z-b3618da4`, discovered 12 BLS files, and began with zero current
+manifest objects. It classified all 12 as new, promoted all 12 verified objects,
+and published 12 manifest transitions. The final reconciliation independently
+matched the 12 active manifest paths to the 12 discovered paths and recomputed
+the full byte count and SHA-256 digest of every referenced Volume object.
+
+I then immediately repeated the discovery and landing with run ID
+`20261017T195437Z-5c5229ba`. It again discovered 12 files and loaded 12 current
+manifest objects. All 12 were classified as unchanged; the run promoted zero
+objects and published zero manifest transitions. New, changed, removed, and
+reused-version counts were also zero. The final reconciliation again verified
+all 12 physical objects. Every active row retained the original first-run ID,
+providing additional evidence that the no-change run did not replace manifest
+state.
+
+This proves the observed BLS inventory can be downloaded with the compliant
+client, landed in the target managed Volume, described by the Delta manifest,
+and rerun without rewriting or republishing unchanged content. It does not prove
+concurrent-writer safety or behavior against a future real provider change;
+those boundaries remain covered by the single-writer operating rule and
+controlled change-contract tests.
+
+Evidence is stored in `docs/screenshots/dq07_first_run_reconciliation.png`,
+`docs/screenshots/dq07_no_change_counts_publication.png`,
+`docs/screenshots/dq07_no_change_counts_unchanged.png`, and
+`docs/screenshots/dq07_no_change_reconciliation.png`.
 
 ## Source documentation notes
 
@@ -197,6 +250,30 @@ The adversarial review found that the parser rejected relative and non-HTTP dire
 The final local suite passed all 19 tests, Python compilation succeeded, and `git diff --check` reported no whitespace errors. With explicit authorization, a live check used the contact email from local Git configuration only in the BLS `User-Agent`; it was not printed or committed. The reviewed code discovered the same 12 source files recorded in the source profile.
 
 This evidence proves safe and deterministic directory discovery for the observed provider listing. It does not prove file download integrity, Volume landing, manifest state transitions, or ingestion idempotency; those remain DQ-06 through DQ-09 responsibilities.
+
+### 2026-10-17: Verified BLS landing implementation
+
+AI assistance was used to draft test cases and implementation for streamed BLS
+downloads, run-scoped staging, immutable promotion, Delta manifest publication,
+and Databricks reconciliation. I retained the architecture from the approved
+manifest contract: complete discovery and download precede planning, all new or
+changed bytes are promoted before one manifest write, and unchanged objects are
+neither rewritten nor republished.
+
+I strengthened the initial implementation by requiring a second size and
+SHA-256 verification after promotion rather than treating a completed move as
+proof that the landed object is correct. I also made the concurrency boundary
+explicit: the assessment notebook is single-writer, and a production schedule
+would need run-level mutual exclusion. The controlled suite currently passes 58
+tests plus 11 subtests, including partial downloads, policy failures, redirect
+boundaries, invalid content lengths, unsafe paths, promotion failures, no-change
+runs, atomic Spark append behavior, and post-landing evidence checks.
+
+The local tests prove deterministic contracts and controlled failure paths. I
+then ran the exact committed notebook in Databricks and completed both the
+first-run and immediate no-change rerun procedure in
+`docs/BLS_LANDING_RUNBOOK.md`. The observed live results and their remaining
+claim boundaries are recorded in the validation log above.
 
 ## Retrospective
 

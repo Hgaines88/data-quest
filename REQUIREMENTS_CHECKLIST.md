@@ -116,11 +116,11 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-02, DQ-05, DQ-06
 
-- [ ] Download every dynamically discovered file using the compliant request behavior.
-- [ ] Write raw bytes to a stable BLS path in the Databricks Volume.
-- [ ] Avoid rewriting or reprocessing unchanged content.
-- [ ] Update the manifest only after a file is landed successfully.
-- [ ] Preserve enough source metadata to audit what was ingested.
+- [x] Download every dynamically discovered file using the compliant request behavior.
+- [x] Write raw bytes to a stable BLS path in the Databricks Volume.
+- [x] Avoid rewriting or reprocessing unchanged content.
+- [x] Update the manifest only after a file is landed successfully.
+- [x] Preserve enough source metadata to audit what was ingested.
 
 **Done when:** The Volume mirrors the current BLS source inventory and the manifest accurately describes the landed files.
 
