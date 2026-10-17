@@ -61,6 +61,38 @@ class FakeResponse:
 
 
 class DownloadToStagingTests(unittest.TestCase):
+    def test_query_urls_require_explicit_opt_in(self) -> None:
+        api_url = "https://api.example.org/data.json?measure=Population"
+        opener = Mock(
+            return_value=FakeResponse(
+                b"{}",
+                response_url=api_url,
+                content_length=2,
+            )
+        )
+
+        with TemporaryDirectory() as directory:
+            destination = Path(directory) / "response.partial"
+
+            with self.assertRaisesRegex(ValueError, "disallowed query"):
+                download_to_staging(
+                    api_url,
+                    USER_AGENT,
+                    destination,
+                    opener=opener,
+                )
+
+            result = download_to_staging(
+                api_url,
+                USER_AGENT,
+                destination,
+                allow_query=True,
+                opener=opener,
+            )
+
+        self.assertEqual(result.source_url, api_url)
+        self.assertEqual(opener.call_count, 1)
+
     def test_streams_exact_bytes_and_returns_auditable_metadata(self) -> None:
         body = b"series_id\tyear\tvalue\nPRS1\t2025\t1.0\n"
         opener = Mock(return_value=FakeResponse(body, content_length=len(body)))

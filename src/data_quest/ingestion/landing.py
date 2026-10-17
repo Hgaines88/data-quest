@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import PurePosixPath
 import re
 import shutil
-from typing import Callable
+from typing import Any, Callable
 
 from data_quest.ingestion.discovery import SourceFile
 from data_quest.ingestion.download import (
@@ -59,7 +59,7 @@ class LandingExecutionResult:
     published_transition_count: int
 
 
-def prepare_bls_landing(
+def prepare_source_landing(
     source_files: list[SourceFile],
     current_entries: list[ManifestEntry],
     *,
@@ -71,6 +71,7 @@ def prepare_bls_landing(
     max_attempts: int = 3,
     backoff_seconds: float = 1.0,
     downloader: Callable[..., DownloadedFile] = download_to_staging,
+    staged_validator: Callable[[DownloadedFile], None] | None = None,
     cleanup_tree: Callable[[str], None] | None = None,
 ) -> LandingPlan:
     """Stage and verify a complete BLS inventory, then create its manifest plan.
@@ -112,6 +113,8 @@ def prepare_bls_landing(
                 raise ValueError(
                     "downloader returned metadata for a different source URL"
                 )
+            if staged_validator is not None:
+                staged_validator(downloaded)
 
             landed_path = build_versioned_landed_path(
                 volume_source_root,
@@ -154,6 +157,16 @@ def prepare_bls_landing(
         staged_files=tuple(staged_files),
         changes=tuple(changes),
     )
+
+
+def prepare_bls_landing(
+    source_files: list[SourceFile],
+    current_entries: list[ManifestEntry],
+    **kwargs: Any,
+) -> LandingPlan:
+    """Prepare the complete BLS inventory using the generic source contract."""
+
+    return prepare_source_landing(source_files, current_entries, **kwargs)
 
 
 def execute_landing_plan(

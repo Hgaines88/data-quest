@@ -66,6 +66,20 @@ publish competing manifest snapshots. In a production client environment I
 would add orchestration-level mutual exclusion or a transactional run-control
 table before permitting parallel schedules.
 
+The assigned Data USA response uses the same immutable promotion and atomic
+publication contract but has its own `datausa_ingestion_manifest`. I kept source
+manifests separate because each ingestion run observes only one provider's
+inventory. Combining provider paths in one unscoped manifest would allow a
+BLS-only run to misclassify the Data USA artifact as removed, or the reverse.
+
+Before a Data USA response becomes publishable, I require valid UTF-8 JSON; the
+documented `annotations`, `columns`, `data`, and `page` envelope types; all four
+assigned population columns; records that match the declared columns; valid
+nation, year, and population values; and pagination evidence that the response
+contains the complete first-page result. Validation reads the staged bytes but
+does not serialize them again, so the promoted raw object remains exactly what
+the provider returned.
+
 ### Planned data flow
 
 The planned flow is:
@@ -274,6 +288,28 @@ then ran the exact committed notebook in Databricks and completed both the
 first-run and immediate no-change rerun procedure in
 `docs/BLS_LANDING_RUNBOOK.md`. The observed live results and their remaining
 claim boundaries are recorded in the validation log above.
+
+### 2026-10-17: Data USA raw-response validation and landing design
+
+AI assistance was used to inspect the current assigned response shape, draft
+failure-oriented tests, and adapt the verified raw-landing contract for the
+single Data USA API artifact. I reviewed the provider documentation and made one
+read-only request to the assigned endpoint. The observed response contained the
+documented four-part envelope, 11 records, and the columns `Nation ID`, `Nation`,
+`Year`, and `Population`.
+
+I rejected a tempting shortcut of placing the Data USA object in the BLS
+manifest. The two ingestions have independent inventories, so a shared unscoped
+snapshot could produce false removal events. I also required explicit opt-in for
+query-bearing download URLs so the BLS file downloader retains its stricter
+default. The controlled suite currently passes 66 tests plus 11 subtests,
+including malformed JSON, invalid UTF-8, missing columns, partial pagination,
+validation cleanup, and a Data USA-specific no-change plan.
+
+The local evidence does not yet prove that the target Databricks workspace can
+fetch, land, publish, and reconcile the live API response. DQ-08 remains
+incomplete until the exact committed notebook passes the first-run and immediate
+no-change procedure in `docs/DATAUSA_LANDING_RUNBOOK.md`.
 
 ## Retrospective
 
