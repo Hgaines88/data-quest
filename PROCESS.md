@@ -44,6 +44,28 @@ Until that transaction commits, the previous manifest and the immutable bytes it
 references remain authoritative. The complete contract and its current evidence
 limits are recorded in `docs/INGESTION_MANIFEST_CONTRACT.md`.
 
+The BLS landing implementation deliberately re-downloads every file in the
+current source inventory so it can calculate its own byte count and SHA-256
+digest. Provider ETags and modification timestamps are retained for provenance,
+but I do not assume they are present or reliable enough to establish content
+identity. On a no-change rerun, the temporary bytes are discarded: the immutable
+raw object is not rewritten, no manifest event is appended, and downstream work
+does not receive a new version to process.
+
+I use content-addressed immutable paths so a failed run cannot overwrite bytes
+referenced by the last committed manifest. The Databricks notebook stages and
+verifies the complete inventory, promotes every new or changed object, verifies
+the promoted bytes again, and appends all manifest transitions with one Delta
+write. It then independently reconciles the active manifest paths against the
+discovered inventory and recomputes the size and digest of every referenced
+object.
+
+This assessment implementation is intentionally single-writer. Concurrent runs
+could race between checking and promoting the same content-addressed path or
+publish competing manifest snapshots. In a production client environment I
+would add orchestration-level mutual exclusion or a transactional run-control
+table before permitting parallel schedules.
+
 ### Planned data flow
 
 The planned flow is:
@@ -197,6 +219,30 @@ The adversarial review found that the parser rejected relative and non-HTTP dire
 The final local suite passed all 19 tests, Python compilation succeeded, and `git diff --check` reported no whitespace errors. With explicit authorization, a live check used the contact email from local Git configuration only in the BLS `User-Agent`; it was not printed or committed. The reviewed code discovered the same 12 source files recorded in the source profile.
 
 This evidence proves safe and deterministic directory discovery for the observed provider listing. It does not prove file download integrity, Volume landing, manifest state transitions, or ingestion idempotency; those remain DQ-06 through DQ-09 responsibilities.
+
+### 2026-10-17: Verified BLS landing implementation
+
+AI assistance was used to draft test cases and implementation for streamed BLS
+downloads, run-scoped staging, immutable promotion, Delta manifest publication,
+and Databricks reconciliation. I retained the architecture from the approved
+manifest contract: complete discovery and download precede planning, all new or
+changed bytes are promoted before one manifest write, and unchanged objects are
+neither rewritten nor republished.
+
+I strengthened the initial implementation by requiring a second size and
+SHA-256 verification after promotion rather than treating a completed move as
+proof that the landed object is correct. I also made the concurrency boundary
+explicit: the assessment notebook is single-writer, and a production schedule
+would need run-level mutual exclusion. The controlled suite currently passes 58
+tests plus 11 subtests, including partial downloads, policy failures, redirect
+boundaries, invalid content lengths, unsafe paths, promotion failures, no-change
+runs, atomic Spark append behavior, and post-landing evidence checks.
+
+These local tests prove the deterministic contracts and controlled failure
+paths. They do not yet prove that the live BLS bytes can be written and
+reconciled through the target Databricks Volume. DQ-07 remains incomplete until
+`notebooks/01_land_bls.py` passes both the first-run and immediate no-change
+rerun procedure in `docs/BLS_LANDING_RUNBOOK.md`.
 
 ## Retrospective
 

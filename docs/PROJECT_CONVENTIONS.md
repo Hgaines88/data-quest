@@ -8,6 +8,7 @@ This document records the working conventions for the Rearc Data Quest solution.
 .
 ├── docs/
 │   └── screenshots/        # Reviewer evidence required by the assignment
+├── notebooks/                  # Databricks orchestration and evidence notebooks
 ├── pipelines/              # Spark Declarative Pipeline definitions
 ├── sql/
 │   └── alternatives/       # Spark SQL counterparts to PySpark logic
