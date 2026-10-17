@@ -1,6 +1,6 @@
 # Project Conventions
 
-This document records the working conventions for the Rearc Data Quest solution. Values that depend on the Databricks workspace will be confirmed during DQ-02 before they are used in code.
+This document records the working conventions for the Rearc Data Quest solution. Workspace-dependent values are recorded only after they are verified in the target Databricks environment.
 
 ## Repository layout
 
@@ -29,7 +29,7 @@ Initial names use lowercase `snake_case`:
 - Raw BLS path: `/Volumes/<catalog>/rearc_data_quest/raw_landing/bls/productivity/`
 - Raw population path: `/Volumes/<catalog>/rearc_data_quest/raw_landing/datausa/population/`
 
-The catalog name is workspace-specific and must be confirmed in DQ-02. It is configuration, not a hardcoded constant.
+DQ-02 confirmed `workspace` as the writable Unity Catalog catalog in the target Free Edition environment. The catalog name remains configuration rather than being repeated throughout the code.
 
 Because Free Edition capabilities may make multiple schemas unnecessary, the initial plan uses one schema and layer-prefixed tables:
 
@@ -77,4 +77,3 @@ These names describe business results rather than implementation details. They m
 - Screenshots must exclude tokens, private workspace identifiers, and unrelated personal information.
 - Meaningful AI use is recorded incrementally in `PROCESS.md`, including the task, the resulting contribution, any correction, and the validation performed.
 - Every submitted line must be understood well enough to explain during an interview.
-
