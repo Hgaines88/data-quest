@@ -23,6 +23,27 @@ The `workspace` catalog was selected because it is the user-writable catalog in 
 
 The setup statements use `IF NOT EXISTS` so environment initialization is safe to rerun. They create or confirm named containers without deleting or replacing existing data.
 
+### Ingestion manifest and rerun contract
+
+The raw mirror uses each source-relative path as its stable object identity. I
+retain provider metadata when available, but I use the verified downloaded byte
+count and SHA-256 digest to decide whether content is unchanged. This avoids
+treating an unreliable or absent ETag as proof of equality.
+
+New and changed objects produce active manifest entries. Missing objects produce
+append-only removal tombstones only after a complete source inventory and all
+required downloads have succeeded. Unchanged objects retain their prior entry
+and are not rewritten. A previously removed path that reappears is new in the
+current lifecycle while its historical tombstone remains auditable.
+
+The planning layer refuses to return a publishable plan for an incomplete
+inventory or partial download run. The planned Databricks implementation stages
+and verifies all required bytes first, promotes changed content to an immutable
+versioned path, then publishes the run's transitions in one Delta transaction.
+Until that transaction commits, the previous manifest and the immutable bytes it
+references remain authoritative. The complete contract and its current evidence
+limits are recorded in `docs/INGESTION_MANIFEST_CONTRACT.md`.
+
 ### Planned data flow
 
 The planned flow is:
@@ -123,6 +144,24 @@ I adopted the protocol because correctness must be supported by multiple indepen
 AI assistance was used to draft tests and implementation for converting an HTML directory listing into a safe, deterministic source inventory. I reviewed the behavior in two layers: a pure parser that rejects links outside the exact configured directory, and a request function that sends an identifying `User-Agent`, applies a timeout, uses bounded retries for transient failures, and fails immediately with policy guidance for HTTP 403 or 429 responses.
 
 The tests were written before the HTTP implementation and initially failed because the new request API did not exist. After implementation and self-review, 13 controlled tests passed without network access. A separate live integration check then discovered the 12 files observed during source profiling. The live check listed files only; it did not download them or write to Databricks. The code contains no hardcoded BLS filenames, and the committed configuration retains a placeholder rather than personal contact information.
+
+### 2026-10-17: Manifest and change-detection contract
+
+AI assistance was used to challenge the manifest design against partial
+downloads, interrupted runs, ambiguous source identities, source removals, and
+misleading provider metadata. I chose the source-relative path as the stable key,
+verified size plus SHA-256 as the content identity, and append-only tombstones as
+the removal representation. I also required a run identifier and deterministic
+path ordering so transitions can be audited and reproduced.
+
+I wrote the contract tests before the implementation; the first run failed
+because the manifest module did not yet exist. I then implemented a pure planning
+layer with no network, filesystem, or Databricks side effects. The full suite
+passed 36 tests covering all four required change cases, reappearance, duplicate
+keys, unsafe paths, invalid digests and timestamps, deterministic ordering, and
+refusal to publish incomplete runs. These tests validate the state model, not the
+future Volume and Delta integration, which remains to be proven in DQ-07 through
+DQ-09.
 
 ### 2026-10-17: DQ-05 enhanced quality review
 
