@@ -162,6 +162,8 @@ class PipelineDefinitionTests(unittest.TestCase):
     def test_bls_rows_are_read_line_by_line(self) -> None:
         self.assertIn("spark.read.text(SETTINGS.bls_object_path", self.source)
         self.assertNotIn('F.posexplode("_lines")', self.source)
+        self.assertNotIn("F.input_file_name()", self.source)
+        self.assertIn('F.col("_metadata.file_path")', self.source)
         self.assertIn(
             'F.split(F.col("_line"), "\\t", -1),\n'
             "                lambda value: F.trim(value),",

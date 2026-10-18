@@ -126,7 +126,9 @@ def _bls_rows(spec: BlsBronzeSpec) -> DataFrame:
     lines = (
         spark.read.text(SETTINGS.bls_object_path(spec.relative_path))
         .select(
-            _canonical_volume_path(F.input_file_name()).alias("_physical_path"),
+            _canonical_volume_path(F.col("_metadata.file_path")).alias(
+                "_physical_path"
+            ),
             F.col("value").alias("_line"),
         )
         .where(F.length("_line") > 0)

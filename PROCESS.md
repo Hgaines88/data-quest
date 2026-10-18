@@ -705,6 +705,15 @@ wraps the pattern with `F.lit`, preserving the intended content-nonempty rule
 without changing its semantics. A source-shape regression now protects this
 runtime-specific API boundary.
 
+The fourth triggered update compiled the shared verifier but Unity Catalog
+rejected `input_file_name()` in the line-oriented reader. Databricks emitted
+the same line-127 error once for each of the ten BLS publications, so the ten
+red entries again represented one shared helper failure rather than ten data
+defects. The supported Unity Catalog metadata column, `_metadata.file_path`,
+provides the same physical-path value needed for the manifest join without an
+extra abstraction or behavioral change. The reader now selects that column
+directly, and a regression prohibits reintroducing `input_file_name()`.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
