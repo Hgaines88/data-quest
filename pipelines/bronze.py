@@ -66,7 +66,7 @@ def _latest_active_manifest(table_name: str) -> DataFrame:
 
 
 def _active_objects(manifest_table: str, object_glob: str) -> DataFrame:
-    """Join physical object bytes to the exact active manifest paths."""
+    """Enumerate provider objects, then retain exact active manifest paths."""
 
     manifest = _latest_active_manifest(manifest_table).select(
         "relative_path",
