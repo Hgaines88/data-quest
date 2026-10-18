@@ -368,6 +368,57 @@ runs prove no-change behavior for the observed sources in the authorized
 workspace. Neither form of evidence proves concurrent-writer safety, so the
 assessment workflow remains explicitly single-writer.
 
+### 2026-10-17: Source schemas and data-quality actions
+
+AI assistance was used to reconcile the observed BLS and Data USA structures,
+the official BLS data dictionary, the logical model, and the three required Gold
+contracts. I reviewed the proposed fields, keys, types, normalization boundaries,
+and expectation severity before recording them in
+`docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md`.
+
+I chose source-shaped string columns for BLS Bronze tables so provider padding,
+leading zeroes, sentinels, and malformed values remain observable before Silver
+typing. Raw bytes remain immutable in the Volume. Silver uses explicit integer,
+long, timestamp, and `decimal(20, 6)` types; the decimal preserves BLS published
+values without introducing binary floating-point error into quarterly sums.
+
+I checked the assigned Data USA endpoint once more before finalizing its nested
+schema. The observed annotation values were strings; pagination fields were
+integers; the declared columns were `Nation ID`, `Nation`, `Year`, and
+`Population`; and the data records used string identifiers, integer years, and
+numeric population values. I also corrected the BLS header rule to compare
+ordered field names after trimming provider padding rather than treating harmless
+header whitespace as schema drift.
+
+Required-key and cast failures are dropped only with visible metrics because
+they cannot safely satisfy the published grain. Duplicate normalized business
+keys, missing series-label lookup matches, incompatible headers, and incomplete
+JSON envelopes fail the update instead of selecting an arbitrary value or
+publishing a plausible but corrupted result. The previous successful pipeline
+state and immutable raw artifact remain available for recovery.
+
+I retained `Q05` in Silver as valid annual-average provider data while requiring
+Question 2 to filter explicitly to `Q01` through `Q04`. I also placed the
+2013–2018 population completeness assertion at the Question 1 boundary rather
+than restricting the reusable Silver population history. These rules are now
+documented implementation contracts; DQ-11 through DQ-15 still need to build and
+validate them in Databricks.
+
+GitHub Copilot's pull-request review identified four documentation gaps before
+merge. I corrected an invalid Mermaid precision annotation, aligned the
+population candidate key with the `nation_id + year` contract, added an explicit
+fail-update gate for malformed or wrong-width BLS records before projection, and
+made the Data USA envelope, pagination, ordered columns, and record-key checks
+exact so additive drift cannot be silently discarded. I reviewed each suggestion
+against the source evidence and project quality policy before accepting it.
+
+Copilot's re-review found two additional quality actions that the first revision
+left implicit. I made both fail-update invariants: every normalized Current row
+must match the AllData snapshot on business key and value, and every retained
+observation must resolve to exactly one valid series-metadata row before enriched
+or Gold publication. These checks prevent an internally inconsistent provider
+snapshot or an unlabeled series from producing apparently complete results.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

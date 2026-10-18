@@ -157,10 +157,10 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-04, DQ-08
 
-- [ ] Define explicit schemas for the BLS observation data, required BLS metadata, and population records.
-- [ ] Identify non-null business keys and acceptable value types.
-- [ ] Decide how malformed, null-key, and duplicate records are handled.
-- [ ] Define the pipeline expectations and their action: retain with metrics, drop, or fail.
+- [x] Define explicit schemas for the BLS observation data, required BLS metadata, and population records.
+- [x] Identify non-null business keys and acceptable value types.
+- [x] Decide how malformed, null-key, and duplicate records are handled.
+- [x] Define the pipeline expectations and their action: retain with metrics, drop, or fail.
 
 **Done when:** Schema and expectation decisions are documented before table implementation.
 
