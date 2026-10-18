@@ -76,6 +76,11 @@ destination is restored from the verified staged copy and increments
 that fails size or digest verification is preserved, never overwritten, and
 fails the run for coordinated operator recovery.
 
+HTTP protocol interruptions during discovery or streaming use the configured
+bounded retry policy. Every failed streaming attempt removes its partial file
+before retry or return. Invalid request targets and local staging-storage
+failures are typed hard failures and are not retried as provider outages.
+
 ## Cleanup and retention
 
 Run-scoped `_staging` content is removed after success or failure. Historical
