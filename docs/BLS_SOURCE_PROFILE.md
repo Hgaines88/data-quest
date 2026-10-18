@@ -44,7 +44,7 @@ Counts and sizes describe this snapshot and may change in later BLS releases.
 | `series_id` | string | Statistical-series key after trimming |
 | `year` | integer | Observation year |
 | `period` | string | `Q01` through `Q05`; `Q05` is annual average |
-| `value` | decimal or double | Published observation value |
+| `value` | `decimal(20, 6)` | Published observation value; DQ-10 fixed the Silver precision |
 | `footnote_codes` | nullable string | Provider footnote code, currently blank or `R` |
 
 The observed business key is `series_id + year + period`. Neither observation file contained duplicate business keys in this snapshot, and none of the five fields other than `footnote_codes` was empty.

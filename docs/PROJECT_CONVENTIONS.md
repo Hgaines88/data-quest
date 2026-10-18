@@ -19,7 +19,7 @@ This document records the working conventions for the Rearc Data Quest solution.
 └── tests/                  # Local unit and contract tests
 ```
 
-Reusable source-access and validation logic belongs under `src/data_quest` so it can be tested independently of Databricks. Databricks pipeline definitions belong under `pipelines` so reviewers can find the platform entry points quickly. Required alternative Spark SQL implementations belong under `sql/alternatives`.
+Reusable source-access and validation logic belongs under `src/data_quest` so it can be tested independently of Databricks. Current ingestion reconciliation is executed by the landing and manifest-validation notebooks; `src/data_quest/validation` is reserved for reusable Bronze, Silver, and Gold checks as those layers are implemented. Databricks pipeline definitions belong under `pipelines` so reviewers can find the platform entry points quickly. Required alternative Spark SQL implementations belong under `sql/alternatives`.
 
 ## Databricks object names
 

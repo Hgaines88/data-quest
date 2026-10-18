@@ -37,7 +37,7 @@ and are not rewritten. A previously removed path that reappears is new in the
 current lifecycle while its historical tombstone remains auditable.
 
 The planning layer refuses to return a publishable plan for an incomplete
-inventory or partial download run. The planned Databricks implementation stages
+inventory or partial download run. The implemented Databricks workflow stages
 and verifies all required bytes first, promotes changed content to an immutable
 versioned path, then publishes the run's transitions in one Delta transaction.
 Until that transaction commits, the previous manifest and the immutable bytes it
@@ -80,9 +80,10 @@ contains the complete first-page result. Validation reads the staged bytes but
 does not serialize them again, so the promoted raw object remains exactly what
 the provider returned.
 
-### Planned data flow
+### Layered data flow
 
-The planned flow is:
+Raw landing is implemented and verified. Bronze, Silver, and Gold remain the
+next planned layers:
 
 1. Discover and land raw BLS and Data USA files in the managed Volume.
 2. Read those source artifacts into Bronze tables with provenance and ingestion quality metrics.
@@ -167,8 +168,9 @@ folder at commit `4b5d642`. The first live run used ID
 `20261017T223018Z-29527a8b` and began with zero current Data USA manifest
 objects. It downloaded and validated one response, classified it as new,
 promoted `population.json`, and published one manifest transition. The parsed
-response contained 11 records spanning 2013 through 2024 with the declared
-columns `Nation ID`, `Nation`, `Year`, and `Population`.
+response contained 11 records with minimum year 2013 and maximum year 2024.
+Those bounds do not imply that every intermediate year was present. The
+declared columns were `Nation ID`, `Nation`, `Year`, and `Population`.
 
 The independent reconciliation reparsed the committed raw bytes and recomputed
 their complete size and SHA-256 digest. It reported one active object of 1,401
@@ -624,6 +626,21 @@ reported all 11 manifest columns. The exact exported row is preserved as
 `docs/evidence/dq41_spark_manifest_validation.csv`. This closes the live DDL,
 append-history, and latest-state ranking gate for the observed runtime while
 retaining the documented concurrency and version claim boundaries.
+
+### 2026-10-18: Documentation reconciliation after ingestion remediation
+
+I re-evaluated all 15 documentation contradictions from the independent audit
+against the repository after DQ-35 through DQ-41. I did not rewrite the audit's
+historical snapshot. Instead, I corrected current contracts, diagrams, evidence
+indexes, checklist state, and planned-versus-implemented wording, and recorded
+an explicit disposition for every item in
+`docs/DOCUMENTATION_RECONCILIATION.md`.
+
+The review preserved the boundary that raw landing is implemented while Bronze,
+Silver, Gold, stakeholder interfaces, deployment, and production concurrency
+controls remain future work. No Databricks execution was required because these
+changes describe behavior already proved by the merged code, controlled tests,
+and recorded live evidence; they do not introduce a new platform claim.
 
 ## Retrospective
 

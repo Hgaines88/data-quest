@@ -52,8 +52,9 @@ failures and are not retried as provider outages.
 ## Observed validation evidence
 
 On 2026-10-17, the first live run (`20261017T223018Z-29527a8b`) published one
-new `population.json` object. It contained 1,401 bytes, 11 records spanning
-2013–2024, and the four expected columns. Its displayed SHA-256 prefix was
+new `population.json` object. It contained 1,401 bytes and 11 records with
+minimum year 2013 and maximum year 2024. These bounds do not assert that every
+intermediate year is present. The response had the four expected columns, and its displayed SHA-256 prefix was
 `daa4d0576778`.
 
 The immediate rerun (`20261017T223605Z-09cb497b`) classified the response as
