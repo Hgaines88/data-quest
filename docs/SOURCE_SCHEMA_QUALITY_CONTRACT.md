@@ -174,7 +174,11 @@ Business key: `series_id + year + period_code`.
 - Retain `Q05` in Silver because it is valid provider data. Required Question 2
   excludes it explicitly because it is an annual average, not a quarter.
 - Treat `bronze_bls_observation_current` as validation input only: every current
-  row should match a row in the AllData-derived Silver table.
+  row must match exactly one row in the AllData-derived Silver table on the
+  normalized business key and value. Fail the update when a Current row is
+  absent from AllData or has a different value. Surface mismatch counts and
+  bounded examples as evidence; do not publish a snapshot assembled from
+  internally inconsistent provider files.
 
 ### `silver_bls_series`
 
@@ -194,6 +198,11 @@ Business key: `series_id`.
 - Fail the update on duplicate `series_id` values.
 - Fail the enriched publication when any component code lacks a lookup match;
   the required output needs a readable label and must not invent one.
+- Before enriched observation or Gold publication, require every retained
+  observation `series_id` to match exactly one valid `silver_bls_series` row.
+  Fail the update on missing or ambiguous series metadata rather than silently
+  omitting the observation or publishing it without the required readable
+  label. Surface orphan and ambiguity counts with bounded examples.
 - Build labels from sector, class, measure, duration, and seasonal descriptions.
   Period and footnote descriptions remain observation provenance, not stable
   label components.

@@ -412,6 +412,13 @@ made the Data USA envelope, pagination, ordered columns, and record-key checks
 exact so additive drift cannot be silently discarded. I reviewed each suggestion
 against the source evidence and project quality policy before accepting it.
 
+Copilot's re-review found two additional quality actions that the first revision
+left implicit. I made both fail-update invariants: every normalized Current row
+must match the AllData snapshot on business key and value, and every retained
+observation must resolve to exactly one valid series-metadata row before enriched
+or Gold publication. These checks prevent an internally inconsistent provider
+snapshot or an unlabeled series from producing apparently complete results.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
