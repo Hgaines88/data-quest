@@ -577,6 +577,28 @@ retry-exhaustion regressions and included read-side `OSError` in discovery's
 bounded network retry set. The earlier `HTTPError` and `InvalidURL` handlers
 still take precedence, preserving their policy and hard-failure semantics.
 
+### 2026-10-18: Test-evidence fidelity and Spark validation
+
+The audit correctly distinguished controlled adapter tests from executed Spark
+evidence. The fake-backed manifest tests validate emitted DDL text, typed row
+mapping, DataFrame construction, writer calls, and identifier rejection; they
+do not execute a window function or Delta write. I renamed the three broadest
+tests so their names state those actual claims.
+
+For landing orchestration, I added a real-filesystem regression around the real
+immutable promoter. It proves that successful promotion followed by publisher
+failure leaves verified bytes unreferenced, and that a later run against the
+still-empty committed manifest reuses the exact immutable object before
+publishing one transition. This complements the existing real-promoter tests
+for missing, valid, and corrupt unchanged objects.
+
+For the platform boundary, I added a dedicated Databricks validation notebook.
+It creates a uniquely named temporary Delta manifest, proves idempotent DDL,
+appends four synthetic transitions, and executes the latest-state window with
+both timestamp and lexical run-ID ordering. It always attempts to drop only its
+generated validation table. The live result remains a required DQ-41 gate and
+will be recorded after execution; unit tests alone do not satisfy that claim.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
