@@ -173,9 +173,9 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 - [x] Preserve source fidelity while adding provenance fields such as source file and ingestion timestamp where useful.
 - [x] Apply expected-schema and non-null-key expectations.
 - [x] Ensure repeated pipeline execution is deterministic.
-- [x] Expose expectation results for screenshot evidence.
+- [x] Expose expectation results for screenshot evidence ([DQ-11 live evidence](docs/evidence/dq11_bronze_live_validation.md)).
 
-**Done when:** Bronze tables are pipeline-managed, queryable, traceable to raw sources, and visibly quality-checked.
+**Done when:** Bronze tables are pipeline-managed, queryable, traceable to raw sources, and visibly quality-checked. See the [completed Databricks update and table evidence](docs/evidence/dq11_bronze_live_validation.md).
 
 ### DQ-12: Build typed and deduplicated Silver BLS observations
 
