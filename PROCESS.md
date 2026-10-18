@@ -677,7 +677,8 @@ affected: the binary verifier decoded each complete file, split it into one
 array-valued row, and downstream publication exploded that array. The design
 therefore concentrated every observation line and its intermediate copies in a
 single row before distribution. The corrective design retains the immutable
-binary size/SHA-256 gate and exact first-line header check, but avoids building
+binary size/SHA-256 gate and ordered first-line header check (trimming
+surrounding field whitespace), but avoids building
 the complete line array. Once verified, each BLS artifact is read through
 Spark's distributed text reader at its static content-addressed filename path;
 physical paths are joined back to the latest-active verified manifest row,

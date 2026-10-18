@@ -162,6 +162,11 @@ class PipelineDefinitionTests(unittest.TestCase):
     def test_bls_rows_are_read_line_by_line(self) -> None:
         self.assertIn("spark.read.text(SETTINGS.bls_object_path", self.source)
         self.assertNotIn('F.posexplode("_lines")', self.source)
+        self.assertIn(
+            'F.split(F.col("_line"), "\\t", -1),\n'
+            "                lambda value: F.trim(value),",
+            self.source,
+        )
 
     def test_population_view_supports_source_names_and_unlimited_pages(self) -> None:
         self.assertIn('"delta.columnMapping.mode": "name"', self.source)

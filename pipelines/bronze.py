@@ -130,7 +130,13 @@ def _bls_rows(spec: BlsBronzeSpec) -> DataFrame:
             F.col("value").alias("_line"),
         )
         .where(F.length("_line") > 0)
-        .where(F.col("_line") != "\t".join(spec.expected_source_columns))
+        .where(
+            F.transform(
+                F.split(F.col("_line"), "\t", -1),
+                lambda value: F.trim(value),
+            )
+            != F.array(*[F.lit(column) for column in spec.expected_source_columns])
+        )
     )
     source = (
         verified.join(
