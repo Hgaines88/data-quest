@@ -15,8 +15,14 @@ class SilverPipelineDefinitionTests(unittest.TestCase):
         self.assertNotIn("binaryFile", self.source)
 
     def test_declares_intentional_types_and_business_key(self) -> None:
-        self.assertIn('.cast("int").alias("year")', self.source)
-        self.assertIn('.cast("decimal(20,6)").alias("value")', self.source)
+        self.assertIn(
+            'F.expr("try_cast(trim(year) as int)").alias("year")',
+            self.source,
+        )
+        self.assertIn(
+            'F.expr("try_cast(trim(value) as decimal(20,6))").alias("value")',
+            self.source,
+        )
         self.assertIn(
             '_BUSINESS_KEY = ("series_id", "year", "period_code")', self.source
         )

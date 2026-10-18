@@ -50,9 +50,9 @@ def _normalized_observations(bronze_table: str) -> DataFrame:
     source = spark.read.table(SETTINGS.table_name(bronze_table))
     normalized = source.select(
         F.trim("series_id").alias("series_id"),
-        F.trim("year").cast("int").alias("year"),
+        F.expr("try_cast(trim(year) as int)").alias("year"),
         F.trim("period").alias("period_code"),
-        F.trim("value").cast("decimal(20,6)").alias("value"),
+        F.expr("try_cast(trim(value) as decimal(20,6))").alias("value"),
         F.when(F.length(F.trim("footnote_codes")) > 0, F.trim("footnote_codes"))
         .otherwise(F.lit(None).cast("string"))
         .alias("footnote_codes"),

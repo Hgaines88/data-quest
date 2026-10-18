@@ -767,6 +767,14 @@ compilation, and diff checks must pass before deployment. DQ-12 will not be
 marked complete until a triggered Databricks update provides table counts and
 expectation evidence on the target runtime.
 
+Copilot's first review identified an important ANSI-mode boundary before live
+deployment. Ordinary integer and decimal casts can throw on malformed or
+overflowing provider text, which would abort evaluation before the named drop
+expectations could count and exclude those rows. The normalization therefore
+uses SQL `try_cast` for both numeric fields. Failed conversions become null and
+reach the existing validity rules, preserving the documented behavior without
+adding another processing stage.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
