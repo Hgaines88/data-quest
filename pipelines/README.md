@@ -4,12 +4,14 @@
 `pyspark.pipelines` API. It publishes ten analytical BLS materialized views and
 one Data USA population materialized view.
 
-The pipeline reads only content-addressed objects selected by the latest active
-manifest state. All source fields remain source-shaped strings except Data USA
-`Year` and `Population`, whose JSON number types are retained. Every output adds
-source file, physical path, ingestion timestamp, run ID, and content digest
-provenance. Structural contract violations fail an update; unusable required
-records are dropped and counted by named expectations.
+Only content-addressed objects selected by the latest active manifest state
+reach Bronze. The binary reader may physically enumerate additional objects
+before the manifest join, as described below. All source fields remain
+source-shaped strings except Data USA `Year` and `Population`, whose JSON number
+types are retained. Every output adds source file, physical path, ingestion
+timestamp, run ID, and content digest provenance. Structural contract
+violations fail an update; unusable required records are dropped and counted by
+named expectations.
 
 Shared temporary verification views join provider object bytes to latest-active
 manifest paths, validate source presence and shape, and then feed every
@@ -39,4 +41,3 @@ The pipeline requires the BLS and Data USA landing notebooks to have populated
 their Delta manifest tables and immutable Volume objects. Run it as a triggered
 batch update. Expectation metrics are available in the pipeline event log and
 the update details in the Databricks UI.
-
