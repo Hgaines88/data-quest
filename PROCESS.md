@@ -566,7 +566,9 @@ storage boundary. I reproduced it with a destination that was an existing
 directory: the initial unlink raised raw `IsADirectoryError` before any network
 request. Cleanup now ignores only genuinely absent paths and wraps every other
 filesystem error as non-retryable `StagingWriteError`; the regression also
-proves that the provider opener is never called.
+proves that the provider opener is never called. I retained Copilot's additional
+permission-denied unlink regression because it covers a distinct cleanup path,
+and removed its duplicate existing-directory case.
 
 ## Retrospective
 
