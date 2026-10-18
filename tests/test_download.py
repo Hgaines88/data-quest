@@ -2,6 +2,7 @@
 
 from email.message import Message
 import hashlib
+from http.client import IncompleteRead, InvalidURL
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -13,12 +14,13 @@ from data_quest.ingestion.download import (
     DownloadIntegrityError,
     DownloadedFile,
     SourceRedirectError,
+    StagingWriteError,
     build_versioned_landed_path,
     download_to_staging,
     promote_verified_file,
     verify_file_evidence,
 )
-from data_quest.ingestion.discovery import SourcePolicyError
+from data_quest.ingestion.discovery import SourcePolicyError, SourceRequestError
 
 
 SOURCE_URL = "https://download.bls.gov/pub/time.series/pr/pr.series"
@@ -58,6 +60,23 @@ class FakeResponse:
 
     def __exit__(self, *args: object) -> None:
         self._body.close()
+
+
+class InterruptedResponse(FakeResponse):
+    """Return some bytes, then simulate an interrupted HTTP response body."""
+
+    def __init__(self, partial_body: bytes) -> None:
+        super().__init__(partial_body)
+        self._interrupted = False
+
+    def read(self, size: int = -1) -> bytes:
+        chunk = super().read(size)
+        if chunk:
+            return chunk
+        if not self._interrupted:
+            self._interrupted = True
+            raise IncompleteRead(b"", 1)
+        return b""
 
 
 class DownloadToStagingTests(unittest.TestCase):
@@ -180,6 +199,118 @@ class DownloadToStagingTests(unittest.TestCase):
         self.assertEqual(result.content_size_bytes, len(complete))
         self.assertEqual(opener.call_count, 2)
         sleeper.assert_called_once_with(0.25)
+
+    def test_retries_an_interrupted_response_and_replaces_partial_bytes(self) -> None:
+        complete = b"complete-body"
+        opener = Mock(
+            side_effect=[
+                InterruptedResponse(b"partial"),
+                FakeResponse(complete, content_length=len(complete)),
+            ]
+        )
+        sleeper = Mock()
+
+        with TemporaryDirectory() as directory:
+            destination = Path(directory) / "file.partial"
+            result = download_to_staging(
+                SOURCE_URL,
+                USER_AGENT,
+                destination,
+                max_attempts=2,
+                backoff_seconds=0.25,
+                opener=opener,
+                sleeper=sleeper,
+            )
+
+            self.assertEqual(destination.read_bytes(), complete)
+
+        self.assertEqual(result.content_size_bytes, len(complete))
+        self.assertEqual(opener.call_count, 2)
+        sleeper.assert_called_once_with(0.25)
+
+    def test_removes_partial_file_after_repeated_response_interruptions(self) -> None:
+        opener = Mock(
+            side_effect=[InterruptedResponse(b"first"), InterruptedResponse(b"second")]
+        )
+
+        with TemporaryDirectory() as directory:
+            destination = Path(directory) / "file.partial"
+
+            with self.assertRaisesRegex(SourceRequestError, "after 2 attempts"):
+                download_to_staging(
+                    SOURCE_URL,
+                    USER_AGENT,
+                    destination,
+                    max_attempts=2,
+                    backoff_seconds=0,
+                    opener=opener,
+                )
+
+            self.assertFalse(destination.exists())
+
+    def test_invalid_url_failure_is_wrapped_without_retrying(self) -> None:
+        opener = Mock(side_effect=InvalidURL("invalid request target"))
+
+        with TemporaryDirectory() as directory:
+            destination = Path(directory) / "file.partial"
+
+            with self.assertRaisesRegex(SourceRequestError, "invalid URL"):
+                download_to_staging(
+                    SOURCE_URL,
+                    USER_AGENT,
+                    destination,
+                    max_attempts=3,
+                    opener=opener,
+                )
+
+            self.assertFalse(destination.exists())
+
+        self.assertEqual(opener.call_count, 1)
+
+    def test_staging_directory_failure_is_wrapped_without_retrying(self) -> None:
+        opener = Mock(return_value=FakeResponse(b"body", content_length=4))
+
+        with TemporaryDirectory() as directory:
+            blocked_parent = Path(directory) / "not-a-directory"
+            blocked_parent.write_text("blocking file", encoding="utf-8")
+            destination = blocked_parent / "file.partial"
+
+            with self.assertRaisesRegex(StagingWriteError, "staging"):
+                download_to_staging(
+                    SOURCE_URL,
+                    USER_AGENT,
+                    destination,
+                    max_attempts=3,
+                    opener=opener,
+                )
+
+            self.assertFalse(destination.exists())
+
+        self.assertEqual(opener.call_count, 1)
+
+    def test_staging_open_failure_is_wrapped_without_retrying(self) -> None:
+        opener = Mock(return_value=FakeResponse(b"body", content_length=4))
+
+        with TemporaryDirectory() as directory:
+            destination = Path(directory) / "file.partial"
+
+            with patch.object(
+                Path,
+                "open",
+                side_effect=PermissionError("staging access denied"),
+            ):
+                with self.assertRaisesRegex(StagingWriteError, "staging"):
+                    download_to_staging(
+                        SOURCE_URL,
+                        USER_AGENT,
+                        destination,
+                        max_attempts=3,
+                        opener=opener,
+                    )
+
+            self.assertFalse(destination.exists())
+
+        self.assertEqual(opener.call_count, 1)
 
     def test_removes_partial_file_when_all_attempts_fail_integrity(self) -> None:
         opener = Mock(

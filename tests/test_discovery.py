@@ -1,6 +1,7 @@
 """Tests for provider-directory link discovery."""
 
 from email.message import Message
+from http.client import IncompleteRead, InvalidURL
 from io import BytesIO
 from urllib.error import HTTPError, URLError
 from urllib.request import Request
@@ -412,6 +413,45 @@ class FetchDirectoryHtmlTests(unittest.TestCase):
         self.assertEqual(result, "<html>recovered</html>")
         self.assertEqual(opener.call_count, 2)
         sleeper.assert_called_once_with(0.25)
+
+    def test_retries_an_interrupted_response_then_succeeds(self) -> None:
+        interrupted_response = FakeResponse(b"partial")
+        interrupted_response.read = Mock(
+            side_effect=IncompleteRead(b"partial", 1)
+        )
+        opener = Mock(
+            side_effect=[
+                interrupted_response,
+                FakeResponse(b"<html>recovered</html>"),
+            ]
+        )
+        sleeper = Mock()
+
+        result = fetch_directory_html(
+            BASE_URL,
+            USER_AGENT,
+            max_attempts=2,
+            backoff_seconds=0.25,
+            opener=opener,
+            sleeper=sleeper,
+        )
+
+        self.assertEqual(result, "<html>recovered</html>")
+        self.assertEqual(opener.call_count, 2)
+        sleeper.assert_called_once_with(0.25)
+
+    def test_invalid_url_failure_is_wrapped_without_retrying(self) -> None:
+        opener = Mock(side_effect=InvalidURL("invalid request target"))
+
+        with self.assertRaisesRegex(SourceRequestError, "invalid URL"):
+            fetch_directory_html(
+                BASE_URL,
+                USER_AGENT,
+                max_attempts=3,
+                opener=opener,
+            )
+
+        self.assertEqual(opener.call_count, 1)
 
     def test_stops_after_the_configured_attempt_limit(self) -> None:
         opener = Mock(side_effect=URLError("network unavailable"))

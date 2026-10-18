@@ -44,6 +44,11 @@ Cross-origin and HTTPS-to-HTTP redirects are refused before they are followed,
 so request headers cannot be forwarded outside the endpoint's configured
 origin. Same-origin HTTPS redirects remain allowed.
 
+HTTP protocol interruptions use the configured bounded retry policy, and every
+failed streaming attempt removes its partial file before retry or return.
+Invalid request targets and local staging-storage failures are typed hard
+failures and are not retried as provider outages.
+
 ## Observed validation evidence
 
 On 2026-10-17, the first live run (`20261017T223018Z-29527a8b`) published one

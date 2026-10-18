@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import hashlib
+from http.client import HTTPException, InvalidURL
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -104,7 +105,14 @@ def download_to_staging(
                         while True:
                             try:
                                 chunk = response.read(chunk_size)
-                            except (OSError, TimeoutError, URLError) as error:
+                            except InvalidURL:
+                                raise
+                            except (
+                                HTTPException,
+                                OSError,
+                                TimeoutError,
+                                URLError,
+                            ) as error:
                                 raise SourceRequestError(
                                     "source response failed while streaming bytes"
                                 ) from error
@@ -121,6 +129,11 @@ def download_to_staging(
                 except StagingWriteError:
                     _remove_if_present(destination_path)
                     raise
+                except OSError as error:
+                    _remove_if_present(destination_path)
+                    raise StagingWriteError(
+                        f"could not prepare staging file: {destination_path}"
+                    ) from error
 
                 if reported_length is not None and byte_count != reported_length:
                     raise DownloadIntegrityError(
@@ -156,10 +169,21 @@ def download_to_staging(
                 last_error = error
             finally:
                 error.close()
+        except InvalidURL as error:
+            _remove_if_present(destination_path)
+            raise SourceRequestError(
+                "source request contains an invalid URL"
+            ) from error
         except (SourceRedirectError, StagingWriteError):
             _remove_if_present(destination_path)
             raise
-        except (DownloadIntegrityError, SourceRequestError, URLError, TimeoutError) as error:
+        except (
+            DownloadIntegrityError,
+            HTTPException,
+            SourceRequestError,
+            URLError,
+            TimeoutError,
+        ) as error:
             _remove_if_present(destination_path)
             last_error = error
 
@@ -368,5 +392,5 @@ def _parse_content_length(raw_value: str | None) -> int | None:
 def _remove_if_present(path: Path) -> None:
     try:
         path.unlink()
-    except FileNotFoundError:
+    except (FileNotFoundError, NotADirectoryError):
         return

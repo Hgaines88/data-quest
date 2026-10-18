@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from html.parser import HTMLParser
+from http.client import HTTPException, InvalidURL
 from pathlib import PurePosixPath
 import re
 import time
@@ -128,7 +129,11 @@ def fetch_directory_html(
             last_error: Exception = error
         except SourceRedirectError:
             raise
-        except (URLError, TimeoutError) as error:
+        except InvalidURL as error:
+            raise SourceRequestError(
+                "source directory request contains an invalid URL"
+            ) from error
+        except (HTTPException, URLError, TimeoutError) as error:
             last_error = error
         except (LookupError, UnicodeError) as error:
             raise SourceRequestError(

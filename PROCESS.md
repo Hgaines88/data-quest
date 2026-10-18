@@ -538,6 +538,29 @@ claim the exact Bronze envelope or the finite, integral, unique Silver business
 contract; those independent pipeline rules remain assigned to DQ-11 through
 DQ-15 in the source-quality contract.
 
+### 2026-10-18: Interrupted HTTP and staging-failure normalization
+
+The independent audit found two failure paths that bypassed the ingestion
+contract. `http.client.IncompleteRead` and related protocol exceptions could
+escape without retry or partial-file cleanup, while a local directory or file
+creation failure could surface as an unclassified `OSError`. `InvalidURL` also
+needed to remain a hard failure rather than consume the retry budget.
+
+I established the boundaries with failing-first tests at both network entry
+points. Directory discovery and streaming downloads now retry bounded HTTP
+protocol interruptions. Downloads remove bytes from every failed attempt before
+retrying or returning, so a later successful attempt replaces rather than
+appends to partial content. An invalid request target is wrapped as a typed
+`SourceRequestError` and is not retried. Local staging setup and write failures
+are wrapped as `StagingWriteError` and likewise do not repeat a provider
+request.
+
+The controlled tests include an interruption after partial bytes have reached
+disk, repeated interruption exhaustion, recovery on the next attempt, invalid
+URL behavior, and a filesystem path whose parent is a regular file. These tests
+exercise failure states that a normal live provider run cannot safely or
+deterministically manufacture.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
