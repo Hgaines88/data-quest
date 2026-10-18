@@ -327,6 +327,83 @@ class PrepareBlsInventorySafetyTests(unittest.TestCase):
 
 
 class ExecuteLandingPlanTests(unittest.TestCase):
+    def test_publisher_failure_leaves_reusable_unreferenced_object(self) -> None:
+        body = b"new immutable bytes"
+        digest = hashlib.sha256(body).hexdigest()
+        committed: list[ManifestEntry] = []
+
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            landed = root / "objects" / digest / "new"
+            first_staging = root / "first"
+            second_staging = root / "second"
+            first_staging.mkdir()
+            second_staging.mkdir()
+
+            def local_landed_path(
+                volume_root: str,
+                relative_path: str,
+                content_sha256: str,
+            ) -> str:
+                return str(root / "objects" / content_sha256 / relative_path)
+
+            with (
+                patch(
+                    "data_quest.ingestion.landing.build_versioned_landed_path",
+                    side_effect=local_landed_path,
+                ),
+                patch("data_quest.ingestion.manifest._validate_landed_path"),
+            ):
+                first_plan = prepare_source_landing(
+                    [source("new")],
+                    committed,
+                    user_agent=USER_AGENT,
+                    volume_source_root=VOLUME_ROOT,
+                    run_id="20261018T060000Z-first",
+                    ingested_at_utc=RUN_TIME,
+                    downloader=downloader_for(
+                        {"new": body}, staging_directory=first_staging
+                    ),
+                    cleanup_tree=Mock(),
+                )
+
+                with self.assertRaisesRegex(RuntimeError, "manifest unavailable"):
+                    execute_landing_plan(
+                        first_plan,
+                        publisher=Mock(
+                            side_effect=RuntimeError("manifest unavailable")
+                        ),
+                        cleanup_tree=Mock(),
+                    )
+
+                self.assertEqual(landed.read_bytes(), body)
+                self.assertEqual(committed, [])
+
+                second_plan = prepare_source_landing(
+                    [source("new")],
+                    committed,
+                    user_agent=USER_AGENT,
+                    volume_source_root=VOLUME_ROOT,
+                    run_id="20261018T060100Z-second",
+                    ingested_at_utc=RUN_TIME,
+                    downloader=downloader_for(
+                        {"new": body}, staging_directory=second_staging
+                    ),
+                    cleanup_tree=Mock(),
+                )
+                result = execute_landing_plan(
+                    second_plan,
+                    publisher=lambda entries: committed.extend(entries),
+                    cleanup_tree=Mock(),
+                )
+
+            self.assertEqual(landed.read_bytes(), body)
+
+        self.assertEqual([entry.relative_path for entry in committed], ["new"])
+        self.assertEqual(result.promoted_count, 0)
+        self.assertEqual(result.reused_version_count, 1)
+        self.assertEqual(result.published_transition_count, 1)
+
     def test_retained_removal_tombstone_needs_no_staged_bytes(self) -> None:
         new_body = b"new"
         tombstone = current_entry("retired", b"retired").as_removed(

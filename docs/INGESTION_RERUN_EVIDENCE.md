@@ -24,6 +24,7 @@ state. A corrupt existing object fails visibly and is never overwritten.
 | Removed source object | `PrepareBlsLandingTests.test_stages_complete_inventory_and_plans_all_change_types`; `PlanManifestChangesTests.test_empty_complete_inventory_marks_all_active_files_removed` | A missing path in a complete inventory produces a deterministic removal tombstone. |
 | Interrupted or failed download | `PrepareBlsLandingTests.test_failed_download_cleans_the_run_and_produces_no_plan`; `PlanManifestChangesTests.test_partial_download_run_cannot_publish_a_plan` | An incomplete download run cleans staging and cannot produce a publishable manifest plan. |
 | Failed promotion | `ExecuteLandingPlanTests.test_promotion_failure_prevents_manifest_publication` | Manifest publication is not attempted when immutable promotion fails. |
+| Failed publication after promotion | `ExecuteLandingPlanTests.test_publisher_failure_leaves_reusable_unreferenced_object` | A publisher failure leaves verified immutable bytes unreferenced; a later run reuses those exact bytes and publishes the transition once. |
 | Verification before publication | `ExecuteLandingPlanTests.test_verifies_all_objects_before_publishing_transitions` | New bytes are promoted and unchanged destinations are verified before any manifest transition is published. |
 | Missing or corrupt immutable object | `ExecuteLandingPlanTests.test_missing_unchanged_object_is_recovered_without_publication`; `test_valid_unchanged_object_is_verified_without_rewrite`; `test_corrupt_unchanged_object_fails_without_overwrite` | Missing bytes are restored from verified staging without a manifest event; valid bytes are retained; corrupt bytes fail without overwrite. |
 
@@ -43,6 +44,13 @@ and digest.
 
 The corresponding screenshots are indexed in `docs/screenshots/README.md`, and
 the Data USA result exports are indexed in `docs/evidence/README.md`.
+
+The Spark manifest adapter's fake-backed unit tests deliberately claim only
+statement generation, row mapping, and writer-call behavior. Its executable
+Delta DDL, append, and latest-state ranking gate is documented in
+`docs/SPARK_MANIFEST_VALIDATION.md`. The 2026-10-18 Databricks run at commit
+`3c153c7` passed all cells and matched all five expected results; its exported
+row is indexed in `docs/evidence/README.md`.
 
 ## Claim boundaries
 

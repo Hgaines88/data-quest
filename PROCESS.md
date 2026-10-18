@@ -577,6 +577,54 @@ retry-exhaustion regressions and included read-side `OSError` in discovery's
 bounded network retry set. The earlier `HTTPError` and `InvalidURL` handlers
 still take precedence, preserving their policy and hard-failure semantics.
 
+### 2026-10-18: Test-evidence fidelity and Spark validation
+
+The audit correctly distinguished controlled adapter tests from executed Spark
+evidence. The fake-backed manifest tests validate emitted DDL text, typed row
+mapping, DataFrame construction, writer calls, and identifier rejection; they
+do not execute a window function or Delta write. I renamed the three broadest
+tests so their names state those actual claims.
+
+For landing orchestration, I added a real-filesystem regression around the real
+immutable promoter. It proves that successful promotion followed by publisher
+failure leaves verified bytes unreferenced, and that a later run against the
+still-empty committed manifest reuses the exact immutable object before
+publishing one transition. This complements the existing real-promoter tests
+for missing, valid, and corrupt unchanged objects.
+
+For the platform boundary, I added a dedicated Databricks validation notebook.
+It creates a uniquely named temporary Delta manifest, proves idempotent DDL,
+appends four synthetic transitions, and executes the latest-state window with
+both timestamp and lexical run-ID ordering. It always attempts to drop only its
+generated validation table. The live result remains a required DQ-41 gate and
+unit tests alone do not satisfy that claim.
+
+Copilot review found that the first synthetic ordering fixture could not
+distinguish timestamp-first ordering from run-ID-first ordering, and that early
+dictionary construction could hide duplicate current rows. I reversed the old
+event's lexical run-ID relationship to conflict with its timestamp and now
+validate the uncollapsed ordered result list before dictionary lookup. The live
+gate therefore fails both incorrect precedence and missing latest-row filtering.
+
+The second review also noted that one write into an empty table could not prove
+append semantics. The notebook now establishes two historical rows in its first
+write and adds two later transitions in a second write. Its four-row assertion
+therefore fails if the adapter overwrites instead of preserving prior history.
+
+A later review correctly noted that the fake-backed writer test recorded append
+mode and destination but did not count writer invocations. I removed the word
+`one` from its name so it claims only the append request that it actually
+observes; the two-write live notebook supplies the append-history evidence.
+
+I then ran every cell of the validation notebook in Databricks from commit
+`3c153c7` on 2026-10-18. All cells completed with green checks. The observed
+result preserved four transitions across the two writes, returned two current
+paths, selected `20261018T010000Z-b` as the removed `ranked.txt` winner, and
+reported all 11 manifest columns. The exact exported row is preserved as
+`docs/evidence/dq41_spark_manifest_validation.csv`. This closes the live DDL,
+append-history, and latest-state ranking gate for the observed runtime while
+retaining the documented concurrency and version claim boundaries.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

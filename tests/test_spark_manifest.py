@@ -82,7 +82,7 @@ class FakeSpark:
 
 
 class SparkManifestTests(unittest.TestCase):
-    def test_creates_a_delta_manifest_table_with_the_contract_fields(self) -> None:
+    def test_emits_delta_manifest_ddl_with_contract_fields(self) -> None:
         spark = FakeSpark()
 
         ensure_manifest_table(spark, TABLE_NAME)
@@ -95,7 +95,7 @@ class SparkManifestTests(unittest.TestCase):
         self.assertIn("run_id STRING NOT NULL", statement)
         self.assertIn("USING DELTA", statement)
 
-    def test_loads_only_the_latest_manifest_state_as_typed_entries(self) -> None:
+    def test_maps_latest_state_query_result_to_typed_entries(self) -> None:
         entry = manifest_entry()
         row = {
             "source_url": entry.source_url,
@@ -119,7 +119,7 @@ class SparkManifestTests(unittest.TestCase):
         self.assertIn("PARTITION BY relative_path", spark.sql_calls[0])
         self.assertIn("WHERE manifest_rank = 1", spark.sql_calls[0])
 
-    def test_appends_all_transitions_in_one_dataframe_write(self) -> None:
+    def test_builds_transition_dataframe_and_requests_append(self) -> None:
         spark = FakeSpark()
         entry = manifest_entry()
 
