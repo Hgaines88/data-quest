@@ -347,6 +347,27 @@ recorded in the validation log above. This completes DQ-08 without claiming
 concurrent-writer safety or behavior against an as-yet-unobserved provider
 change.
 
+### 2026-10-17: Consolidated ingestion rerun evidence
+
+AI assistance was used to audit DQ-09 against the already merged manifest,
+landing, download, and Data USA tests. I chose not to add duplicate
+implementation merely to create a new card-sized change. Instead, I mapped each
+acceptance criterion to a named controlled test and the two completed live
+no-change demonstrations in `docs/INGESTION_RERUN_EVIDENCE.md`.
+
+The audit confirmed controlled coverage for new, changed, unchanged, removed,
+failed-download, partial-run, and failed-promotion behavior. It also clarified
+the term “skipped”: unchanged sources are fetched and verified again to detect
+provider changes, but matching content is not promoted, rewritten, or
+republished. This preserves currency checking without unnecessary state
+transitions.
+
+I retained the existing claim boundary. Controlled fixtures prove deterministic
+change and failure behavior without manipulating external providers; the live
+runs prove no-change behavior for the observed sources in the authorized
+workspace. Neither form of evidence proves concurrent-writer safety, so the
+assessment workflow remains explicitly single-writer.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

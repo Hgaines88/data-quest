@@ -142,11 +142,11 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-07, DQ-08
 
-- [ ] Run ingestion twice with no source changes and show that unchanged files are skipped.
-- [ ] Test new and modified files through a controlled fixture or dependency-injected source listing.
-- [ ] Test removal handling through a controlled fixture rather than manipulating the provider.
-- [ ] Test an interrupted or failed download and confirm the manifest does not falsely mark it successful.
-- [ ] Record concise evidence for `PROCESS.md`.
+- [x] Run ingestion twice with no source changes and show that unchanged files are skipped.
+- [x] Test new and modified files through a controlled fixture or dependency-injected source listing.
+- [x] Test removal handling through a controlled fixture rather than manipulating the provider.
+- [x] Test an interrupted or failed download and confirm the manifest does not falsely mark it successful.
+- [x] Record concise evidence for `PROCESS.md`.
 
 **Done when:** Tests or controlled demonstrations cover new, changed, unchanged, removed, and failed inputs.
 
