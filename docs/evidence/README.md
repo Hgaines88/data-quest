@@ -11,6 +11,10 @@ notebooks. They contain no credentials or contact-widget values.
 - `dq08_no_change_reconciliation.csv`: final reconciliation retaining the
   original published run ID.
 
+In these CSV exports, the `columns` sequence is serialized by Databricks as a
+struct with `_1` through `_4` keys. The values, rather than those generated
+struct keys, are the validated provider column names.
+
 The screenshots in `docs/screenshots/` are the primary reviewer-facing evidence;
 these exports support exact value inspection.
 

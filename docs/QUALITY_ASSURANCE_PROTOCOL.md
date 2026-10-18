@@ -60,6 +60,11 @@ Each pull request declares the highest applicable risk class.
 
 **Pass condition:** All configured checks pass, or an exception is documented and justified.
 
+The current repository configures unit tests and Python compilation in GitHub
+Actions. It does not yet configure a formatter, linter, or static type checker;
+those checks are therefore recorded as not configured rather than implied to
+have run.
+
 ### Gate 4: Manual and adversarial review
 
 - [ ] Read the complete diff line by line.

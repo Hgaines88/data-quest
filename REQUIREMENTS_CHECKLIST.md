@@ -42,10 +42,10 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** None
 
-- [ ] Choose clear locations for ingestion code, pipeline code, SQL alternatives, tests or validation helpers, documentation, and screenshots.
-- [ ] Add a `.gitignore` that excludes local secrets, downloaded data, Databricks state, and generated artifacts that should not be committed.
-- [ ] Document required configuration through environment variables or Databricks configuration, without committing secret values.
-- [ ] Decide on naming conventions for catalog, schema, Volume, and Bronze/Silver/Gold tables.
+- [x] Choose clear locations for ingestion code, pipeline code, SQL alternatives, tests or validation helpers, documentation, and screenshots.
+- [x] Add a `.gitignore` that excludes local secrets, downloaded data, Databricks state, and generated artifacts that should not be committed.
+- [x] Document required configuration through environment variables or Databricks configuration, without committing secret values.
+- [x] Decide on naming conventions for catalog, schema, Volume, and Bronze/Silver/Gold tables.
 
 **Done when:** A reviewer can understand the intended repository layout and no secret material is tracked.
 
@@ -54,10 +54,10 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-01
 
-- [ ] Confirm access to Databricks Free Edition or another authorized workspace.
-- [ ] Confirm that a catalog or metastore, schema, Volume, and Spark Declarative Pipelines are available.
-- [ ] Record runtime and relevant platform assumptions in `PROCESS.md`.
-- [ ] Prove a small file can be written to and read from the target Volume.
+- [x] Confirm access to Databricks Free Edition or another authorized workspace.
+- [x] Confirm that a catalog or metastore, schema, Volume, and Spark Declarative Pipelines are available.
+- [x] Record runtime and relevant platform assumptions in `PROCESS.md`.
+- [x] Prove a small file can be written to and read from the target Volume.
 
 **Done when:** The workspace can execute a minimal read/write test using the planned storage location.
 
@@ -66,9 +66,9 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-01
 
-- [ ] Create `PROCESS.md` with sections for architecture, trade-offs, AI usage, validation or corrections, and retrospective.
-- [ ] Record AI use incrementally, including what was requested, what was accepted or changed, and how the result was checked.
-- [ ] Add a source-notes section referencing the BLS data-access policy and Data USA API documentation.
+- [x] Create `PROCESS.md` with sections for architecture, trade-offs, AI usage, validation or corrections, and retrospective.
+- [x] Record AI use incrementally, including what was requested, what was accepted or changed, and how the result was checked.
+- [x] Add a source-notes section referencing the BLS data-access policy and Data USA API documentation.
 
 **Done when:** The required narrative exists before implementation and can be updated throughout the project.
 
@@ -79,10 +79,10 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-03
 
-- [ ] Inspect the complete BLS `pr` directory rather than only the primary data file.
-- [ ] Identify the data, series, measure, sector, duration, seasonal, period, class, footnote, contact, and documentation files currently present.
-- [ ] Determine which metadata files are required to create a human-readable series label.
-- [ ] Record delimiter, headers, data types, key fields, and any whitespace or null conventions.
+- [x] Inspect the complete BLS `pr` directory rather than only the primary data file.
+- [x] Identify the data, series, measure, sector, duration, seasonal, period, class, footnote, contact, and documentation files currently present.
+- [x] Determine which metadata files are required to create a human-readable series label.
+- [x] Record delimiter, headers, data types, key fields, and any whitespace or null conventions.
 
 **Done when:** The ingestion and modeling design is based on provider documentation and observed file structure.
 
@@ -91,11 +91,11 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-04
 
-- [ ] Fetch the BLS folder listing programmatically.
-- [ ] Send a descriptive `User-Agent` containing valid owner contact information, as required by the BLS automated-retrieval policy.
-- [ ] Discover file links dynamically without hardcoded filenames.
-- [ ] Restrict discovered downloads to the intended BLS directory and reject parent or unrelated links.
-- [ ] Use timeouts, bounded retries or backoff, and clear error reporting without attempting to bypass access controls.
+- [x] Fetch the BLS folder listing programmatically.
+- [x] Send a descriptive `User-Agent` containing valid owner contact information, as required by the BLS automated-retrieval policy.
+- [x] Discover file links dynamically without hardcoded filenames.
+- [x] Restrict discovered downloads to the intended BLS directory and reject parent or unrelated links.
+- [x] Use timeouts, bounded retries or backoff, and clear error reporting without attempting to bypass access controls.
 
 **Done when:** The program discovers the current source inventory and handles a BLS `403` in the documented, policy-compliant manner.
 
@@ -104,10 +104,10 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-05
 
-- [ ] Define a manifest containing at least source URL, relative path, source metadata when available, content size, content digest, ingestion timestamp, and status.
-- [ ] Define how new, changed, unchanged, and removed source objects are detected.
-- [ ] Decide whether removals are represented by deletion, tombstone, or active/inactive status, and explain the choice.
-- [ ] Define safe behavior for partial download failures and interrupted runs.
+- [x] Define a manifest containing at least source URL, relative path, source metadata when available, content size, content digest, ingestion timestamp, and status.
+- [x] Define how new, changed, unchanged, and removed source objects are detected.
+- [x] Decide whether removals are represented by deletion, tombstone, or active/inactive status, and explain the choice.
+- [x] Define safe behavior for partial download failures and interrupted runs.
 
 **Done when:** The rerun behavior is explicit, deterministic, and capable of representing all four source-change cases.
 

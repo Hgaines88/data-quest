@@ -6,8 +6,8 @@ This model separates provider artifacts, normalized economic entities, and stake
 
 ```mermaid
 erDiagram
-    INGESTION_RUN ||--o{ SOURCE_OBJECT : observes
-    SOURCE_OBJECT ||--o{ RAW_ARTIFACT_VERSION : produces
+    RAW_ARTIFACT_VERSION ||--o{ BLS_MANIFEST_EVENT : referenced_by
+    RAW_ARTIFACT_VERSION ||--o{ DATAUSA_MANIFEST_EVENT : referenced_by
     RAW_ARTIFACT_VERSION ||--o{ BRONZE_BLS_OBSERVATION : parsed_into
     RAW_ARTIFACT_VERSION ||--o{ BRONZE_BLS_SERIES : parsed_into
     RAW_ARTIFACT_VERSION ||--o{ BRONZE_BLS_LOOKUP : parsed_into
@@ -21,42 +21,43 @@ erDiagram
     SILVER_BLS_SEASONAL ||--o{ SILVER_BLS_SERIES : categorizes
     SILVER_BLS_PERIOD ||--o{ SILVER_BLS_OBSERVATION : defines
 
-    SILVER_BLS_OBSERVATION ||--o{ GOLD_SERIES_ANNUAL_RESULT : aggregates_to
-    SILVER_BLS_SERIES ||--o{ GOLD_SERIES_ANNUAL_RESULT : labels
-    SILVER_POPULATION ||--o{ GOLD_POPULATION_SUMMARY : summarizes
-    SILVER_BLS_OBSERVATION ||--o{ GOLD_SERIES_POPULATION_CONTEXT : contributes
-    SILVER_POPULATION ||--o{ GOLD_SERIES_POPULATION_CONTEXT : contributes
+    SILVER_BLS_OBSERVATION ||--o{ GOLD_BLS_BEST_YEAR_BY_SERIES : aggregates_to
+    SILVER_BLS_SERIES ||--o{ GOLD_BLS_BEST_YEAR_BY_SERIES : labels
+    SILVER_POPULATION ||--o{ GOLD_POPULATION_SUMMARY_2013_2018 : summarizes
+    SILVER_BLS_OBSERVATION ||--o{ GOLD_BLS_Q01_POPULATION : contributes
+    SILVER_POPULATION ||--o{ GOLD_BLS_Q01_POPULATION : contributes
 
-    INGESTION_RUN {
-        string ingestion_run_id PK
-        timestamp started_at
-        timestamp completed_at
+    BLS_MANIFEST_EVENT {
+        string relative_path
+        string source_url
+        string landed_path
+        string source_last_modified
+        long content_size_bytes
+        string content_sha256
+        timestamp ingested_at_utc
+        string run_id
         string status
-        int discovered_count
-        int landed_count
-        int skipped_count
-        int failed_count
     }
 
-    SOURCE_OBJECT {
-        string source_object_id PK
-        string provider
-        string source_url UK
+    DATAUSA_MANIFEST_EVENT {
         string relative_path
-        boolean is_active
-        timestamp first_seen_at
-        timestamp last_seen_at
+        string source_url
+        string landed_path
+        string source_last_modified
+        long content_size_bytes
+        string content_sha256
+        timestamp ingested_at_utc
+        string run_id
+        string status
     }
 
     RAW_ARTIFACT_VERSION {
         string artifact_version_id PK
-        string source_object_id FK
-        string ingestion_run_id FK
         string volume_path
         long content_size
         string sha256_digest
-        timestamp source_last_modified
-        timestamp ingested_at
+        string source_last_modified
+        timestamp ingested_at_utc
         string status
     }
 
@@ -80,9 +81,9 @@ erDiagram
         int year PK
         string period_code PK,FK
         decimal value
-        string footnote_code
+        string footnote_codes
         string source_file
-        timestamp ingested_at
+        timestamp ingested_at_utc
     }
 
     SILVER_POPULATION {
@@ -90,11 +91,11 @@ erDiagram
         string nation
         int year PK
         long population
-        string source_url
-        timestamp ingested_at
+        string source_file
+        timestamp ingested_at_utc
     }
 
-    GOLD_SERIES_ANNUAL_RESULT {
+    GOLD_BLS_BEST_YEAR_BY_SERIES {
         string series_id PK,FK
         int year PK
         decimal annual_value
@@ -102,7 +103,7 @@ erDiagram
         string aggregation_method
     }
 
-    GOLD_POPULATION_SUMMARY {
+    GOLD_POPULATION_SUMMARY_2013_2018 {
         int start_year PK
         int end_year PK
         double mean_population
@@ -110,7 +111,7 @@ erDiagram
         string stddev_semantics
     }
 
-    GOLD_SERIES_POPULATION_CONTEXT {
+    GOLD_BLS_Q01_POPULATION {
         string series_id PK,FK
         int year PK
         decimal q01_value
@@ -120,19 +121,19 @@ erDiagram
     }
 ```
 
-## Planned grains and keys
+## Current and planned grains and keys
 
-| Object | Intended grain | Candidate key | Primary use |
+| Object | Intended grain | Logical identity (not a declared database constraint) | Primary use |
 | --- | --- | --- | --- |
-| `ingestion_run` | One execution of the ingestion workflow | `ingestion_run_id` | Operational audit and rerun evidence |
-| `source_object` | One stable provider URL or relative path | `source_object_id`; unique source URL | Current inventory and removal state |
-| `raw_artifact_version` | One observed content version of one source object | `artifact_version_id`; source plus digest | Provenance, change detection, and reproducibility |
+| `bls_ingestion_manifest` | One append-only BLS state transition | `relative_path + ingested_at_utc + run_id` | Current inventory and auditable history |
+| `datausa_ingestion_manifest` | One append-only Data USA state transition | `relative_path + ingested_at_utc + run_id` | Current response state and auditable history |
+| Raw artifact version | One immutable content-addressed version | source-relative path plus digest | Provenance, change detection, and reproducibility |
 | `silver_bls_series` | One BLS statistical series | `series_id` | Meaning, coverage, and readable labels |
 | `silver_bls_observation` | One series, year, and published period | `series_id + year + period_code` | Historical productivity observations |
 | `silver_population` | One nation and year | `nation_id + year` | Annual population context |
-| `gold_series_annual_result` | One series and selected annual result year | `series_id + year` | Question 2 and trend exploration |
-| `gold_population_summary` | One requested inclusive year range | `start_year + end_year` | Question 1 |
-| `gold_series_population_context` | One selected series and year | `series_id + year` | Question 3 and population-context view |
+| `gold_bls_best_year_by_series` | One series and selected annual result year | `series_id` | Question 2 and trend exploration |
+| `gold_population_summary_2013_2018` | One requested inclusive year range | `start_year + end_year` | Question 1 |
+| `gold_bls_q01_population` | One selected series and year | `series_id + year` | Question 3 and population-context view |
 
 ## BLS semantic relationships
 
@@ -178,16 +179,15 @@ The binding calculation and validation rules are maintained in
 
 ## Data-model decisions still open
 
-- Whether raw artifact history is retained as full versions, current state plus audit history, or both.
-- Whether removed source objects use tombstones, `is_active`, or a separate event history.
-- Decimal precision for BLS values and tolerances used for cross-implementation comparisons.
 - Whether BLS lookup entities remain separate Silver tables or are additionally exposed through a denormalized series dimension.
 - Whether an additional dashboard-only trend view stores every annual `Q01`–`Q04` sum; the required best-year Gold object stores only the deterministic selected result.
 - Which time-series and indexed-comparison Gold views the stakeholder dashboard requires beyond the three assigned questions.
 - Whether Data USA's response supplies additional geographic attributes worth preserving outside the current national grain.
 - Which objects become physical tables versus governed views.
-- Which quality failures cause warning, row quarantine, row drop, or pipeline failure.
 - Which dashboard and Genie objects are supported in the authorized Databricks edition.
 
-These decisions will be closed only after source landing, schema inspection, quality profiling, and verified stakeholder need provide evidence.
+Raw history, append-only removal tombstones, `decimal(20, 6)` BLS values, and
+quality-failure actions are already fixed by the manifest and source-quality
+contracts. The remaining decisions will be closed only after pipeline execution,
+quality profiling, and verified stakeholder need provide evidence.
 

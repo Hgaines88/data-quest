@@ -1,6 +1,10 @@
 # UML-style system design
 
-This document records the intended system before the remaining implementation decisions are made. Solid relationships are planned product responsibilities. Dashed relationships are validation, governance, or optional interactions. Exact Databricks resource names remain subject to verified platform behavior.
+This document combines the implemented raw-ingestion boundary with the planned
+Bronze, Silver, Gold, and stakeholder layers. Solid relationships are product
+responsibilities; the landing notebooks and separate source manifests exist
+today, while pipeline and presentation components remain planned. Dashed
+relationships are validation, governance, or optional interactions.
 
 ## Component view
 
@@ -11,7 +15,10 @@ flowchart LR
 
     subgraph dbx["Databricks workspace"]
         discover["Compliant source discovery<br/>and HTTP client"]
-        manifest["Ingestion manifest<br/>state and provenance"]
+        bls_job["BLS landing notebook"]
+        datausa_job["Data USA landing notebook"]
+        bls_manifest["BLS manifest<br/>state and provenance"]
+        datausa_manifest["Data USA manifest<br/>state and provenance"]
         volume[("Unity Catalog Volume<br/>raw provider artifacts")]
 
         subgraph sdp["Spark Declarative Pipeline"]
@@ -33,15 +40,20 @@ flowchart LR
     platform["Platform / governance lead"]
 
     bls --> discover
-    datausa --> discover
-    discover --> manifest
-    discover --> volume
-    manifest -. verifies .-> volume
+    discover --> bls_job
+    datausa --> datausa_job
+    bls_job --> bls_manifest
+    datausa_job --> datausa_manifest
+    bls_job --> volume
+    datausa_job --> volume
+    bls_manifest -. verifies .-> volume
+    datausa_manifest -. verifies .-> volume
     volume --> bronze
     bronze --> silver
     silver --> gold
 
-    quality -. checks .-> manifest
+    quality -. checks .-> bls_manifest
+    quality -. checks .-> datausa_manifest
     quality -. checks .-> bronze
     quality -. checks .-> silver
     quality -. reconciles .-> gold
@@ -51,7 +63,8 @@ flowchart LR
     uc -. governs .-> gold
     uc -. governs .-> dashboard
     uc -. governs .-> genie
-    obs -. observes .-> manifest
+    obs -. observes .-> bls_manifest
+    obs -. observes .-> datausa_manifest
     obs -. observes .-> sdp
     dab -. deploys .-> sdp
     dab -. configures .-> uc
@@ -67,24 +80,28 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Job as Ingestion job
+    participant BLSJob as BLS landing notebook
+    participant USAJob as Data USA landing notebook
     participant BLS as BLS directory
     participant USA as Data USA API
-    participant M as Manifest
+    participant BM as BLS manifest
+    participant UM as Data USA manifest
     participant V as UC Volume
     participant P as Declarative Pipeline
     participant G as Gold tables/views
     participant X as Dashboard / Genie
     participant A as Read-only analyst
 
-    Job->>BLS: Discover files with identifying User-Agent
-    BLS-->>Job: Current provider inventory
-    Job->>USA: Request assigned population response
-    USA-->>Job: Raw JSON response
-    Job->>M: Compare URL, size, metadata, digest, and active state
-    Job->>V: Land new or changed raw bytes
-    Job->>M: Commit success only after verified write
-    Job-->>M: Mark missing provider objects according to removal policy
+    BLSJob->>BLS: Discover files with identifying User-Agent
+    BLS-->>BLSJob: Current provider inventory
+    BLSJob->>BM: Compare path, size, digest, and current state
+    BLSJob->>V: Land new or changed raw bytes
+    BLSJob->>BM: Append transitions after verified promotion
+    USAJob->>USA: Request assigned population response
+    USA-->>USAJob: Raw JSON response
+    USAJob->>UM: Compare path, size, digest, and current state
+    USAJob->>V: Land validated raw response bytes
+    USAJob->>UM: Append transition after verified promotion
 
     P->>V: Read immutable raw artifacts
     P->>P: Build and check Bronze

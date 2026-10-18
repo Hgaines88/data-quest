@@ -23,7 +23,11 @@ recomputed and compared each complete 64-character SHA-256 digest.
 - `dq08_reconciliation_identity.png`: final active-object reconciliation showing
   the original run ID, shortened digest, path, and status.
 - `dq08_reconciliation_schema.png`: complementary reconciliation view showing
-  declared columns, byte size, record count, and year bounds.
+  the four validated column names, byte size, record count, and year bounds.
+
+Databricks exports the displayed column-name sequence as a struct with `_1`
+through `_4` field labels. Those labels are serialization artifacts; the values
+are the validated `Nation ID`, `Nation`, `Year`, and `Population` names.
 
 The request-contact widget was excluded from committed evidence. Digest prefixes
 are displayed for readability; the notebook compared the complete digest.

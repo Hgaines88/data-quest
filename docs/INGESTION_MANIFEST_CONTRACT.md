@@ -26,7 +26,7 @@ Each current or historical manifest entry contains:
 | `source_content_length` | Provider-reported content length when present; retained as advisory metadata |
 | `content_size_bytes` | Number of bytes actually read and verified |
 | `content_sha256` | Lowercase SHA-256 digest of the exact downloaded bytes |
-| `ingested_at_utc` | UTC-aware timestamp of the successful state transition |
+| `ingested_at_utc` | UTC-aware timestamp assigned to the ingestion attempt and carried by any transitions it successfully publishes |
 | `run_id` | Nonblank identifier tying all transitions to one ingestion attempt |
 | `status` | `active` for a current source object or `removed` for a tombstone |
 
