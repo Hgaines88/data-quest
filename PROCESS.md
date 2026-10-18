@@ -735,6 +735,38 @@ reviewed at the exact commit, and validated again on the target runtime. DQ-11
 is therefore complete at the Bronze scope; Silver behavior remains separate
 work.
 
+### DQ-12: isolate typed BLS observations behind explicit Silver gates
+
+Silver observation work began from the validated DQ-11 commit on a dedicated
+branch and in a separate `pipelines/silver.py` source file. This boundary is
+deliberate: a Silver deployment can be reviewed and validated without changing
+the live Bronze graph that already passed its target-runtime run.
+
+The implementation keeps one normalization path for both provider observation
+files. It trims provider padding, casts `year` to integer and `value` to
+`decimal(20,6)`, maps `period` to `period_code`, converts blank footnotes to
+null, and retains the Bronze provenance needed to trace any Silver row. Named
+drop expectations measure invalid required casts, keys, periods, and provenance.
+`Q05` remains valid Silver data because it is the provider's annual-average
+period; the quarterly analytical question will exclude it at query time.
+
+I did not silently deduplicate the source. A window count on
+`series_id + year + period_code` feeds a fail-fast expectation, because choosing
+an arbitrary duplicate could change an annual total. The published table also
+depends on a separate Current-file consistency gate. That gate normalizes
+`bronze_bls_observation_current` with the same rules and requires every row to
+match the unique AllData-derived candidate on the complete business key and
+value. This makes AllData the sole publication source while still using Current
+as independent provider consistency evidence.
+
+The design publishes only `silver_bls_observation`; candidate, uniqueness, and
+consistency datasets are temporary pipeline views. This keeps the public model
+small while leaving each quality decision visible in the pipeline graph and
+event log. Local source-contract tests, the full repository test suite, Python
+compilation, and diff checks must pass before deployment. DQ-12 will not be
+marked complete until a triggered Databricks update provides table counts and
+expectation evidence on the target runtime.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

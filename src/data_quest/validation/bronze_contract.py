@@ -208,3 +208,10 @@ class PipelineSettings:
             f"/Volumes/{self.catalog}/{self.schema}/{self.volume}/"
             "datausa/population/objects/*/*"
         )
+
+    def table_name(self, name: str) -> str:
+        """Return a validated three-part table name in the configured schema."""
+
+        if not _IDENTIFIER.fullmatch(name):
+            raise ValueError("name must be a safe SQL identifier")
+        return f"{self.catalog}.{self.schema}.{name}"
