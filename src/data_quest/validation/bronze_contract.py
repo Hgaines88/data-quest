@@ -15,6 +15,7 @@ class BlsBronzeSpec:
     table_name: str
     columns: tuple[str, ...]
     required_nonblank: tuple[str, ...]
+    source_columns: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         if not self.relative_path or "/" in self.relative_path:
@@ -23,10 +24,20 @@ class BlsBronzeSpec:
             raise ValueError("table_name must be a safe SQL identifier")
         if not self.columns or len(self.columns) != len(set(self.columns)):
             raise ValueError("columns must be nonempty and unique")
+        if self.source_columns is not None and len(self.source_columns) != len(
+            self.columns
+        ):
+            raise ValueError("source_columns must match the projected column count")
         if not self.required_nonblank or not set(self.required_nonblank) <= set(
             self.columns
         ):
             raise ValueError("required_nonblank must name declared columns")
+
+    @property
+    def expected_source_columns(self) -> tuple[str, ...]:
+        """Return the provider's exact ordered header for validation."""
+
+        return self.source_columns or self.columns
 
 
 _OBSERVATION_COLUMNS = (
@@ -105,6 +116,7 @@ BLS_BRONZE_SPECS = (
         table_name="bronze_bls_seasonal",
         columns=("seasonal_code", "seasonal_text"),
         required_nonblank=("seasonal_code", "seasonal_text"),
+        source_columns=("Seasonal_code", "Seasonal_text"),
     ),
     BlsBronzeSpec(
         relative_path="pr.sector",

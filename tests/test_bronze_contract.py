@@ -47,6 +47,7 @@ class BronzeContractTests(unittest.TestCase):
             by_path["pr.data.0.Current"].columns,
             observation_columns,
         )
+
         self.assertEqual(
             by_path["pr.data.1.AllData"].columns,
             observation_columns,
@@ -67,6 +68,18 @@ class BronzeContractTests(unittest.TestCase):
                 "end_year",
                 "end_period",
             ),
+        )
+
+    def test_seasonal_preserves_exact_provider_header(self) -> None:
+        by_path = {spec.relative_path: spec for spec in BLS_BRONZE_SPECS}
+
+        self.assertEqual(
+            by_path["pr.seasonal"].expected_source_columns,
+            ("Seasonal_code", "Seasonal_text"),
+        )
+        self.assertEqual(
+            by_path["pr.seasonal"].columns,
+            ("seasonal_code", "seasonal_text"),
         )
 
     def test_required_fields_are_declared_columns(self) -> None:

@@ -193,7 +193,7 @@ _DATAUSA_COLUMNS = ("Nation ID", "Nation", "Year", "Population")
 def _verified_bls_source_rows() -> DataFrame:
     expected = spark.createDataFrame(
         [
-            (spec.relative_path, list(spec.columns))
+            (spec.relative_path, list(spec.expected_source_columns))
             for spec in BLS_BRONZE_SPECS
         ],
         "relative_path STRING, expected_columns ARRAY<STRING>",
