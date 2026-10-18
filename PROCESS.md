@@ -775,6 +775,24 @@ uses SQL `try_cast` for both numeric fields. Failed conversions become null and
 reach the existing validity rules, preserving the documented behavior without
 adding another processing stage.
 
+The target-runtime update then completed successfully on October 18, 2026 at
+7:21 PM EDT. Databricks reported zero errors and zero warnings, and published
+approximately 77,000 `silver_bls_observation` rows in 5 seconds. Because the
+published table depends on both fail-fast gates, completion also establishes
+that no normalized duplicate business key or unmatched Current record reached
+publication. The captured table screen lists the expectation definitions but
+does not expose a per-rule `met` count, so the evidence makes no stronger claim
+than the UI supports. The completed update, graph, performance view, and editor
+pipeline-selector interpretation are preserved in
+[`docs/evidence/dq12_silver_live_validation.md`](docs/evidence/dq12_silver_live_validation.md).
+
+The runtime workflow reinforced a useful deployment lesson for later Silver
+and Gold work: keep each medallion pipeline separate while allowing both to use
+one versioned Git folder. Databricks consequently shows a `2 pipelines` editor
+selector; that selector names `data-quest-silver` as current and
+`data-quest-bronze` as the other associated pipeline. It is navigation context,
+not duplicate source execution or cross-pipeline contamination.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

@@ -182,13 +182,13 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-11
 
-- [ ] Normalize column names and trim provider formatting artifacts.
-- [ ] Cast year, value, and other fields to intentional types.
-- [ ] Define and enforce the observation business key.
-- [ ] Handle nulls and duplicates according to the documented rule.
-- [ ] Preserve useful period information for quarterly analysis.
+- [x] Normalize column names and trim provider formatting artifacts.
+- [x] Cast year, value, and other fields to intentional types.
+- [x] Define and enforce the observation business key.
+- [x] Handle nulls and duplicates according to the documented rule.
+- [x] Preserve useful period information for quarterly analysis.
 
-**Done when:** Silver observations have intentional types, stable uniqueness, and no unexpected null keys.
+**Done when:** Silver observations have intentional types, stable uniqueness, and no unexpected null keys. See the [completed Silver update, graph, and performance evidence](docs/evidence/dq12_silver_live_validation.md).
 
 ### DQ-13: Build Silver BLS series metadata and readable labels
 
