@@ -40,6 +40,13 @@ Expected output:
 - `ranked_status = removed`
 - `schema_column_count = 11`
 
+## Observed result
+
+On 2026-10-18, I ran every cell successfully in Databricks from commit
+`3c153c7`. The result matched all five expected values exactly. The exported
+row is preserved in
+`docs/evidence/dq41_spark_manifest_validation.csv` for exact inspection.
+
 The `finally` block drops the temporary table on success or assertion failure.
 If compute terminates before cleanup, locate only the table whose generated
 name begins `spark_manifest_validation_`, verify that it belongs to this run,

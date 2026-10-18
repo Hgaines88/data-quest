@@ -597,7 +597,7 @@ It creates a uniquely named temporary Delta manifest, proves idempotent DDL,
 appends four synthetic transitions, and executes the latest-state window with
 both timestamp and lexical run-ID ordering. It always attempts to drop only its
 generated validation table. The live result remains a required DQ-41 gate and
-will be recorded after execution; unit tests alone do not satisfy that claim.
+unit tests alone do not satisfy that claim.
 
 Copilot review found that the first synthetic ordering fixture could not
 distinguish timestamp-first ordering from run-ID-first ordering, and that early
@@ -610,6 +610,15 @@ The second review also noted that one write into an empty table could not prove
 append semantics. The notebook now establishes two historical rows in its first
 write and adds two later transitions in a second write. Its four-row assertion
 therefore fails if the adapter overwrites instead of preserving prior history.
+
+I then ran every cell of the validation notebook in Databricks from commit
+`3c153c7` on 2026-10-18. All cells completed with green checks. The observed
+result preserved four transitions across the two writes, returned two current
+paths, selected `20261018T010000Z-b` as the removed `ranked.txt` winner, and
+reported all 11 manifest columns. The exact exported row is preserved as
+`docs/evidence/dq41_spark_manifest_validation.csv`. This closes the live DDL,
+append-history, and latest-state ranking gate for the observed runtime while
+retaining the documented concurrency and version claim boundaries.
 
 ## Retrospective
 

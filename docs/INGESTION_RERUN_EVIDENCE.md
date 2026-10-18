@@ -48,8 +48,9 @@ the Data USA result exports are indexed in `docs/evidence/README.md`.
 The Spark manifest adapter's fake-backed unit tests deliberately claim only
 statement generation, row mapping, and writer-call behavior. Its executable
 Delta DDL, append, and latest-state ranking gate is documented in
-`docs/SPARK_MANIFEST_VALIDATION.md` and must be run in Databricks before DQ-41
-is merged.
+`docs/SPARK_MANIFEST_VALIDATION.md`. The 2026-10-18 Databricks run at commit
+`3c153c7` passed all cells and matched all five expected results; its exported
+row is indexed in `docs/evidence/README.md`.
 
 ## Claim boundaries
 

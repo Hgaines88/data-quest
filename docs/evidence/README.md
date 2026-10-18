@@ -13,3 +13,10 @@ notebooks. They contain no credentials or contact-widget values.
 
 The screenshots in `docs/screenshots/` are the primary reviewer-facing evidence;
 these exports support exact value inspection.
+
+## DQ-41 Spark manifest adapter validation
+
+- `dq41_spark_manifest_validation.csv`: live Databricks result proving four
+  transitions remained after two writes, two current paths were selected, the
+  expected timestamp/run-ID winner was returned as removed, and all 11 manifest
+  columns were present.
