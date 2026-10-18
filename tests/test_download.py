@@ -312,6 +312,26 @@ class DownloadToStagingTests(unittest.TestCase):
 
         self.assertEqual(opener.call_count, 1)
 
+    def test_staging_cleanup_failure_is_wrapped_before_network_access(self) -> None:
+        opener = Mock()
+
+        with TemporaryDirectory() as directory:
+            destination = Path(directory) / "existing-directory"
+            destination.mkdir()
+
+            with self.assertRaisesRegex(StagingWriteError, "remove staging"):
+                download_to_staging(
+                    SOURCE_URL,
+                    USER_AGENT,
+                    destination,
+                    max_attempts=3,
+                    opener=opener,
+                )
+
+            self.assertTrue(destination.is_dir())
+
+        opener.assert_not_called()
+
     def test_removes_partial_file_when_all_attempts_fail_integrity(self) -> None:
         opener = Mock(
             side_effect=[

@@ -561,6 +561,13 @@ URL behavior, and a filesystem path whose parent is a regular file. These tests
 exercise failure states that a normal live provider run cannot safely or
 deterministically manufacture.
 
+Copilot review identified that cleanup itself remained outside the typed local
+storage boundary. I reproduced it with a destination that was an existing
+directory: the initial unlink raised raw `IsADirectoryError` before any network
+request. Cleanup now ignores only genuinely absent paths and wraps every other
+filesystem error as non-retryable `StagingWriteError`; the regression also
+proves that the provider opener is never called.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

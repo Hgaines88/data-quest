@@ -394,3 +394,7 @@ def _remove_if_present(path: Path) -> None:
         path.unlink()
     except (FileNotFoundError, NotADirectoryError):
         return
+    except OSError as error:
+        raise StagingWriteError(
+            f"could not remove staging file: {path}"
+        ) from error
