@@ -53,6 +53,21 @@ def valid_payload() -> dict[str, object]:
 
 
 class PopulationValidationTests(unittest.TestCase):
+    def test_rejects_nonstandard_json_numeric_constants(self) -> None:
+        for constant in ["NaN", "Infinity", "-Infinity"]:
+            with self.subTest(constant=constant):
+                payload = valid_payload()
+                payload["data"][0]["Population"] = float(constant)
+
+                with TemporaryDirectory() as directory:
+                    path = Path(directory) / "population.json"
+                    path.write_text(json.dumps(payload), encoding="utf-8")
+
+                    with self.assertRaisesRegex(
+                        PopulationResponseError, "valid UTF-8 JSON"
+                    ):
+                        validate_population_response(path)
+
     def test_datausa_user_agent_contains_no_contact_email(self) -> None:
         self.assertNotIn("@", DATAUSA_USER_AGENT)
         self.assertIn("Data USA", DATAUSA_USER_AGENT)

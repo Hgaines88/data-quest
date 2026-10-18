@@ -43,8 +43,11 @@ def validate_population_response(path: str | Path) -> PopulationResponseSummary:
         ) from error
 
     try:
-        payload = json.loads(raw_bytes.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        payload = json.loads(
+            raw_bytes.decode("utf-8"),
+            parse_constant=_reject_nonstandard_json_constant,
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
         raise PopulationResponseError(
             "population response must be valid UTF-8 JSON"
         ) from error
@@ -130,6 +133,12 @@ def validate_population_response(path: str | Path) -> PopulationResponseSummary:
         minimum_year=min(years),
         maximum_year=max(years),
     )
+
+
+def _reject_nonstandard_json_constant(value: str) -> None:
+    """Reject Python's extensions for constants absent from the JSON grammar."""
+
+    raise ValueError(f"non-standard JSON numeric constant: {value}")
 
 
 def prepare_population_landing(

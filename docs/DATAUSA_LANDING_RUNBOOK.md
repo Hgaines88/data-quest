@@ -34,7 +34,8 @@ an existing corrupt object fails visibly and is never overwritten.
 
 ## Failure boundary
 
-Invalid UTF-8, malformed JSON, a missing envelope field or required column, an
+Invalid UTF-8, malformed JSON, non-standard numeric constants (`NaN`,
+`Infinity`, or `-Infinity`), a missing envelope field or required column, an
 invalid record, or a partial page fails before promotion and manifest
 publication. Promotion failure also prevents manifest publication. The previous
 committed state therefore remains authoritative.
