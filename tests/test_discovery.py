@@ -40,6 +40,35 @@ class FakeResponse:
 
 
 class DiscoverFileLinksTests(unittest.TestCase):
+    def test_preserves_encoded_space_in_request_url(self) -> None:
+        result = discover_file_links(
+            '<a href="annual%20average.txt">Annual average</a>',
+            BASE_URL,
+        )
+
+        self.assertEqual(
+            result,
+            [
+                SourceFile(
+                    "annual average.txt",
+                    f"{BASE_URL}annual%20average.txt",
+                )
+            ],
+        )
+
+    def test_rejects_decoded_percent_slash_and_backslash_names(self) -> None:
+        for href in [
+            "a%2541.txt",
+            "nested%2Ffile.txt",
+            r"unsafe\name.txt",
+            "unsafe%5Cname.txt",
+        ]:
+            with self.subTest(href=href):
+                with self.assertRaisesRegex(
+                    DirectoryListingError, "no valid file links"
+                ):
+                    discover_file_links(f'<a href="{href}">unsafe</a>', BASE_URL)
+
     def test_returns_only_files_in_the_exact_configured_directory(self) -> None:
         html = """
         <html><body>

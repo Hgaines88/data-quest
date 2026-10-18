@@ -471,6 +471,27 @@ but correctly has neither an active immutable-object requirement nor staged
 bytes. I added a failing regression with an unrelated new object and narrowed
 verification to unchanged entries whose resulting status is `active`.
 
+### 2026-10-18: Encoded discovery URL integrity
+
+The independent audit found that discovery decoded each linked URL path before
+rebuilding the request URL. That coupled a manifest-friendly display name to
+network identity: `%20` became a literal space, while `%25` could be interpreted
+again by a later URL layer and address a different object.
+
+I separated those responsibilities. Discovery now preserves the provider's
+encoded path in the canonical request URL and decodes only the local relative
+name used by the manifest. Decoded percent signs, path separators, backslashes,
+and control characters are rejected because they make that local identity
+ambiguous; a safely encoded space remains supported and stays encoded on the
+wire. Same-origin and exact-directory checks still operate on the decoded path
+so an encoded separator cannot escape the configured directory.
+
+I established the change with failing-first cases for `%20`, `%25`, `%2F`, and
+literal and encoded backslashes, then reran the entire controlled suite. This
+remediation prevents discovery from requesting a different path than the one
+advertised. Redirect handling and network-exception normalization remain
+separate audit findings and are not claimed here.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

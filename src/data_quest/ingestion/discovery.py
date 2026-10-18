@@ -152,11 +152,17 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
     discovered: dict[str, SourceFile] = {}
     for href in parser.hrefs:
         candidate = urlsplit(urljoin(canonical_base, href))
-        candidate_path = unquote(candidate.path)
+        encoded_path = candidate.path
+        candidate_path = unquote(encoded_path)
 
         if candidate.scheme.casefold() != base.scheme.casefold():
             continue
         if candidate.netloc.casefold() != base.netloc.casefold():
+            continue
+        if any(
+            character.isspace() or ord(character) < 32
+            for character in encoded_path
+        ):
             continue
         if candidate.query or candidate.fragment or candidate_path.endswith("/"):
             continue
@@ -167,14 +173,14 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
             continue
 
         name = PurePosixPath(normalized_path).name
-        if not name or name in {".", ".."}:
+        if not _is_safe_decoded_name(name):
             continue
 
         canonical_url = urlunsplit(
             (
                 base.scheme.casefold(),
                 base.netloc.casefold(),
-                normalized_path,
+                encoded_path,
                 "",
                 "",
             )
@@ -187,6 +193,17 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
         )
 
     return sorted(discovered.values())
+
+
+def _is_safe_decoded_name(name: str) -> bool:
+    """Reject decoded names whose URL or manifest identity is ambiguous."""
+
+    return bool(name) and name not in {".", ".."} and not any(
+        character in {"%", "/", "\\"}
+        or ord(character) < 32
+        or ord(character) == 127
+        for character in name
+    )
 
 
 def _normalized_directory_path(path: str) -> str:
