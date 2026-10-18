@@ -49,7 +49,9 @@ must show:
 
 The implementation re-downloads current provider bytes to compute independent
 content evidence. A no-change rerun must not rewrite an immutable object or
-append a duplicate manifest event.
+append a duplicate manifest event. The result's `recovered_count` must normally
+be zero. A positive value means an absent immutable object was restored from
+freshly downloaded bytes that matched the committed size and SHA-256 evidence.
 
 ## Failure boundary
 
@@ -67,6 +69,12 @@ paths would be removed, publication fails unless `allow_mass_removal` was
 explicitly enabled after operator review. Any failure occurs before downloads,
 promotion, or manifest publication, so the existing active state remains
 authoritative.
+
+Every unchanged destination is verified before manifest publication. A missing
+destination is restored from the verified staged copy and increments
+`recovered_count` without creating a manifest transition. An existing object
+that fails size or digest verification is preserved, never overwritten, and
+fails the run for coordinated operator recovery.
 
 ## Cleanup and retention
 

@@ -26,8 +26,10 @@ raw bytes against the envelope, pagination, column, and record contract.
 
 Run the timestamp/manifest, landing, and reconciliation cells again without
 changing configuration. The result must show one unchanged object, zero
-promotions, and zero published transitions. The reconciled manifest entry must
-retain the first-run ID.
+promotions, zero recoveries, and zero published transitions. The reconciled
+manifest entry must retain the first-run ID. A missing immutable object may be
+restored from the freshly verified response and increments `recovered_count`;
+an existing corrupt object fails visibly and is never overwritten.
 
 ## Failure boundary
 

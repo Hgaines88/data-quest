@@ -55,6 +55,7 @@ class LandingExecutionResult:
 
     discovered_count: int
     promoted_count: int
+    recovered_count: int
     reused_version_count: int
     new_count: int
     changed_count: int
@@ -268,12 +269,20 @@ def execute_landing_plan(
         staged.relative_path: staged for staged in plan.staged_files
     }
     promoted_count = 0
+    recovered_count = 0
     reused_count = 0
     publish_entries: list[ManifestEntry] = []
 
     try:
         for change in plan.changes:
-            if change.change_type in {ChangeType.NEW, ChangeType.CHANGED}:
+            needs_immutable_object = change.change_type in {
+                ChangeType.NEW,
+                ChangeType.CHANGED,
+            } or (
+                change.change_type is ChangeType.UNCHANGED
+                and change.after.status is ManifestStatus.ACTIVE
+            )
+            if needs_immutable_object:
                 staged = staged_by_path.get(change.relative_path)
                 if staged is None:
                     raise ValueError(
@@ -286,7 +295,10 @@ def execute_landing_plan(
                     expected_size=change.after.content_size_bytes,
                     expected_sha256=change.after.content_sha256,
                 )
-                if promoted:
+                if change.change_type is ChangeType.UNCHANGED:
+                    if promoted:
+                        recovered_count += 1
+                elif promoted:
                     promoted_count += 1
                 else:
                     reused_count += 1
@@ -308,6 +320,7 @@ def execute_landing_plan(
     return LandingExecutionResult(
         discovered_count=len(plan.staged_files),
         promoted_count=promoted_count,
+        recovered_count=recovered_count,
         reused_version_count=reused_count,
         new_count=counts[ChangeType.NEW],
         changed_count=counts[ChangeType.CHANGED],

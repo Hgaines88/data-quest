@@ -444,6 +444,33 @@ silently mutating manifest truth while preserving an auditable path for real
 upstream deletions. They do not prove that a stable provider deletion was
 intentional; the mass-removal override deliberately remains a human judgment.
 
+### 2026-10-18: Immutable raw-object recovery
+
+The independent audit identified a recovery gap after manifest classification:
+a freshly downloaded object could correctly classify as unchanged even when its
+canonical immutable file had been deleted or damaged. The old execution path
+discarded the staged copy and discovered the storage problem only during final
+reconciliation, so every later rerun failed in the same way.
+
+I chose to verify every unchanged destination during the promotion phase,
+before any manifest transitions are published. When the destination is absent,
+the existing immutable promoter restores it from freshly staged bytes whose
+size and SHA-256 already match committed evidence. This increments a separate
+`recovered_count`; it does not publish a manifest event because logical manifest
+state did not change. When a destination exists but fails evidence verification,
+the run stops without overwriting it. That case still requires coordinated
+operator quarantine and recovery so corruption is never silently hidden.
+
+I established the behavior with failing-first filesystem tests for missing,
+valid, and corrupt unchanged destinations, plus ordering coverage proving all
+object verification completes before publication. This design repairs absence
+automatically while preserving the stronger safety boundary around conflicting
+immutable bytes. Copilot review then exposed a lifecycle distinction in the
+first revision: a retained removal tombstone is also classified as unchanged,
+but correctly has neither an active immutable-object requirement nor staged
+bytes. I added a failing regression with an unrelated new object and narrowed
+verification to unchanged entries whose resulting status is `active`.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
