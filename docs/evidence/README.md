@@ -20,9 +20,10 @@ these exports support exact value inspection.
 
 ## DQ-11 Bronze pipeline validation
 
-- `dq11_bronze_live_validation.md`: indexes the successful pipeline revision,
-  pipeline ID, completion state, displayed table counts, expectation results,
-  screenshot paths, and screenshot SHA-256 digests.
+- `dq11_bronze_live_validation.md`: indexes the operator-recorded deployment
+  revision, pipeline ID, screenshot-proven completion state, displayed table
+  counts, expectation results, screenshot paths, and screenshot SHA-256
+  digests.
 
 ## DQ-41 Spark manifest adapter validation
 

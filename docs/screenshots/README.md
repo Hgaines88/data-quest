@@ -40,7 +40,7 @@ are displayed for readability; the notebook compared the complete digest.
   expectation results, including both BLS observation views, Data USA, and the
   source-contract audit.
 
-The corresponding revision, pipeline ID, displayed metrics, evidence digests,
-and scope boundary are indexed in
+The operator-recorded deployment revision, pipeline ID, displayed metrics,
+evidence digests, attribution limitation, and scope boundary are indexed in
 `docs/evidence/dq11_bronze_live_validation.md`.
 
