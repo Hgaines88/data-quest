@@ -611,6 +611,11 @@ append semantics. The notebook now establishes two historical rows in its first
 write and adds two later transitions in a second write. Its four-row assertion
 therefore fails if the adapter overwrites instead of preserving prior history.
 
+A later review correctly noted that the fake-backed writer test recorded append
+mode and destination but did not count writer invocations. I removed the word
+`one` from its name so it claims only the append request that it actually
+observes; the two-write live notebook supplies the append-history evidence.
+
 I then ran every cell of the validation notebook in Databricks from commit
 `3c153c7` on 2026-10-18. All cells completed with green checks. The observed
 result preserved four transitions across the two writes, returned two current

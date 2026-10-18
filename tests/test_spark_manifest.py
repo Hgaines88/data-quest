@@ -119,7 +119,7 @@ class SparkManifestTests(unittest.TestCase):
         self.assertIn("PARTITION BY relative_path", spark.sql_calls[0])
         self.assertIn("WHERE manifest_rank = 1", spark.sql_calls[0])
 
-    def test_builds_transition_dataframe_and_requests_one_append(self) -> None:
+    def test_builds_transition_dataframe_and_requests_append(self) -> None:
         spark = FakeSpark()
         entry = manifest_entry()
 
