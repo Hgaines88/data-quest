@@ -275,11 +275,14 @@ def execute_landing_plan(
 
     try:
         for change in plan.changes:
-            if change.change_type in {
+            needs_immutable_object = change.change_type in {
                 ChangeType.NEW,
                 ChangeType.CHANGED,
-                ChangeType.UNCHANGED,
-            }:
+            } or (
+                change.change_type is ChangeType.UNCHANGED
+                and change.after.status is ManifestStatus.ACTIVE
+            )
+            if needs_immutable_object:
                 staged = staged_by_path.get(change.relative_path)
                 if staged is None:
                     raise ValueError(

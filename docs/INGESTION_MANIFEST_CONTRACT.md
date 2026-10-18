@@ -97,9 +97,10 @@ The implementation sequence for DQ-07 is:
    and SHA-256 while reading.
 4. Compare verified observations with the current committed manifest.
 5. Promote new and changed objects to immutable, versioned raw paths and verify
-   every unchanged destination. If an unchanged destination is absent, restore
-   it from its freshly verified staged copy. If it exists but fails evidence
-   verification, stop without overwriting it. The path includes a digest or
+   every unchanged active destination. Retained removal tombstones require no
+   staged or landed bytes. If an unchanged active destination is absent,
+   restore it from its freshly verified staged copy. If it exists but fails
+   evidence verification, stop without overwriting it. The path includes a digest or
    equivalent unique version component so an interrupted run cannot overwrite
    bytes referenced by the committed manifest.
 6. Append the run's new, changed, and removed transitions in one Delta

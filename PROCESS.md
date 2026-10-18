@@ -465,7 +465,11 @@ I established the behavior with failing-first filesystem tests for missing,
 valid, and corrupt unchanged destinations, plus ordering coverage proving all
 object verification completes before publication. This design repairs absence
 automatically while preserving the stronger safety boundary around conflicting
-immutable bytes.
+immutable bytes. Copilot review then exposed a lifecycle distinction in the
+first revision: a retained removal tombstone is also classified as unchanged,
+but correctly has neither an active immutable-object requirement nor staged
+bytes. I added a failing regression with an unrelated new object and narrowed
+verification to unchanged entries whose resulting status is `active`.
 
 ## Retrospective
 

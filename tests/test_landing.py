@@ -20,6 +20,7 @@ from data_quest.ingestion.landing import (
 from data_quest.ingestion.manifest import (
     ChangeType,
     ManifestEntry,
+    ManifestStatus,
     ObservedFile,
 )
 
@@ -326,6 +327,49 @@ class PrepareBlsInventorySafetyTests(unittest.TestCase):
 
 
 class ExecuteLandingPlanTests(unittest.TestCase):
+    def test_retained_removal_tombstone_needs_no_staged_bytes(self) -> None:
+        new_body = b"new"
+        tombstone = current_entry("retired", b"retired").as_removed(
+            removed_at_utc=RUN_TIME,
+            run_id=RUN_ID,
+        )
+        promoter = Mock(return_value=True)
+        publisher = Mock()
+
+        with TemporaryDirectory() as directory:
+            plan = prepare_source_landing(
+                [source("new")],
+                [tombstone],
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id="20261018T010000Z-test",
+                ingested_at_utc=datetime(2026, 10, 18, 1, tzinfo=timezone.utc),
+                downloader=downloader_for(
+                    {"new": new_body}, staging_directory=Path(directory)
+                ),
+                cleanup_tree=Mock(),
+            )
+
+            result = execute_landing_plan(
+                plan,
+                promoter=promoter,
+                publisher=publisher,
+                cleanup_tree=Mock(),
+            )
+
+        promoter.assert_called_once()
+        publisher.assert_called_once()
+        published = publisher.call_args.args[0]
+        self.assertEqual([entry.relative_path for entry in published], ["new"])
+        retained = next(
+            change
+            for change in plan.changes
+            if change.relative_path == "retired"
+        )
+        self.assertIs(retained.change_type, ChangeType.UNCHANGED)
+        self.assertIs(retained.after.status, ManifestStatus.REMOVED)
+        self.assertEqual(result.unchanged_count, 1)
+
     def test_missing_unchanged_object_is_recovered_without_publication(self) -> None:
         body = b"same"
         publisher = Mock()
