@@ -149,7 +149,8 @@ try:
             f"manifest columns differ: {actual_columns} != {EXPECTED_COLUMNS}"
         )
 
-    append_manifest_entries(spark, VALIDATION_TABLE, validation_entries)
+    append_manifest_entries(spark, VALIDATION_TABLE, validation_entries[:2])
+    append_manifest_entries(spark, VALIDATION_TABLE, validation_entries[2:])
     inserted_count = spark.table(VALIDATION_TABLE).count()
     if inserted_count != len(validation_entries):
         raise RuntimeError(

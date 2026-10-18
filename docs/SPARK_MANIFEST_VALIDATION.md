@@ -20,7 +20,9 @@ Delta Lake.
 
 Run all cells in order. The notebook creates a uniquely named temporary Delta
 table, calls the table-creation function twice to prove idempotency, appends four
-synthetic contract-valid transitions in one batch, and loads current state.
+synthetic contract-valid transitions across two writes, and loads current state.
+The first write establishes history and the second must preserve it, so a
+regression from append to overwrite fails the required four-row count.
 
 The older `ranked.txt` row deliberately has the lexically greatest run ID,
 `z-older-timestamp`, while the two rows with the latest timestamp differ only

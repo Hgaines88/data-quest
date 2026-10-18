@@ -606,6 +606,11 @@ event's lexical run-ID relationship to conflict with its timestamp and now
 validate the uncollapsed ordered result list before dictionary lookup. The live
 gate therefore fails both incorrect precedence and missing latest-row filtering.
 
+The second review also noted that one write into an empty table could not prove
+append semantics. The notebook now establishes two historical rows in its first
+write and adds two later transitions in a second write. Its four-row assertion
+therefore fails if the adapter overwrites instead of preserving prior history.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
