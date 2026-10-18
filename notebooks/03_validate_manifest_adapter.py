@@ -118,7 +118,7 @@ validation_entries = [
         "ranked.txt",
         "a",
         older_time,
-        "20261018T000000Z-old",
+        "z-older-timestamp",
         ManifestStatus.ACTIVE,
     ),
     validation_entry(
@@ -158,11 +158,12 @@ try:
         )
 
     current_entries = load_current_manifest(spark, VALIDATION_TABLE)
-    current_by_path = {entry.relative_path: entry for entry in current_entries}
-    if list(current_by_path) != ["other.txt", "ranked.txt"]:
+    current_paths = [entry.relative_path for entry in current_entries]
+    if current_paths != ["other.txt", "ranked.txt"]:
         raise RuntimeError(
-            f"latest-state paths differ: {list(current_by_path)}"
+            f"latest-state rows differ: {current_paths}"
         )
+    current_by_path = {entry.relative_path: entry for entry in current_entries}
     ranked = current_by_path["ranked.txt"]
     if (
         ranked.run_id != "20261018T010000Z-b"

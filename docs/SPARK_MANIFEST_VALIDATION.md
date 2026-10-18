@@ -22,10 +22,13 @@ Run all cells in order. The notebook creates a uniquely named temporary Delta
 table, calls the table-creation function twice to prove idempotency, appends four
 synthetic contract-valid transitions in one batch, and loads current state.
 
-The two `ranked.txt` rows with the latest timestamp differ only by lexical
-`run_id`. The expected winner is `20261018T010000Z-b` with status `removed`,
-which proves that the executed window uses timestamp then run-ID ordering. An
-independent `other.txt` row proves partitioning by relative path.
+The older `ranked.txt` row deliberately has the lexically greatest run ID,
+`z-older-timestamp`, while the two rows with the latest timestamp differ only
+by lexical `run_id`. The expected winner is `20261018T010000Z-b` with status
+`removed`. This conflict proves that timestamp takes precedence and that run ID
+breaks timestamp ties. An independent `other.txt` row proves partitioning by
+relative path, and the notebook checks the uncollapsed result list so duplicate
+current rows cannot be hidden by dictionary construction.
 
 Expected output:
 

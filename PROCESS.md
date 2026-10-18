@@ -599,6 +599,13 @@ both timestamp and lexical run-ID ordering. It always attempts to drop only its
 generated validation table. The live result remains a required DQ-41 gate and
 will be recorded after execution; unit tests alone do not satisfy that claim.
 
+Copilot review found that the first synthetic ordering fixture could not
+distinguish timestamp-first ordering from run-ID-first ordering, and that early
+dictionary construction could hide duplicate current rows. I reversed the old
+event's lexical run-ID relationship to conflict with its timestamp and now
+validate the uncollapsed ordered result list before dictionary lookup. The live
+gate therefore fails both incorrect precedence and missing latest-row filtering.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
