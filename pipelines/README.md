@@ -11,6 +11,12 @@ source file, physical path, ingestion timestamp, run ID, and content digest
 provenance. Structural contract violations fail an update; unusable required
 records are dropped and counted by named expectations.
 
+Shared temporary verification views scan each provider object root once, join
+the bytes to latest-active manifest paths, validate source presence and shape,
+and then feed every published Bronze view. This explicit dependency prevents an
+empty or invalid source from independently replacing a Bronze table. The raw
+scan remains declarative: it does not collect manifest paths to the driver.
+
 Configure these pipeline properties when deployment identifiers differ from
 the defaults:
 

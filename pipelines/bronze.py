@@ -104,21 +104,8 @@ def _active_objects(manifest_table: str, object_glob: str) -> DataFrame:
 
 def _bls_rows(spec: BlsBronzeSpec) -> DataFrame:
     source = (
-        _active_objects(SETTINGS.bls_manifest_table, SETTINGS.bls_object_glob)
+        spark.read.table("verified_bls_sources")
         .where(F.col("relative_path") == spec.relative_path)
-        .withColumn("_text", F.decode("content", "UTF-8"))
-        .withColumn(
-            "_lines",
-            F.split(F.regexp_replace("_text", "\\r\\n?", "\n"), "\n", -1),
-        )
-        .withColumn(
-            "_header_valid",
-            F.transform(
-                F.split(F.element_at("_lines", 1), "\t", -1),
-                lambda value: F.trim(value),
-            )
-            == F.array(*[F.lit(column) for column in spec.columns]),
-        )
         .select(
             "relative_path",
             "landed_path",
@@ -191,10 +178,6 @@ def _register_bls_table(spec: BlsBronzeSpec) -> None:
         return _bls_rows(specification)
 
 
-for _specification in BLS_BRONZE_SPECS:
-    _register_bls_table(_specification)
-
-
 _DATAUSA_RECORD_TYPE = T.ArrayType(
     T.MapType(T.StringType(), T.StringType(), valueContainsNull=True)
 )
@@ -207,13 +190,19 @@ _DATAUSA_TOP_LEVEL_KEYS = ("annotations", "columns", "data", "page")
 _DATAUSA_COLUMNS = ("Nation ID", "Nation", "Year", "Population")
 
 
-def _bls_audit_row(spec: BlsBronzeSpec) -> DataFrame:
-    expected = spark.createDataFrame([(spec.relative_path,)], "relative_path STRING")
+def _verified_bls_source_rows() -> DataFrame:
+    expected = spark.createDataFrame(
+        [
+            (spec.relative_path, list(spec.columns))
+            for spec in BLS_BRONZE_SPECS
+        ],
+        "relative_path STRING, expected_columns ARRAY<STRING>",
+    )
     active = _active_objects(
         SETTINGS.bls_manifest_table,
         SETTINGS.bls_object_glob,
-    ).where(F.col("relative_path") == spec.relative_path)
-    audited = (
+    )
+    return (
         expected.join(active, "relative_path", "left")
         .withColumn("_text", F.decode("content", "UTF-8"))
         .withColumn(
@@ -227,29 +216,32 @@ def _bls_audit_row(spec: BlsBronzeSpec) -> DataFrame:
                 lambda line: F.length(line) > 0,
             ),
         )
-    )
-    return audited.select(
-        F.col("relative_path").alias("source_file"),
-        F.coalesce("_object_valid", F.lit(False)).alias("active_object_valid"),
-        F.coalesce(
+        .withColumn(
+            "_object_valid",
+            F.coalesce("_object_valid", F.lit(False)),
+        )
+        .withColumn(
+            "_header_valid",
             F.transform(
                 F.split(F.element_at("_lines", 1), "\t", -1),
                 lambda value: F.trim(value),
             )
-            == F.array(*[F.lit(column) for column in spec.columns]),
-            F.lit(False),
-        ).alias("schema_valid"),
-        F.coalesce(F.size("_data_lines") > 0, F.lit(False)).alias("content_nonempty"),
+            == F.col("expected_columns"),
+        )
+        .withColumn(
+            "_content_nonempty",
+            F.coalesce(F.size("_data_lines") > 0, F.lit(False)),
+        )
     )
 
 
-def _datausa_audit_row() -> DataFrame:
+def _verified_datausa_source_rows() -> DataFrame:
     expected = spark.createDataFrame([("population.json",)], "relative_path STRING")
     active = _active_objects(
         SETTINGS.datausa_manifest_table,
         SETTINGS.datausa_object_glob,
     ).where(F.col("relative_path") == "population.json")
-    audited = (
+    return (
         expected.join(active, "relative_path", "left")
         .withColumn("_text", F.decode("content", "UTF-8"))
         .withColumn("_keys", F.array_sort(F.json_object_keys("_text")))
@@ -288,13 +280,17 @@ def _datausa_audit_row() -> DataFrame:
             )
             & (F.element_at("_page", "offset") == 0)
             & (F.element_at("_page", "total") == F.size("_records"))
-            & (F.element_at("_page", "limit") >= F.size("_records")),
+            & (
+                (F.element_at("_page", "limit") == 0)
+                | (F.element_at("_page", "limit") >= F.size("_records"))
+            ),
         )
-    )
-    return audited.select(
-        F.col("relative_path").alias("source_file"),
-        F.coalesce("_object_valid", F.lit(False)).alias("active_object_valid"),
-        F.coalesce(
+        .withColumn(
+            "_object_valid",
+            F.coalesce("_object_valid", F.lit(False)),
+        )
+        .withColumn(
+            "_header_valid",
             (
                 F.col("_keys")
                 == F.array(*[F.lit(key) for key in _DATAUSA_TOP_LEVEL_KEYS])
@@ -306,98 +302,67 @@ def _datausa_audit_row() -> DataFrame:
             )
             & F.col("_record_keys_valid")
             & F.col("_page_valid"),
-            F.lit(False),
-        ).alias("schema_valid"),
-        F.coalesce(F.size("_records") > 0, F.lit(False)).alias("content_nonempty"),
+        )
+        .withColumn(
+            "_content_nonempty",
+            F.coalesce(F.size("_records") > 0, F.lit(False)),
+        )
     )
+
+
+@dp.temporary_view(name="verified_bls_sources")
+@dp.expect_all_or_fail(
+    {
+        "active_object_exists_and_matches_manifest": "_object_valid",
+        "ordered_header_matches_contract": "_header_valid",
+        "source_contains_records": "_content_nonempty",
+    }
+)
+def verified_bls_sources() -> DataFrame:
+    return _verified_bls_source_rows()
+
+
+@dp.temporary_view(name="verified_datausa_source")
+@dp.expect_all_or_fail(
+    {
+        "active_object_exists_and_matches_manifest": "_object_valid",
+        "json_contract_matches": "_header_valid",
+        "source_contains_records": "_content_nonempty",
+    }
+)
+def verified_datausa_source() -> DataFrame:
+    return _verified_datausa_source_rows()
+
+
+for _specification in BLS_BRONZE_SPECS:
+    _register_bls_table(_specification)
 
 
 @dp.materialized_view(
     name="bronze_source_contract_audit",
     comment="One structural quality result for every required Bronze source.",
 )
-@dp.expect_all_or_fail(
-    {
-        "active_object_exists_and_matches_manifest": "active_object_valid",
-        "source_schema_matches_contract": "schema_valid",
-        "source_contains_records": "content_nonempty",
-    }
-)
 def bronze_source_contract_audit() -> DataFrame:
-    rows = [_bls_audit_row(specification) for specification in BLS_BRONZE_SPECS]
-    rows.append(_datausa_audit_row())
-    audit = rows[0]
-    for row in rows[1:]:
-        audit = audit.unionByName(row)
-    return audit.select(*_AUDIT_COLUMNS)
+    bls = spark.read.table("verified_bls_sources").select(
+        F.col("relative_path").alias("source_file"),
+        F.col("_object_valid").alias("active_object_valid"),
+        F.col("_header_valid").alias("schema_valid"),
+        F.col("_content_nonempty").alias("content_nonempty"),
+    )
+    datausa = spark.read.table("verified_datausa_source").select(
+        F.col("relative_path").alias("source_file"),
+        F.col("_object_valid").alias("active_object_valid"),
+        F.col("_header_valid").alias("schema_valid"),
+        F.col("_content_nonempty").alias("content_nonempty"),
+    )
+    return bls.unionByName(datausa).select(*_AUDIT_COLUMNS)
 
 
 def _datausa_rows() -> DataFrame:
     source = (
-        _active_objects(
-            SETTINGS.datausa_manifest_table,
-            SETTINGS.datausa_object_glob,
-        )
-        .where(F.col("relative_path") == "population.json")
-        .withColumn("_text", F.decode("content", "UTF-8"))
-        .withColumn(
-            "_top_level_valid",
-            F.array_sort(F.json_object_keys("_text"))
-            == F.array(*[F.lit(key) for key in _DATAUSA_TOP_LEVEL_KEYS]),
-        )
-        .withColumn(
-            "_columns",
-            F.from_json(F.get_json_object("_text", "$.columns"), _DATAUSA_COLUMNS_TYPE),
-        )
-        .withColumn(
-            "_annotations",
-            F.from_json(
-                F.get_json_object("_text", "$.annotations"),
-                _DATAUSA_ANNOTATIONS_TYPE,
-            ),
-        )
-        .withColumn(
-            "_columns_valid",
-            F.col("_columns")
-            == F.array(*[F.lit(column) for column in _DATAUSA_COLUMNS]),
-        )
-        .withColumn(
-            "_records",
-            F.from_json(F.get_json_object("_text", "$.data"), _DATAUSA_RECORD_TYPE),
-        )
-        .withColumn(
-            "_record_keys_valid",
-            F.expr(
-                "forall(_records, record -> "
-                "array_sort(map_keys(record)) = "
-                "array('Nation', 'Nation ID', 'Population', 'Year'))"
-            ),
-        )
-        .withColumn(
-            "_page",
-            F.from_json(F.get_json_object("_text", "$.page"), _DATAUSA_PAGE_TYPE),
-        )
-        .withColumn(
-            "_page_valid",
-            (
-                F.array_sort(F.map_keys("_page"))
-                == F.array(F.lit("limit"), F.lit("offset"), F.lit("total"))
-            )
-            & (F.element_at("_page", "offset") == 0)
-            & (F.element_at("_page", "total") == F.size("_records"))
-            & (F.element_at("_page", "limit") >= F.size("_records")),
-        )
+        spark.read.table("verified_datausa_source")
         .withColumn("_record", F.explode("_records"))
-        .withColumn(
-            "_header_valid",
-            F.col("_top_level_valid")
-            & F.col("_annotations").isNotNull()
-            & F.col("_columns_valid"),
-        )
-        .withColumn(
-            "_field_count_valid",
-            F.col("_record_keys_valid") & F.col("_page_valid"),
-        )
+        .withColumn("_field_count_valid", F.col("_header_valid"))
     )
     return rows_with_provenance(
         source,
@@ -414,6 +379,7 @@ def _datausa_rows() -> DataFrame:
 @dp.materialized_view(
     name="bronze_datausa_population",
     comment="Source-shaped national population records from Data USA.",
+    table_properties={"delta.columnMapping.mode": "name"},
 )
 @dp.expect_all_or_fail(
     {

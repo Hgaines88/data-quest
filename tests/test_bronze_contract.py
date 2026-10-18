@@ -1,3 +1,4 @@
+from pathlib import Path
 import unittest
 
 from data_quest.validation.bronze_contract import (
@@ -119,6 +120,24 @@ class PipelineSettingsTests(unittest.TestCase):
             with self.subTest(field_name=field_name):
                 with self.assertRaisesRegex(ValueError, field_name):
                     PipelineSettings(**values)
+
+
+class PipelineDefinitionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.source = (
+            Path(__file__).resolve().parents[1] / "pipelines" / "bronze.py"
+        ).read_text(encoding="utf-8")
+
+    def test_publications_depend_on_verified_source_views(self) -> None:
+        self.assertIn('spark.read.table("verified_bls_sources")', self.source)
+        self.assertIn('spark.read.table("verified_datausa_source")', self.source)
+        self.assertIn('@dp.temporary_view(name="verified_bls_sources")', self.source)
+        self.assertIn('@dp.temporary_view(name="verified_datausa_source")', self.source)
+
+    def test_population_view_supports_source_names_and_unlimited_pages(self) -> None:
+        self.assertIn('"delta.columnMapping.mode": "name"', self.source)
+        self.assertIn('(F.element_at("_page", "limit") == 0)', self.source)
 
 
 if __name__ == "__main__":
