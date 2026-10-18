@@ -66,6 +66,20 @@ publish competing manifest snapshots. In a production client environment I
 would add orchestration-level mutual exclusion or a transactional run-control
 table before permitting parallel schedules.
 
+The assigned Data USA response uses the same immutable promotion and atomic
+publication contract but has its own `datausa_ingestion_manifest`. I kept source
+manifests separate because each ingestion run observes only one provider's
+inventory. Combining provider paths in one unscoped manifest would allow a
+BLS-only run to misclassify the Data USA artifact as removed, or the reverse.
+
+Before a Data USA response becomes publishable, I require valid UTF-8 JSON; the
+documented `annotations`, `columns`, `data`, and `page` envelope types; all four
+assigned population columns; records that match the declared columns; valid
+nation, year, and population values; and pagination evidence that the response
+contains the complete first-page result. Validation reads the staged bytes but
+does not serialize them again, so the promoted raw object remains exactly what
+the provider returned.
+
 ### Planned data flow
 
 The planned flow is:
@@ -145,6 +159,40 @@ Evidence is stored in `docs/screenshots/dq07_first_run_reconciliation.png`,
 `docs/screenshots/dq07_no_change_counts_publication.png`,
 `docs/screenshots/dq07_no_change_counts_unchanged.png`, and
 `docs/screenshots/dq07_no_change_reconciliation.png`.
+
+### 2026-10-17: Data USA Volume landing and no-change rerun
+
+I executed `notebooks/02_land_datausa_population.py` from the Databricks Git
+folder at commit `4b5d642`. The first live run used ID
+`20261017T223018Z-29527a8b` and began with zero current Data USA manifest
+objects. It downloaded and validated one response, classified it as new,
+promoted `population.json`, and published one manifest transition. The parsed
+response contained 11 records spanning 2013 through 2024 with the declared
+columns `Nation ID`, `Nation`, `Year`, and `Population`.
+
+The independent reconciliation reparsed the committed raw bytes and recomputed
+their complete size and SHA-256 digest. It reported one active object of 1,401
+bytes with digest prefix `daa4d0576778` and the original first-run ID.
+
+I immediately repeated the manifest load and landing with run ID
+`20261017T223605Z-09cb497b`. The response was again discovered and validated,
+but it was classified as unchanged. The rerun promoted zero objects and
+published zero manifest transitions; new, changed, removed, and reused-version
+counts were also zero. Final reconciliation retained the original first-run ID,
+size, digest, record count, and year bounds.
+
+This proves that the observed assigned response can be fetched, validated,
+preserved unchanged in the target managed Volume, described by a dedicated
+Delta manifest, and checked again without rewriting or republishing identical
+content. It does not prove concurrent-writer safety or behavior against a future
+real provider change. Those boundaries remain addressed by the single-writer
+operating rule and controlled change-contract tests.
+
+Reviewer-friendly screenshots are stored in
+`docs/screenshots/dq08_no_change_counts.png`,
+`docs/screenshots/dq08_reconciliation_identity.png`, and
+`docs/screenshots/dq08_reconciliation_schema.png`. Machine-readable exports are
+stored under `docs/evidence/`.
 
 ## Source documentation notes
 
@@ -274,6 +322,30 @@ then ran the exact committed notebook in Databricks and completed both the
 first-run and immediate no-change rerun procedure in
 `docs/BLS_LANDING_RUNBOOK.md`. The observed live results and their remaining
 claim boundaries are recorded in the validation log above.
+
+### 2026-10-17: Data USA raw-response validation and landing design
+
+AI assistance was used to inspect the current assigned response shape, draft
+failure-oriented tests, and adapt the verified raw-landing contract for the
+single Data USA API artifact. I reviewed the provider documentation and made one
+read-only request to the assigned endpoint. The observed response contained the
+documented four-part envelope, 11 records, and the columns `Nation ID`, `Nation`,
+`Year`, and `Population`.
+
+I rejected a tempting shortcut of placing the Data USA object in the BLS
+manifest. The two ingestions have independent inventories, so a shared unscoped
+snapshot could produce false removal events. I also required explicit opt-in for
+query-bearing download URLs so the BLS file downloader retains its stricter
+default. The controlled suite currently passes 66 tests plus 11 subtests,
+including malformed JSON, invalid UTF-8, missing columns, partial pagination,
+validation cleanup, and a Data USA-specific no-change plan.
+
+I then executed the exact committed notebook in the target Databricks workspace.
+The first run and immediate no-change rerun passed the procedure in
+`docs/DATAUSA_LANDING_RUNBOOK.md`; the observed results and bounded claims are
+recorded in the validation log above. This completes DQ-08 without claiming
+concurrent-writer safety or behavior against an as-yet-unobserved provider
+change.
 
 ## Retrospective
 

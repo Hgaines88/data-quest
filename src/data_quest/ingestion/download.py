@@ -51,6 +51,7 @@ def download_to_staging(
     max_attempts: int = 3,
     backoff_seconds: float = 1.0,
     chunk_size: int = 64 * 1024,
+    allow_query: bool = False,
     opener: Callable[..., Any] = urlopen,
     sleeper: Callable[[float], None] = time.sleep,
 ) -> DownloadedFile:
@@ -68,6 +69,7 @@ def download_to_staging(
         max_attempts=max_attempts,
         backoff_seconds=backoff_seconds,
         chunk_size=chunk_size,
+        allow_query=allow_query,
     )
     destination_path = Path(destination)
     _remove_if_present(destination_path)
@@ -295,13 +297,20 @@ def _validate_download_options(
     max_attempts: int,
     backoff_seconds: float,
     chunk_size: int,
+    allow_query: bool,
 ) -> tuple[str, str]:
     parsed = urlsplit(source_url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise ValueError("source_url must be an absolute HTTP(S) URL")
-    if parsed.username or parsed.password or parsed.query or parsed.fragment:
+    if (
+        parsed.username
+        or parsed.password
+        or (parsed.query and not allow_query)
+        or parsed.fragment
+    ):
         raise ValueError(
-            "source_url must not contain credentials, a query, or a fragment"
+            "source_url must not contain credentials, a disallowed query, "
+            "or a fragment"
         )
     email_match = re.search(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", user_agent, re.I)
     if not email_match or email_match.group(0).casefold() == "your-email@example.com":

@@ -16,3 +16,15 @@ Required screenshots of the Databricks pipeline, representative tables, and all 
 Digest prefixes are displayed for safe, readable evidence. The notebook
 recomputed and compared each complete 64-character SHA-256 digest.
 
+## DQ-08 Data USA landing evidence
+
+- `dq08_no_change_counts.png`: immediate rerun showing one unchanged response,
+  zero promotions, and zero published transitions.
+- `dq08_reconciliation_identity.png`: final active-object reconciliation showing
+  the original run ID, shortened digest, path, and status.
+- `dq08_reconciliation_schema.png`: complementary reconciliation view showing
+  declared columns, byte size, record count, and year bounds.
+
+The request-contact widget was excluded from committed evidence. Digest prefixes
+are displayed for readability; the notebook compared the complete digest.
+

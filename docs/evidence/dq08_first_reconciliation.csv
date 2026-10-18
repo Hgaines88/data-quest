@@ -1,0 +1,2 @@
+columns,content_size_bytes,maximum_year,minimum_year,record_count,relative_path,run_id,sha256_prefix,status
+"{""_1"":""Nation ID"",""_2"":""Nation"",""_3"":""Year"",""_4"":""Population""}",1401,2024,2013,11,population.json,20261017T223018Z-29527a8b,daa4d0576778,active
