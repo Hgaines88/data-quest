@@ -169,11 +169,11 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-07, DQ-08, DQ-10
 
-- [ ] Read raw BLS files and population JSON from the Volume.
-- [ ] Preserve source fidelity while adding provenance fields such as source file and ingestion timestamp where useful.
-- [ ] Apply expected-schema and non-null-key expectations.
-- [ ] Ensure repeated pipeline execution is deterministic.
-- [ ] Expose expectation results for screenshot evidence.
+- [x] Read raw BLS files and population JSON from the Volume.
+- [x] Preserve source fidelity while adding provenance fields such as source file and ingestion timestamp where useful.
+- [x] Apply expected-schema and non-null-key expectations.
+- [x] Ensure repeated pipeline execution is deterministic.
+- [x] Expose expectation results for screenshot evidence.
 
 **Done when:** Bronze tables are pipeline-managed, queryable, traceable to raw sources, and visibly quality-checked.
 

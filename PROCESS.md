@@ -714,6 +714,27 @@ provides the same physical-path value needed for the manifest join without an
 extra abstraction or behavioral change. The reader now selects that column
 directly, and a regression prohibits reintroducing `input_file_name()`.
 
+The next normal triggered update, started at 5:46 PM EDT on 2026-10-18,
+completed successfully with zero errors and zero warnings. All ten BLS
+materialized views, the Data USA population view, and the source-contract audit
+were green. Most importantly, the two flows that had isolated the original
+memory defect completed after the line-oriented correction:
+`bronze_bls_observation_all` published approximately 77,000 rows with all seven
+expectations met, and `bronze_bls_observation_current` published approximately
+38,000 rows with all seven expectations met. `bronze_datausa_population`
+published 11 rows, and the audit published one passing result for each of the
+11 required sources.
+
+This sequence closed the live-validation loop without increasing compute or
+weakening quality controls. The successive error counts were decomposed by
+shared dependency: provider-header evidence corrected one contract boundary;
+table-specific runtime evidence isolated the whole-file memory shape; and
+graph-analysis messages identified two Databricks API compatibility boundaries.
+Each correction was made at the shared cause, covered by a focused regression,
+reviewed at the exact commit, and validated again on the target runtime. DQ-11
+is therefore complete at the Bronze scope; Silver behavior remains separate
+work.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
