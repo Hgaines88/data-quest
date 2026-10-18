@@ -49,6 +49,12 @@ _AUDIT_COLUMNS = (
 )
 
 
+def _canonical_volume_path(path: Column) -> Column:
+    """Normalize Spark path schemes to the manifest's /Volumes form."""
+
+    return F.regexp_replace(path, r"^(?:dbfs:|file:(?://)?)", "")
+
+
 def _latest_active_manifest(table_name: str) -> DataFrame:
     """Return one deterministic latest active state per logical source path."""
 
@@ -80,7 +86,7 @@ def _active_objects(manifest_table: str, object_glob: str) -> DataFrame:
         spark.read.format("binaryFile")
         .load(object_glob)
         .select(
-            F.regexp_replace("path", r"^dbfs:", "").alias("_physical_path"),
+            _canonical_volume_path(F.col("path")).alias("_physical_path"),
             F.col("length").alias("_physical_size_bytes"),
             "content",
         )
@@ -89,7 +95,7 @@ def _active_objects(manifest_table: str, object_glob: str) -> DataFrame:
         F.broadcast(manifest)
         .join(
             objects,
-            F.regexp_replace(manifest.landed_path, r"^dbfs:", "")
+            _canonical_volume_path(manifest.landed_path)
             == objects._physical_path,
             "left",
         )
@@ -103,7 +109,7 @@ def _active_objects(manifest_table: str, object_glob: str) -> DataFrame:
 
 
 def _bls_rows(spec: BlsBronzeSpec) -> DataFrame:
-    source = (
+    verified = (
         spark.read.table("verified_bls_sources")
         .where(F.col("relative_path") == spec.relative_path)
         .select(
@@ -115,9 +121,24 @@ def _bls_rows(spec: BlsBronzeSpec) -> DataFrame:
             "run_id",
             "_object_valid",
             "_header_valid",
-            F.posexplode("_lines").alias("_line_number", "_line"),
         )
-        .where((F.col("_line_number") > 0) & (F.length(F.col("_line")) > 0))
+    )
+    lines = (
+        spark.read.text(SETTINGS.bls_object_path(spec.relative_path))
+        .select(
+            _canonical_volume_path(F.input_file_name()).alias("_physical_path"),
+            F.col("value").alias("_line"),
+        )
+        .where(F.length("_line") > 0)
+        .where(F.col("_line") != "\t".join(spec.expected_source_columns))
+    )
+    source = (
+        verified.join(
+            lines,
+            _canonical_volume_path(verified.landed_path)
+            == lines._physical_path,
+            "inner",
+        )
         .withColumn("_fields", F.split("_line", "\t", -1))
         .withColumn("_field_count_valid", F.size("_fields") == len(spec.columns))
     )
@@ -206,15 +227,8 @@ def _verified_bls_source_rows() -> DataFrame:
         expected.join(active, "relative_path", "left")
         .withColumn("_text", F.decode("content", "UTF-8"))
         .withColumn(
-            "_lines",
-            F.split(F.regexp_replace("_text", "\\r\\n?", "\n"), "\n", -1),
-        )
-        .withColumn(
-            "_data_lines",
-            F.filter(
-                F.slice("_lines", 2, F.greatest(F.size("_lines") - 1, F.lit(0))),
-                lambda line: F.length(line) > 0,
-            ),
+            "_normalized_text",
+            F.regexp_replace("_text", "\\r\\n?", "\n"),
         )
         .withColumn(
             "_object_valid",
@@ -223,14 +237,17 @@ def _verified_bls_source_rows() -> DataFrame:
         .withColumn(
             "_header_valid",
             F.transform(
-                F.split(F.element_at("_lines", 1), "\t", -1),
+                F.split(F.substring_index("_normalized_text", "\n", 1), "\t", -1),
                 lambda value: F.trim(value),
             )
             == F.col("expected_columns"),
         )
         .withColumn(
             "_content_nonempty",
-            F.coalesce(F.size("_data_lines") > 0, F.lit(False)),
+            F.coalesce(
+                F.regexp_like("_normalized_text", r"(?s)^[^\n]*\n[^\n]+"),
+                F.lit(False),
+            ),
         )
     )
 

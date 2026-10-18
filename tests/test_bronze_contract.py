@@ -113,6 +113,11 @@ class PipelineSettingsTests(unittest.TestCase):
             "bls/productivity/objects/*/*",
         )
         self.assertEqual(
+            settings.bls_object_path("pr.data.1.AllData"),
+            "/Volumes/workspace/rearc_data_quest/raw_landing/"
+            "bls/productivity/objects/*/pr.data.1.AllData",
+        )
+        self.assertEqual(
             settings.datausa_object_glob,
             "/Volumes/workspace/rearc_data_quest/raw_landing/"
             "datausa/population/objects/*/*",
@@ -134,6 +139,12 @@ class PipelineSettingsTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, field_name):
                     PipelineSettings(**values)
 
+    def test_rejects_unsafe_bls_relative_path(self) -> None:
+        settings = PipelineSettings("catalog", "schema", "volume")
+
+        with self.assertRaises(ValueError):
+            settings.bls_object_path("nested/pr.series")
+
 
 class PipelineDefinitionTests(unittest.TestCase):
     @classmethod
@@ -147,6 +158,10 @@ class PipelineDefinitionTests(unittest.TestCase):
         self.assertIn('spark.read.table("verified_datausa_source")', self.source)
         self.assertIn('@dp.temporary_view(name="verified_bls_sources")', self.source)
         self.assertIn('@dp.temporary_view(name="verified_datausa_source")', self.source)
+
+    def test_bls_rows_are_read_line_by_line(self) -> None:
+        self.assertIn("spark.read.text(SETTINGS.bls_object_path", self.source)
+        self.assertNotIn('F.posexplode("_lines")', self.source)
 
     def test_population_view_supports_source_names_and_unlimited_pages(self) -> None:
         self.assertIn('"delta.columnMapping.mode": "name"', self.source)

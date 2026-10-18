@@ -18,6 +18,12 @@ manifest paths, validate source presence and shape, and then feed every
 published Bronze view. This explicit dependency prevents an empty or invalid
 source from independently replacing a Bronze table.
 
+BLS publication reads each artifact as distributed text lines after its exact
+immutable path has passed the binary size, SHA-256, header, and nonempty-content
+gates. It does not split a complete observation file into one in-row array.
+This keeps the two observation datasets line-oriented during projection while
+preserving exact provider-header validation and normalized Bronze column names.
+
 The binary reader enumerates each provider's static content-addressed object
 glob before the manifest join. The join prevents historical or unreferenced
 bytes from reaching Bronze, but the execution engine can still read those bytes

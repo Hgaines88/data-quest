@@ -192,6 +192,16 @@ class PipelineSettings:
             "bls/productivity/objects/*/*"
         )
 
+    def bls_object_path(self, relative_path: str) -> str:
+        """Return the static immutable-object path for one BLS artifact."""
+
+        if not relative_path or "/" in relative_path:
+            raise ValueError("relative_path must be one canonical BLS filename")
+        return (
+            f"/Volumes/{self.catalog}/{self.schema}/{self.volume}/"
+            f"bls/productivity/objects/*/{relative_path}"
+        )
+
     @property
     def datausa_object_glob(self) -> str:
         return (

@@ -642,6 +642,56 @@ controls remain future work. No Databricks execution was required because these
 changes describe behavior already proved by the merged code, controlled tests,
 and recorded live evidence; they do not introduce a new platform claim.
 
+### 2026-10-18: Bronze live-validation fault decomposition
+
+The first triggered Bronze update discovered the complete 12-node graph but
+failed with 11 flow errors and one executor out-of-memory warning. I treated
+those counts as symptoms rather than 12 independent defects. The event log
+showed two different failure classes: repeated
+`ordered_header_matches_contract` expectation violations and executor/JVM heap
+loss. Increasing compute or immediately rerunning would have mixed those causes
+and weakened the evidence, so neither action was taken.
+
+The expectation payload identified `pr.seasonal` as the deterministic contract
+failure. Its immutable object existed, matched the manifest byte count and
+SHA-256 digest, and contained data, but the provider header was
+`Seasonal_code` / `Seasonal_text` while the contract reused normalized Bronze
+names `seasonal_code` / `seasonal_text`. Those are two legitimate naming layers,
+not corrupt source data. The contract now stores an optional exact provider
+header separately from projected Bronze columns. A regression asserts both
+representations. Local tests, compilation, repository CI, and a focused Copilot
+review passed before the next platform run.
+
+The second triggered update supplied the necessary isolation evidence. The
+seasonal table published two rows with all five expectations met; the other
+small BLS tables and Data USA population also completed. Only
+`bronze_bls_observation_current` and `bronze_bls_observation_all` failed. Both
+had met all seven expectations before failing at approximately five minutes.
+Databricks reported executor exit code 52 and `JVM_OUT_OF_MEMORY` in
+`UnsafeRow.copy`, while the larger AllData flow lost its executor. This ruled
+out source absence, checksum mismatch, header drift, row-width failure, and the
+earlier seasonal defect as explanations for the remaining failures.
+
+The common implementation shape explained why only the observation files were
+affected: the binary verifier decoded each complete file, split it into one
+array-valued row, and downstream publication exploded that array. The design
+therefore concentrated every observation line and its intermediate copies in a
+single row before distribution. The corrective design retains the immutable
+binary size/SHA-256 gate and exact first-line header check, but avoids building
+the complete line array. Once verified, each BLS artifact is read through
+Spark's distributed text reader at its static content-addressed filename path;
+physical paths are joined back to the latest-active verified manifest row,
+headers and blank lines are removed, and individual lines retain the existing
+field-count, required-value, and provenance rules.
+
+Two tempting shortcuts were rejected. Raising executor memory would make
+correctness depend on a larger runtime and leave future provider growth exposed;
+disabling expectations would conceal evidence that had already distinguished
+valid source from execution failure. The line-oriented change instead removes
+the pathological memory shape without weakening governance. It remains subject
+to a fresh GitHub/Copilot review and a third Databricks triggered update before
+DQ-11 can be considered complete.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
