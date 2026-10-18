@@ -32,3 +32,15 @@ are the validated `Nation ID`, `Nation`, `Year`, and `Population` names.
 The request-contact widget was excluded from committed evidence. Digest prefixes
 are displayed for readability; the notebook compared the complete digest.
 
+## DQ-11 Bronze pipeline evidence
+
+- `dq11_bronze_run_completed.png`: pipeline update started at 5:46 PM EDT and
+  marked `Completed`, with zero reported errors and warnings.
+- `dq11_bronze_tables_expectations.png`: successful Bronze output counts and
+  expectation results, including both BLS observation views, Data USA, and the
+  source-contract audit.
+
+The operator-recorded deployment revision, pipeline ID, displayed metrics,
+evidence digests, attribution limitation, and scope boundary are indexed in
+`docs/evidence/dq11_bronze_live_validation.md`.
+
