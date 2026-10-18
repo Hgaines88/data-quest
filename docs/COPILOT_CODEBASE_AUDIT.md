@@ -10,7 +10,7 @@ information was read or recorded.
 | Item | Value |
 | --- | --- |
 | Audited commit | `8cf008b` ("Clarify schema quality boundaries", 2026-10-17). The checked-out `HEAD` is `5b6dc01` ("Initial plan"), an empty commit; `git diff --stat 8cf008b HEAD` is empty, so the audited tree is identical. |
-| Base branch | `main` (inferred, not verified: `.github/workflows/quality.yml` and `PROCESS.md` refer to `main`, but the clone is shallow and holds only `copilot/independent-engineering-audit`). |
+| Base branch | `codex/dq-10-source-schema-quality-rules` (provided as the base branch for this stacked pull request). |
 | Scope | The entire tree at that commit: 53 tracked files (all listed in section 2), not a diff. |
 | Environment | Python 3.12.3, the same minor version as CI. `coverage`, `pyflakes`, `mypy`, and `ruff` were installed only for this audit and nothing was added to the repository. `pyspark` is not installed. |
 
