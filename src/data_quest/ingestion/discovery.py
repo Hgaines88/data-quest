@@ -133,7 +133,7 @@ def fetch_directory_html(
             raise SourceRequestError(
                 "source directory request contains an invalid URL"
             ) from error
-        except (HTTPException, URLError, TimeoutError) as error:
+        except (HTTPException, OSError, URLError, TimeoutError) as error:
             last_error = error
         except (LookupError, UnicodeError) as error:
             raise SourceRequestError(

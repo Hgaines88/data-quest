@@ -570,6 +570,13 @@ proves that the provider opener is never called. I retained Copilot's additional
 permission-denied unlink regression because it covers a distinct cleanup path,
 and removed its duplicate existing-directory case.
 
+Copilot's exact-head re-review then identified the parallel discovery case for
+connection resets: `response.read()` can raise `ConnectionResetError`, an
+`OSError` rather than an `HTTPException`. I added failing-first recovery and
+retry-exhaustion regressions and included read-side `OSError` in discovery's
+bounded network retry set. The earlier `HTTPError` and `InvalidURL` handlers
+still take precedence, preserving their policy and hard-failure semantics.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

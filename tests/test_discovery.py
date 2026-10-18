@@ -440,6 +440,54 @@ class FetchDirectoryHtmlTests(unittest.TestCase):
         self.assertEqual(opener.call_count, 2)
         sleeper.assert_called_once_with(0.25)
 
+    def test_retries_a_connection_reset_during_response_read(self) -> None:
+        reset_response = FakeResponse(b"partial")
+        reset_response.read = Mock(
+            side_effect=ConnectionResetError("connection reset by peer")
+        )
+        opener = Mock(
+            side_effect=[
+                reset_response,
+                FakeResponse(b"<html>recovered</html>"),
+            ]
+        )
+        sleeper = Mock()
+
+        result = fetch_directory_html(
+            BASE_URL,
+            USER_AGENT,
+            max_attempts=2,
+            backoff_seconds=0.25,
+            opener=opener,
+            sleeper=sleeper,
+        )
+
+        self.assertEqual(result, "<html>recovered</html>")
+        self.assertEqual(opener.call_count, 2)
+        sleeper.assert_called_once_with(0.25)
+
+    def test_connection_reset_exhaustion_is_wrapped(self) -> None:
+        responses = [FakeResponse(b"partial"), FakeResponse(b"partial")]
+        for response in responses:
+            response.read = Mock(
+                side_effect=ConnectionResetError("connection reset by peer")
+            )
+        opener = Mock(side_effect=responses)
+        sleeper = Mock()
+
+        with self.assertRaisesRegex(SourceRequestError, "after 2 attempts"):
+            fetch_directory_html(
+                BASE_URL,
+                USER_AGENT,
+                max_attempts=2,
+                backoff_seconds=0.25,
+                opener=opener,
+                sleeper=sleeper,
+            )
+
+        self.assertEqual(opener.call_count, 2)
+        sleeper.assert_called_once_with(0.25)
+
     def test_invalid_url_failure_is_wrapped_without_retrying(self) -> None:
         opener = Mock(side_effect=InvalidURL("invalid request target"))
 
