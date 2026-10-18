@@ -526,6 +526,18 @@ tests prove redirect decisions before a follow-up request is created; the live
 notebook check can confirm normal provider operation but cannot manufacture a
 real provider redirect.
 
+### 2026-10-18: Strict Data USA JSON syntax
+
+Python's default JSON parser accepts `NaN`, `Infinity`, and `-Infinity` even
+though the JSON grammar does not. I reproduced that gap with a failing-first
+subtest for each constant, then supplied a `parse_constant` callback that raises
+before envelope or record validation and before any raw promotion.
+
+This change enforces valid JSON syntax at landing. It deliberately does not
+claim the exact Bronze envelope or the finite, integral, unique Silver business
+contract; those independent pipeline rules remain assigned to DQ-11 through
+DQ-15 in the source-quality contract.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
