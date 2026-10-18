@@ -9,9 +9,18 @@ class SilverPipelineDefinitionTests(unittest.TestCase):
             Path(__file__).resolve().parents[1] / "pipelines" / "silver.py"
         ).read_text(encoding="utf-8")
 
-    def test_reads_only_bronze_observation_inputs(self) -> None:
+    def test_reads_validated_bronze_inputs(self) -> None:
         self.assertIn('"bronze_bls_observation_all"', self.source)
         self.assertIn('"bronze_bls_observation_current"', self.source)
+        for table in (
+            "bronze_bls_series",
+            "bronze_bls_sector",
+            "bronze_bls_class",
+            "bronze_bls_measure",
+            "bronze_bls_duration",
+            "bronze_bls_seasonal",
+        ):
+            self.assertIn(f'"{table}"', self.source)
         self.assertNotIn("binaryFile", self.source)
 
     def test_declares_intentional_types_and_business_key(self) -> None:
@@ -37,9 +46,18 @@ class SilverPipelineDefinitionTests(unittest.TestCase):
         )
         self.assertIn('spark.read.table("bls_current_consistency")', self.source)
 
-    def test_publishes_one_explainable_silver_table(self) -> None:
-        self.assertEqual(self.source.count("@dp.materialized_view("), 1)
+    def test_publishes_explainable_silver_tables(self) -> None:
+        self.assertEqual(self.source.count("@dp.materialized_view("), 2)
         self.assertIn('name="silver_bls_observation"', self.source)
+        self.assertIn('name="silver_bls_series"', self.source)
+
+    def test_series_labels_require_complete_unique_provider_lookups(self) -> None:
+        self.assertIn(
+            '"series_metadata_is_complete_and_unique",', self.source
+        )
+        self.assertIn('"_series_match_count = 1 AND _all_lookups_matched"', self.source)
+        self.assertIn('F.concat_ws(', self.source)
+        self.assertNotIn("Unknown series", self.source)
 
 
 if __name__ == "__main__":

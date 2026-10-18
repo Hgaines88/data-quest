@@ -793,6 +793,23 @@ selector; that selector names `data-quest-silver` as current and
 `data-quest-bronze` as the other associated pipeline. It is navigation context,
 not duplicate source execution or cross-pipeline contamination.
 
+### DQ-13: build labels from provider metadata without inventing meaning
+
+The series dimension extends the existing Silver pipeline without changing the
+validated observation path. It starts from `bronze_bls_series` and left-joins
+the five provider lookups referenced by that file: sector, class, measure,
+duration, and seasonal adjustment. Keeping the joins left-sided makes a missing
+description observable instead of silently removing the series.
+
+One fail-fast gate enforces the two risks that matter at this boundary. Every
+provider description must match, and the joined result must contain exactly one
+row per `series_id`. The latter also detects a duplicated lookup code because a
+many-to-many join would increase the per-series window count. The readable
+label is a simple concatenation of the five provider descriptions; there is no
+guessed fallback such as `Unknown series`. This produces one public
+`silver_bls_series` table while keeping the quality decision visible in the
+temporary candidate view.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

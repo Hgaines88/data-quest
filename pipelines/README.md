@@ -67,3 +67,9 @@ The triggered target-runtime update completed successfully with zero errors and
 warnings and approximately 77,000 published rows. See the
 [DQ-12 live validation record](../docs/evidence/dq12_silver_live_validation.md)
 for the completed-run, graph, performance, and pipeline-association evidence.
+
+`silver_bls_series` left-joins the provider's series inventory to the sector,
+class, measure, duration, and seasonal lookup tables. Its label concatenates
+only provider descriptions. A fail-fast expectation requires every lookup to
+match and every `series_id` to remain one row after the joins, so missing labels
+or duplicate lookup keys cannot be hidden by a fallback description.
