@@ -21,11 +21,11 @@ erDiagram
     SILVER_BLS_SEASONAL ||--o{ SILVER_BLS_SERIES : categorizes
     SILVER_BLS_PERIOD ||--o{ SILVER_BLS_OBSERVATION : defines
 
-    SILVER_BLS_OBSERVATION ||--o{ GOLD_BLS_BEST_YEAR_BY_SERIES : aggregates_to
-    SILVER_BLS_SERIES ||--o{ GOLD_BLS_BEST_YEAR_BY_SERIES : labels
-    SILVER_POPULATION ||--o{ GOLD_POPULATION_SUMMARY_2013_2018 : summarizes
-    SILVER_BLS_OBSERVATION ||--o{ GOLD_BLS_Q01_POPULATION : contributes
-    SILVER_POPULATION ||--o{ GOLD_BLS_Q01_POPULATION : contributes
+    SILVER_BLS_OBSERVATION }|--o| GOLD_BLS_BEST_YEAR_BY_SERIES : aggregates_to
+    SILVER_BLS_SERIES ||--|| GOLD_BLS_BEST_YEAR_BY_SERIES : labels
+    SILVER_POPULATION }|--o| GOLD_POPULATION_SUMMARY_2013_2018 : summarizes
+    SILVER_BLS_OBSERVATION ||--o| GOLD_BLS_Q01_POPULATION : contributes
+    SILVER_POPULATION o|--o| GOLD_BLS_Q01_POPULATION : optionally_contributes
 
     BLS_MANIFEST_EVENT {
         string relative_path
@@ -97,7 +97,7 @@ erDiagram
 
     GOLD_BLS_BEST_YEAR_BY_SERIES {
         string series_id PK,FK
-        int year PK
+        int year
         decimal annual_value
         string series_label
         string aggregation_method

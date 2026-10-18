@@ -7,9 +7,9 @@ after DQ-35 through DQ-41.
 
 | Finding | Current disposition | Evidence or correction |
 | --- | --- | --- |
-| D-1 | Resolved by implementation | Data USA landing now rejects non-standard JSON constants and enforces the documented envelope, exact columns, finite integral population, and unique normalized keys before publication. |
+| D-1 | Landing gap resolved; downstream scope preserved | Data USA landing now rejects non-standard JSON constants before publication. Exact top-level and ordered-column checks, finite integral population, and normalized-key uniqueness remain binding Bronze and Silver work in `docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md`; this reconciliation does not claim they are implemented. |
 | D-2 | Corrected here | The manifest contract now describes `ingested_at_utc` as the attempt timestamp carried by successfully published transitions, matching the notebooks. |
-| D-3 | Resolved by implementation | BLS removals require anchor files, an identical second discovery, and a reviewed mass-removal threshold override. |
+| D-3 | Resolved by implementation | BLS removals require anchor files and an identical second discovery. When the removal fraction exceeds the configured threshold, publication also requires a reviewed mass-removal override. |
 | D-4 | Corrected here | `PROCESS.md` now distinguishes implemented raw landing from planned Bronze, Silver, and Gold work. |
 | D-5 | Resolved by implementation | Data USA uses a provider-specific product user agent without personal contact information; only BLS requires the contact widget. |
 | D-6 | Corrected here | The logical model now uses the three binding names from `docs/REQUIRED_GOLD_CONTRACTS.md`. |
