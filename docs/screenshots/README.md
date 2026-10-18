@@ -44,3 +44,17 @@ The operator-recorded deployment revision, pipeline ID, displayed metrics,
 evidence digests, attribution limitation, and scope boundary are indexed in
 `docs/evidence/dq11_bronze_live_validation.md`.
 
+## DQ-12 Silver pipeline evidence
+
+- `dq12_silver_run_completed.png`: explicit `Completed` update, zero errors and
+  warnings, validation views, and the successful approximately 77K-row table.
+- `dq12_silver_performance.png`: finished refresh query and execution stages.
+- `dq12_silver_pipeline_graph.png`: AllData normalization and uniqueness plus
+  the independent Current consistency path feeding the published table.
+- `dq12_silver_pipeline_selector.png`: confirms the `2 pipelines` badge is the
+  Bronze/Silver navigation selector and names Silver as the current pipeline.
+
+The operator-recorded revision, metric limits, evidence digests, and quality
+interpretation are indexed in
+`docs/evidence/dq12_silver_live_validation.md`.
+

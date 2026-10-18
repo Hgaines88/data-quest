@@ -122,6 +122,10 @@ class PipelineSettingsTests(unittest.TestCase):
             "/Volumes/workspace/rearc_data_quest/raw_landing/"
             "datausa/population/objects/*/*",
         )
+        self.assertEqual(
+            settings.table_name("bronze_bls_observation_all"),
+            "workspace.rearc_data_quest.bronze_bls_observation_all",
+        )
 
     def test_rejects_unsafe_sql_or_volume_identifiers(self) -> None:
         for field_name, value in (
@@ -144,6 +148,9 @@ class PipelineSettingsTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             settings.bls_object_path("nested/pr.series")
+
+        with self.assertRaises(ValueError):
+            settings.table_name("bronze; DROP TABLE x")
 
 
 class PipelineDefinitionTests(unittest.TestCase):

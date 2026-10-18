@@ -48,3 +48,22 @@ The pipeline requires the BLS and Data USA landing notebooks to have populated
 their Delta manifest tables and immutable Volume objects. Run it as a triggered
 batch update. Expectation metrics are available in the pipeline event log and
 the update details in the Databricks UI.
+
+## Silver observations
+
+`silver.py` is a separate pipeline source so Silver development cannot alter the
+validated Bronze graph. It reads the published AllData and Current observation
+tables, trims provider formatting, casts `year` to integer and `value` to
+`decimal(20,6)`, retains `Q01` through `Q05`, and converts blank footnotes to
+null.
+
+Invalid required rows are dropped and counted by named expectations. Duplicate
+`series_id + year + period_code` keys fail the update rather than being resolved
+arbitrarily. A second fail-fast gate requires every normalized Current row to
+match the AllData-derived candidate on the complete business key and value. The
+published `silver_bls_observation` depends on both gates.
+
+The triggered target-runtime update completed successfully with zero errors and
+warnings and approximately 77,000 published rows. See the
+[DQ-12 live validation record](../docs/evidence/dq12_silver_live_validation.md)
+for the completed-run, graph, performance, and pipeline-association evidence.

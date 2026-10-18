@@ -31,3 +31,9 @@ these exports support exact value inspection.
   transitions remained after two writes, two current paths were selected, the
   expected timestamp/run-ID winner was returned as removed, and all 11 manifest
   columns were present.
+
+## DQ-12 Silver pipeline validation
+
+- `dq12_silver_live_validation.md`: indexes the operator-recorded branch
+  revision, completed update, output scale, dependency graph, pipeline-selector
+  interpretation, screenshot paths, and screenshot SHA-256 digests.
