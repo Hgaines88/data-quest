@@ -79,7 +79,7 @@ erDiagram
         string series_id PK,FK
         int year PK
         string period_code PK,FK
-        decimal(20,6) value
+        decimal value
         string footnote_code
         string source_file
         timestamp ingested_at
@@ -129,7 +129,7 @@ erDiagram
 | `raw_artifact_version` | One observed content version of one source object | `artifact_version_id`; source plus digest | Provenance, change detection, and reproducibility |
 | `silver_bls_series` | One BLS statistical series | `series_id` | Meaning, coverage, and readable labels |
 | `silver_bls_observation` | One series, year, and published period | `series_id + year + period_code` | Historical productivity observations |
-| `silver_population` | One nation and year | `nation + year` | Annual population context |
+| `silver_population` | One nation and year | `nation_id + year` | Annual population context |
 | `gold_series_annual_result` | One series and selected annual result year | `series_id + year` | Question 2 and trend exploration |
 | `gold_population_summary` | One requested inclusive year range | `start_year + end_year` | Question 1 |
 | `gold_series_population_context` | One selected series and year | `series_id + year` | Question 3 and population-context view |

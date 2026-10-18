@@ -34,6 +34,14 @@ Every Bronze row adds `_source_file`, `_source_path`, and `_ingested_at_utc`.
 The pipeline reads only the active manifest versions, never an unscoped wildcard
 that could mix historical content-addressed versions.
 
+Before projecting named BLS columns, the reader captures parser-level malformed
+records and verifies the physical field count against the declared header. Any
+malformed record or width mismatch fails the update rather than risking shifted
+columns. This structural gate applies to both observation files, `pr.series`,
+and every analytical lookup file. The immutable raw artifact remains available
+for diagnosis, and the failed-record count is surfaced with the pipeline
+evidence.
+
 ### `bronze_bls_observation_all`
 
 Source: `pr.data.1.AllData`. `pr.data.0.Current` is modeled separately as a
@@ -127,11 +135,19 @@ page         STRUCT<limit: BIGINT, offset: BIGINT, total: BIGINT>
 ```
 
 The source is already validated before promotion, but the pipeline independently
-checks the committed object. It fails the update when required envelope fields
-or declared columns are missing, pagination indicates an incomplete response,
-or the envelope cannot be parsed. After exploding `data`, it drops and measures
-rows with blank `Nation ID` or `Nation`, null `Year`, null `Population`, or a
-negative population.
+checks the committed object before typed projection. The top-level keys must be
+exactly `annotations`, `columns`, `data`, and `page`; the pagination keys must be
+exactly `limit`, `offset`, and `total`; and `columns` must equal the ordered list
+`Nation ID`, `Nation`, `Year`, `Population`. Every record must have exactly that
+declared key set. Annotation-map keys remain provider-defined because they are
+metadata rather than analytical columns.
+
+The update fails when these envelope, pagination, column-set, record-key, or
+parser checks fail, or when pagination indicates an incomplete response. This
+detects both missing and additive schema drift instead of allowing an explicit
+reader schema to silently discard new fields. After exploding `data`, the
+pipeline drops and measures rows with blank `Nation ID` or `Nation`, null `Year`,
+null `Population`, or a negative population.
 
 ## Silver contracts
 

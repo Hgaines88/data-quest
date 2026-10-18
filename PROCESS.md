@@ -404,6 +404,14 @@ than restricting the reusable Silver population history. These rules are now
 documented implementation contracts; DQ-11 through DQ-15 still need to build and
 validate them in Databricks.
 
+GitHub Copilot's pull-request review identified four documentation gaps before
+merge. I corrected an invalid Mermaid precision annotation, aligned the
+population candidate key with the `nation_id + year` contract, added an explicit
+fail-update gate for malformed or wrong-width BLS records before projection, and
+made the Data USA envelope, pagination, ordered columns, and record-key checks
+exact so additive drift cannot be silently discarded. I reviewed each suggestion
+against the source evidence and project quality policy before accepting it.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
