@@ -13,6 +13,7 @@ from data_quest.ingestion.manifest import ManifestEntry
 
 
 POPULATION_RELATIVE_PATH = "population.json"
+DATAUSA_USER_AGENT = "rearc-data-quest/0.1 (Data USA population ingestion)"
 REQUIRED_COLUMNS = ("Nation ID", "Nation", "Year", "Population")
 
 
@@ -184,5 +185,6 @@ def _download_api_response(
         user_agent,
         destination,
         allow_query=True,
+        require_contact_email=False,
         **kwargs,
     )

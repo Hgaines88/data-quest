@@ -3,11 +3,14 @@
 from email.message import Message
 from io import BytesIO
 from urllib.error import HTTPError, URLError
+from urllib.request import Request
 import unittest
 from unittest.mock import Mock
 
 from data_quest.ingestion.discovery import (
     DirectoryListingError,
+    SameOriginRedirectHandler,
+    SourceRedirectError,
     SourcePolicyError,
     SourceRequestError,
     SourceFile,
@@ -24,13 +27,22 @@ USER_AGENT = "data-quest-test/0.1 (contact: owner@example.org)"
 class FakeResponse:
     """Minimal context-managed response used to test without network access."""
 
-    def __init__(self, body: bytes, charset: str = "utf-8") -> None:
+    def __init__(
+        self,
+        body: bytes,
+        charset: str = "utf-8",
+        response_url: str = BASE_URL,
+    ) -> None:
         self._body = BytesIO(body)
+        self._response_url = response_url
         self.headers = Message()
         self.headers["Content-Type"] = f"text/html; charset={charset}"
 
     def read(self) -> bytes:
         return self._body.read()
+
+    def geturl(self) -> str:
+        return self._response_url
 
     def __enter__(self) -> "FakeResponse":
         return self
@@ -176,6 +188,45 @@ class DiscoverFileLinksTests(unittest.TestCase):
 
 
 class FetchDirectoryHtmlTests(unittest.TestCase):
+    def test_redirect_handler_refuses_cross_origin_and_downgrade_before_following(self) -> None:
+        handler = SameOriginRedirectHandler(BASE_URL)
+        request = Request(BASE_URL)
+
+        for redirect_url in [
+            "https://example.org/pub/time.series/pr/",
+            "http://download.bls.gov/pub/time.series/pr/",
+        ]:
+            with self.subTest(redirect_url=redirect_url):
+                with self.assertRaisesRegex(SourceRedirectError, "origin"):
+                    handler.redirect_request(
+                        request, None, 302, "Found", Message(), redirect_url
+                    )
+
+    def test_redirect_handler_allows_same_origin_https_redirect(self) -> None:
+        handler = SameOriginRedirectHandler(BASE_URL)
+        redirected = handler.redirect_request(
+            Request(BASE_URL),
+            None,
+            302,
+            "Found",
+            Message(),
+            f"{BASE_URL}index.html",
+        )
+
+        self.assertIsNotNone(redirected)
+        self.assertEqual(redirected.full_url, f"{BASE_URL}index.html")
+
+    def test_discovery_rejects_cross_origin_response_from_injected_opener(self) -> None:
+        opener = Mock(
+            return_value=FakeResponse(
+                b"<html>redirected</html>",
+                response_url="https://example.org/provider/",
+            )
+        )
+
+        with self.assertRaisesRegex(SourceRedirectError, "origin"):
+            fetch_directory_html(BASE_URL, USER_AGENT, opener=opener)
+
     def test_public_discovery_entry_point_fetches_and_parses(self) -> None:
         opener = Mock(
             return_value=FakeResponse(

@@ -7,7 +7,8 @@ single-writer and preserves the assigned API response bytes unchanged.
 
 - Run `notebooks/02_land_datausa_population.py` from this repository's
   Databricks Git folder.
-- Enter a valid contact email in the request-contact widget.
+- The notebook uses a Data USA-specific product `User-Agent` without personal
+  contact information. No contact-email widget is required.
 - Keep the verified defaults unless the authorized workspace differs:
   `workspace.rearc_data_quest.raw_landing`.
 
@@ -37,6 +38,10 @@ Invalid UTF-8, malformed JSON, a missing envelope field or required column, an
 invalid record, or a partial page fails before promotion and manifest
 publication. Promotion failure also prevents manifest publication. The previous
 committed state therefore remains authoritative.
+
+Cross-origin and HTTPS-to-HTTP redirects are refused before they are followed,
+so request headers cannot be forwarded outside the endpoint's configured
+origin. Same-origin HTTPS redirects remain allowed.
 
 ## Observed validation evidence
 

@@ -9,9 +9,14 @@ import time
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import Request, build_opener
 
-from data_quest.ingestion.discovery import SourcePolicyError, SourceRequestError
+from data_quest.ingestion.discovery import (
+    SameOriginRedirectHandler,
+    SourcePolicyError,
+    SourceRedirectError,
+    SourceRequestError,
+)
 
 
 _SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
@@ -19,10 +24,6 @@ _SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
 
 class DownloadIntegrityError(SourceRequestError):
     """Raised when downloaded or previously landed bytes fail verification."""
-
-
-class SourceRedirectError(SourceRequestError):
-    """Raised when a source request resolves outside its configured origin."""
 
 
 class StagingWriteError(RuntimeError):
@@ -52,7 +53,8 @@ def download_to_staging(
     backoff_seconds: float = 1.0,
     chunk_size: int = 64 * 1024,
     allow_query: bool = False,
-    opener: Callable[..., Any] = urlopen,
+    require_contact_email: bool = True,
+    opener: Callable[..., Any] | None = None,
     sleeper: Callable[[float], None] = time.sleep,
 ) -> DownloadedFile:
     """Stream one source object to staging and verify its complete byte count.
@@ -70,15 +72,19 @@ def download_to_staging(
         backoff_seconds=backoff_seconds,
         chunk_size=chunk_size,
         allow_query=allow_query,
+        require_contact_email=require_contact_email,
     )
     destination_path = Path(destination)
     _remove_if_present(destination_path)
+    selected_opener = opener or build_opener(
+        SameOriginRedirectHandler(source_url)
+    ).open
     request = Request(source_url, headers={"User-Agent": user_agent})
     last_error: Exception | None = None
 
     for attempt in range(1, max_attempts + 1):
         try:
-            with opener(request, timeout=timeout_seconds) as response:
+            with selected_opener(request, timeout=timeout_seconds) as response:
                 response_url = response.geturl()
                 response_origin = _origin(response_url)
                 if response_origin != source_origin:
@@ -298,7 +304,8 @@ def _validate_download_options(
     backoff_seconds: float,
     chunk_size: int,
     allow_query: bool,
-) -> tuple[str, str]:
+    require_contact_email: bool,
+) -> tuple[str, str, int | None]:
     parsed = urlsplit(source_url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise ValueError("source_url must be an absolute HTTP(S) URL")
@@ -313,7 +320,10 @@ def _validate_download_options(
             "or a fragment"
         )
     email_match = re.search(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", user_agent, re.I)
-    if not email_match or email_match.group(0).casefold() == "your-email@example.com":
+    if require_contact_email and (
+        not email_match
+        or email_match.group(0).casefold() == "your-email@example.com"
+    ):
         raise ValueError(
             "user_agent must contain a non-placeholder contact email address"
         )
@@ -325,12 +335,18 @@ def _validate_download_options(
         raise ValueError("backoff_seconds cannot be negative")
     if chunk_size < 1:
         raise ValueError("chunk_size must be at least one byte")
-    return parsed.scheme.casefold(), parsed.netloc.casefold()
+    return _origin(source_url)
 
 
-def _origin(url: str) -> tuple[str, str]:
+def _origin(url: str) -> tuple[str, str, int | None]:
     parsed = urlsplit(url)
-    return parsed.scheme.casefold(), parsed.netloc.casefold()
+    scheme = parsed.scheme.casefold()
+    default_port = {"http": 80, "https": 443}.get(scheme)
+    try:
+        port = parsed.port if parsed.port is not None else default_port
+    except ValueError as error:
+        raise ValueError("source URL contains an invalid port") from error
+    return scheme, (parsed.hostname or "").casefold(), port
 
 
 def _parse_content_length(raw_value: str | None) -> int | None:
