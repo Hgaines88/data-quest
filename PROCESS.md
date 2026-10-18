@@ -419,6 +419,31 @@ observation must resolve to exactly one valid series-metadata row before enriche
 or Gold publication. These checks prevent an internally inconsistent provider
 snapshot or an unlabeled series from producing apparently complete results.
 
+### 2026-10-18: Independent audit and inventory-safety remediation
+
+I commissioned a repository-wide Copilot audit after completing the raw landing
+and schema-contract phases, then independently reviewed and corrected the audit
+report before merging it. The accepted high-severity finding showed that a BLS
+directory response could remain nonempty yet be severely truncated. Without an
+additional guard, that response could be treated as a complete inventory and
+publish false removal tombstones for valid active files.
+
+For DQ-35, I kept the generic landing planner reusable and placed the
+provider-specific safety policy in the BLS wrapper. A BLS inventory must contain
+the data and metadata anchors `pr.data.1.AllData` and `pr.series`. When any
+currently active path appears removed, the notebook performs a second
+independent discovery and both inventories must match exactly. A confirmed plan
+that removes more than half of the active inventory is blocked unless I
+explicitly enable the operator-reviewed `allow_mass_removal` override.
+
+I used failing-first tests to establish each boundary before implementation:
+missing anchors, absent confirmation, disagreement between discoveries,
+severely truncated inventories, explicit override behavior, and a legitimate
+confirmed single-file deletion. These controls prevent partial discovery from
+silently mutating manifest truth while preserving an auditable path for real
+upstream deletions. They do not prove that a stable provider deletion was
+intentional; the mass-removal override deliberately remains a human judgment.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

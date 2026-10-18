@@ -57,6 +57,16 @@ An empty inventory is meaningful only when discovery itself completed
 successfully. DQ-05 rejects a malformed directory page that yields no usable
 links, which prevents that failure from being interpreted as mass removal.
 
+A nonempty inventory is not automatically trusted as complete when it would
+remove currently active BLS paths. The BLS workflow requires its semantic
+anchor files (`pr.data.1.AllData` and `pr.series`), repeats discovery
+independently when removals are proposed, and requires both inventories to
+match exactly. It also blocks removal of more than half of the active inventory
+unless an operator explicitly enables the reviewed mass-removal override. This
+guard prevents a truncated but superficially valid directory page from
+publishing widespread tombstones. It does not prove that a confirmed upstream
+deletion was intentional; that remains an operator-review decision.
+
 ## Removal decision
 
 Removals are represented by append-only tombstones rather than physical
@@ -73,7 +83,9 @@ make an upstream mistake or transient listing defect harder to investigate.
 
 The manifest plan may be created only after both conditions are true:
 
-1. Source discovery returned a complete, validated inventory.
+1. Source discovery returned a complete, validated inventory. For BLS runs
+   proposing removals, an independent second discovery matched it exactly and
+   the mass-removal safety gate was satisfied.
 2. Every object needed for the run was fully staged and its observed byte count
    and SHA-256 digest were computed successfully.
 
