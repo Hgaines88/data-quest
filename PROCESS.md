@@ -693,6 +693,18 @@ the pathological memory shape without weakening governance. It remains subject
 to a fresh GitHub/Copilot review and a third Databricks triggered update before
 DQ-11 can be considered complete.
 
+The third triggered update failed during graph analysis rather than execution.
+Two primary errors reported the regular-expression text
+`(?s)^[^\\n]*\\n[^\\n]+` as an unresolved column at the shared BLS verifier;
+the other eleven messages only reported that downstream flows could not resolve
+`verified_bls_sources`. I therefore treated the downstream count as dependency
+fan-out, not eleven new defects. The PySpark `regexp_like` function accepts its
+pattern as a column expression in this Databricks runtime, so passing a Python
+string caused Spark to interpret the regex as a column name. The correction
+wraps the pattern with `F.lit`, preserving the intended content-nonempty rule
+without changing its semantics. A source-shape regression now protects this
+runtime-specific API boundary.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

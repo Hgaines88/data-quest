@@ -251,7 +251,10 @@ def _verified_bls_source_rows() -> DataFrame:
         .withColumn(
             "_content_nonempty",
             F.coalesce(
-                F.regexp_like("_normalized_text", r"(?s)^[^\n]*\n[^\n]+"),
+                F.regexp_like(
+                    "_normalized_text",
+                    F.lit(r"(?s)^[^\n]*\n[^\n]+"),
+                ),
                 F.lit(False),
             ),
         )

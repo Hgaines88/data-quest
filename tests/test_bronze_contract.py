@@ -168,6 +168,13 @@ class PipelineDefinitionTests(unittest.TestCase):
             self.source,
         )
 
+    def test_regexp_like_uses_a_literal_pattern_column(self) -> None:
+        self.assertIn(
+            'F.regexp_like(\n                    "_normalized_text",\n'
+            '                    F.lit(r"(?s)^[^\\n]*\\n[^\\n]+"),',
+            self.source,
+        )
+
     def test_population_view_supports_source_names_and_unlimited_pages(self) -> None:
         self.assertIn('"delta.columnMapping.mode": "name"', self.source)
         self.assertIn('(F.element_at("_page", "limit") == 0)', self.source)
