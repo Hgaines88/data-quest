@@ -32,6 +32,7 @@ REPOSITORY_ROOT = find_repository_root()
 sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 
 from data_quest.ingestion.datausa import (  # noqa: E402
+    DATAUSA_USER_AGENT,
     POPULATION_RELATIVE_PATH,
     prepare_population_landing,
     validate_population_response,
@@ -47,20 +48,15 @@ from data_quest.ingestion.spark_manifest import (  # noqa: E402
 
 # COMMAND ----------
 
-dbutils.widgets.text("contact_email", "", "Request contact email")
 dbutils.widgets.text("catalog", "workspace", "Unity Catalog catalog")
 dbutils.widgets.text("schema", "rearc_data_quest", "Project schema")
 dbutils.widgets.text("volume", "raw_landing", "Raw managed Volume")
 
 # COMMAND ----------
 
-contact_email = dbutils.widgets.get("contact_email").strip()
 catalog = dbutils.widgets.get("catalog").strip()
 schema = dbutils.widgets.get("schema").strip()
 volume = dbutils.widgets.get("volume").strip()
-
-if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", contact_email):
-    raise ValueError("Enter a valid contact_email widget value before running")
 
 for name, value in {"catalog": catalog, "schema": schema, "volume": volume}.items():
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", value):
@@ -71,7 +67,7 @@ DATAUSA_ENDPOINT = (
     "cube=acs_yg_total_population_1&drilldowns=Year%2CNation&locale=en&"
     "measures=Population"
 )
-USER_AGENT = f"rearc-data-quest/0.1 (contact: {contact_email})"
+USER_AGENT = DATAUSA_USER_AGENT
 VOLUME_SOURCE_ROOT = (
     f"/Volumes/{catalog}/{schema}/{volume}/datausa/population"
 )

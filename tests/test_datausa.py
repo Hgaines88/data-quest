@@ -6,9 +6,12 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+
+from data_quest.ingestion import datausa
 
 from data_quest.ingestion.datausa import (
+    DATAUSA_USER_AGENT,
     PopulationResponseError,
     prepare_population_landing,
     validate_population_response,
@@ -50,6 +53,10 @@ def valid_payload() -> dict[str, object]:
 
 
 class PopulationValidationTests(unittest.TestCase):
+    def test_datausa_user_agent_contains_no_contact_email(self) -> None:
+        self.assertNotIn("@", DATAUSA_USER_AGENT)
+        self.assertIn("Data USA", DATAUSA_USER_AGENT)
+
     def test_validates_expected_envelope_without_modifying_bytes(self) -> None:
         original = json.dumps(valid_payload(), indent=2).encode("utf-8") + b"\n"
 
@@ -98,6 +105,24 @@ class PopulationValidationTests(unittest.TestCase):
 
 
 class PopulationLandingPreparationTests(unittest.TestCase):
+    def test_api_downloader_explicitly_disables_contact_email_requirement(self) -> None:
+        downloaded = Mock(spec=DownloadedFile)
+        with patch.object(datausa, "download_to_staging", return_value=downloaded) as call:
+            result = datausa._download_api_response(
+                ENDPOINT,
+                DATAUSA_USER_AGENT,
+                "/tmp/population.partial",
+            )
+
+        self.assertIs(result, downloaded)
+        call.assert_called_once_with(
+            ENDPOINT,
+            DATAUSA_USER_AGENT,
+            "/tmp/population.partial",
+            allow_query=True,
+            require_contact_email=False,
+        )
+
     def test_stages_valid_raw_bytes_and_plans_one_new_object(self) -> None:
         body = json.dumps(valid_payload()).encode("utf-8")
 

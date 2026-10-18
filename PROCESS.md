@@ -503,6 +503,29 @@ prefers the spelling with fewer percent escapes and then lexical URL order. The
 regressions reverse alias order to prove the result does not depend on listing
 order.
 
+### 2026-10-18: Redirect-origin and request-identity privacy
+
+The audit showed that checking `response.geturl()` after `urllib` returned was
+too late to protect an identifying header: the standard redirect handler had
+already sent the redirected request. Discovery also lacked the post-response
+check, and the Data USA notebook reused the BLS contact-bearing `User-Agent`
+without a documented provider requirement.
+
+I moved the boundary to a custom `HTTPRedirectHandler`. It compares normalized
+scheme, hostname, and effective port before constructing a redirected request,
+allowing same-origin HTTPS redirects while refusing cross-origin and HTTPS-to-
+HTTP redirects. The existing response-origin checks remain as defense in depth
+for injected or custom openers. BLS retains its required non-placeholder contact
+validation by default. Data USA now uses a distinct product-only identity and
+explicitly opts out of the contact-email requirement.
+
+Failing-first tests cover cross-origin and downgrade refusal at the handler
+level, safe same-origin behavior, discovery's injected-opener boundary, default
+BLS contact enforcement, and the explicit Data USA opt-out. These controlled
+tests prove redirect decisions before a follow-up request is created; the live
+notebook check can confirm normal provider operation but cannot manufacture a
+real provider redirect.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

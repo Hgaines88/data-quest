@@ -8,7 +8,7 @@ import time
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
 from urllib.parse import SplitResult, unquote, urljoin, urlsplit, urlunsplit
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
 class SourceRequestError(RuntimeError):
@@ -17,6 +17,33 @@ class SourceRequestError(RuntimeError):
 
 class SourcePolicyError(SourceRequestError):
     """Raised when a provider refuses access for a policy-related reason."""
+
+
+class SourceRedirectError(SourceRequestError):
+    """Raised before a source request follows an unsafe redirect."""
+
+
+class SameOriginRedirectHandler(HTTPRedirectHandler):
+    """Allow redirects only when scheme, host, and effective port are unchanged."""
+
+    def __init__(self, source_url: str) -> None:
+        super().__init__()
+        self._source_origin = _origin(source_url)
+
+    def redirect_request(
+        self,
+        req: Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> Request | None:
+        if _origin(newurl) != self._source_origin:
+            raise SourceRedirectError(
+                "source redirect would leave the configured origin"
+            )
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 class DirectoryListingError(ValueError):
@@ -57,7 +84,7 @@ def fetch_directory_html(
     timeout_seconds: float = 30.0,
     max_attempts: int = 3,
     backoff_seconds: float = 1.0,
-    opener: Callable[..., Any] = urlopen,
+    opener: Callable[..., Any] | None = None,
     sleeper: Callable[[float], None] = time.sleep,
 ) -> str:
     """Retrieve a directory page with identifying and bounded request behavior."""
@@ -69,11 +96,19 @@ def fetch_directory_html(
         max_attempts=max_attempts,
         backoff_seconds=backoff_seconds,
     )
+    source_origin = _origin(directory_url)
+    selected_opener = opener or build_opener(
+        SameOriginRedirectHandler(directory_url)
+    ).open
     request = Request(directory_url, headers={"User-Agent": user_agent})
 
     for attempt in range(1, max_attempts + 1):
         try:
-            with opener(request, timeout=timeout_seconds) as response:
+            with selected_opener(request, timeout=timeout_seconds) as response:
+                if _origin(response.geturl()) != source_origin:
+                    raise SourceRedirectError(
+                        "source response redirected outside the configured origin"
+                    )
                 charset = response.headers.get_content_charset() or "utf-8"
                 return response.read().decode(charset)
         except HTTPError as error:
@@ -91,6 +126,8 @@ def fetch_directory_html(
                     f"source directory request failed with HTTP {error.code}"
                 ) from error
             last_error: Exception = error
+        except SourceRedirectError:
+            raise
         except (URLError, TimeoutError) as error:
             last_error = error
         except (LookupError, UnicodeError) as error:
@@ -113,7 +150,7 @@ def discover_source_files(
     timeout_seconds: float = 30.0,
     max_attempts: int = 3,
     backoff_seconds: float = 1.0,
-    opener: Callable[..., Any] = urlopen,
+    opener: Callable[..., Any] | None = None,
     sleeper: Callable[[float], None] = time.sleep,
 ) -> list[SourceFile]:
     """Retrieve and parse the current file inventory for one source directory."""
@@ -223,6 +260,19 @@ def _url_alias_order(url: str) -> tuple[int, str]:
     """Prefer the least encoded spelling, then make the choice deterministic."""
 
     return url.count("%"), url
+
+
+def _origin(url: str) -> tuple[str, str, int | None]:
+    """Return a normalized network origin with default ports made explicit."""
+
+    parsed = urlsplit(url)
+    scheme = parsed.scheme.casefold()
+    default_port = {"http": 80, "https": 443}.get(scheme)
+    try:
+        port = parsed.port if parsed.port is not None else default_port
+    except ValueError as error:
+        raise ValueError("source URL contains an invalid port") from error
+    return scheme, (parsed.hostname or "").casefold(), port
 
 
 def _normalized_directory_path(path: str) -> str:

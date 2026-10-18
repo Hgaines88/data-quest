@@ -61,6 +61,31 @@ class FakeResponse:
 
 
 class DownloadToStagingTests(unittest.TestCase):
+    def test_contact_email_is_required_by_default_but_can_be_provider_specific(self) -> None:
+        public_user_agent = "rearc-data-quest/0.1 (Data USA population ingestion)"
+        opener = Mock(return_value=FakeResponse(b"{}", content_length=2))
+
+        with TemporaryDirectory() as directory:
+            destination = Path(directory) / "response.partial"
+            with self.assertRaisesRegex(ValueError, "contact email"):
+                download_to_staging(
+                    SOURCE_URL,
+                    public_user_agent,
+                    destination,
+                    opener=opener,
+                )
+
+            result = download_to_staging(
+                SOURCE_URL,
+                public_user_agent,
+                destination,
+                require_contact_email=False,
+                opener=opener,
+            )
+
+        self.assertEqual(result.content_size_bytes, 2)
+        self.assertEqual(opener.call_count, 1)
+
     def test_query_urls_require_explicit_opt_in(self) -> None:
         api_url = "https://api.example.org/data.json?measure=Population"
         opener = Mock(
