@@ -1,14 +1,16 @@
 """Whole-run tests for safe BLS staging, promotion, and publication order."""
 
+from dataclasses import replace
 from datetime import datetime, timezone
 import hashlib
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from data_quest.ingestion.discovery import SourceFile, SourceRequestError
 from data_quest.ingestion.download import DownloadedFile
+from data_quest.ingestion.download import DownloadIntegrityError
 from data_quest.ingestion.landing import (
     BLS_REQUIRED_SOURCE_NAMES,
     execute_landing_plan,
@@ -324,7 +326,113 @@ class PrepareBlsInventorySafetyTests(unittest.TestCase):
 
 
 class ExecuteLandingPlanTests(unittest.TestCase):
-    def test_promotes_before_publishing_and_skips_unchanged_bytes(self) -> None:
+    def test_missing_unchanged_object_is_recovered_without_publication(self) -> None:
+        body = b"same"
+        publisher = Mock()
+
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            landed = root / "objects" / hashlib.sha256(body).hexdigest() / "same"
+            with patch("data_quest.ingestion.manifest._validate_landed_path"):
+                current = replace(
+                    current_entry("same", body), landed_path=str(landed)
+                )
+            plan = prepare_source_landing(
+                [source("same")],
+                [current],
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader_for({"same": body}, staging_directory=root),
+                cleanup_tree=Mock(),
+            )
+
+            result = execute_landing_plan(
+                plan,
+                publisher=publisher,
+                cleanup_tree=Mock(),
+            )
+
+            self.assertEqual(landed.read_bytes(), body)
+
+        publisher.assert_not_called()
+        self.assertEqual(result.recovered_count, 1)
+        self.assertEqual(result.promoted_count, 0)
+
+    def test_valid_unchanged_object_is_verified_without_rewrite(self) -> None:
+        body = b"same"
+        publisher = Mock()
+
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            landed = root / "objects" / hashlib.sha256(body).hexdigest() / "same"
+            landed.parent.mkdir(parents=True)
+            landed.write_bytes(body)
+            with patch("data_quest.ingestion.manifest._validate_landed_path"):
+                current = replace(
+                    current_entry("same", body), landed_path=str(landed)
+                )
+            plan = prepare_source_landing(
+                [source("same")],
+                [current],
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader_for({"same": body}, staging_directory=root),
+                cleanup_tree=Mock(),
+            )
+
+            result = execute_landing_plan(
+                plan,
+                publisher=publisher,
+                cleanup_tree=Mock(),
+            )
+
+            self.assertEqual(landed.read_bytes(), body)
+
+        publisher.assert_not_called()
+        self.assertEqual(result.recovered_count, 0)
+        self.assertEqual(result.reused_version_count, 0)
+
+    def test_corrupt_unchanged_object_fails_without_overwrite(self) -> None:
+        body = b"same"
+        corrupt = b"corrupt"
+        publisher = Mock()
+
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            landed = root / "objects" / hashlib.sha256(body).hexdigest() / "same"
+            landed.parent.mkdir(parents=True)
+            landed.write_bytes(corrupt)
+            with patch("data_quest.ingestion.manifest._validate_landed_path"):
+                current = replace(
+                    current_entry("same", body), landed_path=str(landed)
+                )
+            plan = prepare_source_landing(
+                [source("same")],
+                [current],
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader_for({"same": body}, staging_directory=root),
+                cleanup_tree=Mock(),
+            )
+
+            with self.assertRaises(DownloadIntegrityError):
+                execute_landing_plan(
+                    plan,
+                    publisher=publisher,
+                    cleanup_tree=Mock(),
+                )
+
+            self.assertEqual(landed.read_bytes(), corrupt)
+
+        publisher.assert_not_called()
+
+    def test_verifies_all_objects_before_publishing_transitions(self) -> None:
         bodies = {"new": b"new", "same": b"same"}
         events: list[str] = []
 
@@ -345,7 +453,7 @@ class ExecuteLandingPlanTests(unittest.TestCase):
 
             def promoter(*args: object, **kwargs: object) -> bool:
                 events.append(f"promote:{Path(str(args[0])).name}")
-                return True
+                return Path(str(args[0])).name == "new.partial"
 
             published: list[ManifestEntry] = []
 
@@ -361,8 +469,9 @@ class ExecuteLandingPlanTests(unittest.TestCase):
             )
 
         self.assertEqual(events[0], "promote:new.partial")
-        self.assertEqual(events[1], "publish")
-        self.assertTrue(events[2].startswith("cleanup:"))
+        self.assertEqual(events[1], "promote:same.partial")
+        self.assertEqual(events[2], "publish")
+        self.assertTrue(events[3].startswith("cleanup:"))
         self.assertEqual([entry.relative_path for entry in published], ["new"])
         self.assertEqual(result.promoted_count, 1)
         self.assertEqual(result.unchanged_count, 1)
@@ -398,9 +507,9 @@ class ExecuteLandingPlanTests(unittest.TestCase):
         publisher.assert_not_called()
         cleanup.assert_called_once_with(plan.staging_root)
 
-    def test_unchanged_run_does_not_publish_or_promote(self) -> None:
+    def test_unchanged_run_verifies_but_does_not_publish_or_promote(self) -> None:
         bodies = {"same": b"same"}
-        promoter = Mock()
+        promoter = Mock(return_value=False)
         publisher = Mock()
         cleanup = Mock()
 
@@ -426,10 +535,12 @@ class ExecuteLandingPlanTests(unittest.TestCase):
                 cleanup_tree=cleanup,
             )
 
-        promoter.assert_not_called()
+        promoter.assert_called_once()
         publisher.assert_not_called()
         cleanup.assert_called_once_with(plan.staging_root)
         self.assertEqual(result.unchanged_count, 1)
+        self.assertEqual(result.recovered_count, 0)
+        self.assertEqual(result.promoted_count, 0)
 
 
 if __name__ == "__main__":
