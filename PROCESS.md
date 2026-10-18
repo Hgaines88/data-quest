@@ -492,6 +492,17 @@ remediation prevents discovery from requesting a different path than the one
 advertised. Redirect handling and network-exception normalization remain
 separate audit findings and are not claimed here.
 
+Copilot review found three remaining identity edge cases in the first revision.
+I accepted all three after reproducing them: an encoded base directory was
+decoded before relative-link resolution, path normalization could hide an
+encoded separator in the original final component, and two encoded aliases
+could produce duplicate manifest names. The corrected parser preserves the
+encoded base, validates the decoded original component before normalization,
+and deduplicates by decoded name. When aliases exist, it deterministically
+prefers the spelling with fewer percent escapes and then lexical URL order. The
+regressions reverse alias order to prove the result does not depend on listing
+order.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

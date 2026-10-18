@@ -56,10 +56,23 @@ class DiscoverFileLinksTests(unittest.TestCase):
             ],
         )
 
+    def test_preserves_encoded_directory_during_relative_resolution(self) -> None:
+        base_url = "https://example.com/annual%20reports/"
+
+        result = discover_file_links('<a href="file.txt">File</a>', base_url)
+
+        self.assertEqual(
+            result,
+            [SourceFile("file.txt", f"{base_url}file.txt")],
+        )
+
     def test_rejects_decoded_percent_slash_and_backslash_names(self) -> None:
         for href in [
             "a%2541.txt",
             "nested%2Ffile.txt",
+            "%2Fpr.series",
+            ".%2Fpr.series",
+            "pr.series%2F.",
             r"unsafe\name.txt",
             "unsafe%5Cname.txt",
         ]:
@@ -68,6 +81,20 @@ class DiscoverFileLinksTests(unittest.TestCase):
                     DirectoryListingError, "no valid file links"
                 ):
                     discover_file_links(f'<a href="{href}">unsafe</a>', BASE_URL)
+
+    def test_deduplicates_encoded_aliases_by_name_regardless_of_order(self) -> None:
+        aliases = [
+            '<a href="pr.series">literal</a><a href="pr%2Eseries">encoded</a>',
+            '<a href="pr%2Eseries">encoded</a><a href="pr.series">literal</a>',
+        ]
+
+        for html in aliases:
+            with self.subTest(html=html):
+                self.assertEqual(
+                    discover_file_links(html, BASE_URL),
+                    [SourceFile("pr.series", f"{BASE_URL}pr.series")],
+                )
+
 
     def test_returns_only_files_in_the_exact_configured_directory(self) -> None:
         html = """
