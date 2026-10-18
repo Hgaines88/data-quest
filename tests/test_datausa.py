@@ -57,7 +57,7 @@ class PopulationValidationTests(unittest.TestCase):
         for constant in ["NaN", "Infinity", "-Infinity"]:
             with self.subTest(constant=constant):
                 payload = valid_payload()
-                payload["data"][0]["Population"] = float(constant)
+                payload["annotations"] = {"source_name": float(constant)}
 
                 with TemporaryDirectory() as directory:
                     path = Path(directory) / "population.json"
