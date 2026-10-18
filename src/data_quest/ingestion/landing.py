@@ -16,14 +16,18 @@ from data_quest.ingestion.download import (
 )
 from data_quest.ingestion.manifest import (
     ChangeType,
+    IncompleteRunError,
     ManifestChange,
     ManifestEntry,
+    ManifestStatus,
     ObservedFile,
     plan_manifest_changes,
 )
 
 
 _RUN_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
+BLS_REQUIRED_SOURCE_NAMES = ("pr.data.1.AllData", "pr.series")
+DEFAULT_MAX_REMOVAL_FRACTION = 0.5
 
 
 @dataclass(frozen=True)
@@ -162,11 +166,87 @@ def prepare_source_landing(
 def prepare_bls_landing(
     source_files: list[SourceFile],
     current_entries: list[ManifestEntry],
+    *,
+    confirmed_source_files: list[SourceFile] | None = None,
+    max_removal_fraction: float = DEFAULT_MAX_REMOVAL_FRACTION,
+    allow_mass_removal: bool = False,
     **kwargs: Any,
 ) -> LandingPlan:
-    """Prepare the complete BLS inventory using the generic source contract."""
+    """Validate BLS inventory completeness before staging and planning changes.
+
+    The complete inventory remains dynamic. Only sources required by the
+    assignment are fixed prerequisites. Any proposed removal needs a second,
+    identical discovery, while an unusually large removal additionally needs
+    an explicit operator override.
+    """
+
+    _validate_bls_inventory_safety(
+        source_files,
+        current_entries,
+        confirmed_source_files=confirmed_source_files,
+        max_removal_fraction=max_removal_fraction,
+        allow_mass_removal=allow_mass_removal,
+    )
 
     return prepare_source_landing(source_files, current_entries, **kwargs)
+
+
+def _validate_bls_inventory_safety(
+    source_files: list[SourceFile],
+    current_entries: list[ManifestEntry],
+    *,
+    confirmed_source_files: list[SourceFile] | None,
+    max_removal_fraction: float,
+    allow_mass_removal: bool,
+) -> None:
+    if (
+        isinstance(max_removal_fraction, bool)
+        or not isinstance(max_removal_fraction, (int, float))
+        or not 0 <= max_removal_fraction <= 1
+    ):
+        raise ValueError("max_removal_fraction must be between zero and one")
+    if not isinstance(allow_mass_removal, bool):
+        raise ValueError("allow_mass_removal must be a boolean")
+
+    first_inventory = _source_inventory(source_files)
+    missing_required = set(BLS_REQUIRED_SOURCE_NAMES) - set(first_inventory)
+    if missing_required:
+        raise IncompleteRunError(
+            "required BLS source files are missing from discovery: "
+            f"{sorted(missing_required)}"
+        )
+
+    active_paths = {
+        entry.relative_path
+        for entry in current_entries
+        if entry.status is ManifestStatus.ACTIVE
+    }
+    removal_candidates = active_paths - set(first_inventory)
+    if not removal_candidates:
+        return
+
+    if confirmed_source_files is None:
+        raise IncompleteRunError(
+            "BLS removal candidates require a second inventory confirmation"
+        )
+
+    confirmed_inventory = _source_inventory(confirmed_source_files)
+    if confirmed_inventory != first_inventory:
+        raise IncompleteRunError(
+            "independent BLS removal inventories do not match"
+        )
+
+    removal_fraction = len(removal_candidates) / len(active_paths)
+    if removal_fraction > max_removal_fraction and not allow_mass_removal:
+        raise IncompleteRunError(
+            "BLS mass removal exceeds the configured safety threshold; "
+            "an explicit operator override is required"
+        )
+
+
+def _source_inventory(source_files: list[SourceFile]) -> dict[str, str]:
+    _validate_unique_source_paths(source_files)
+    return {source.name: source.url for source in source_files}
 
 
 def execute_landing_plan(

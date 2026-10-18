@@ -10,8 +10,10 @@ from unittest.mock import Mock
 from data_quest.ingestion.discovery import SourceFile, SourceRequestError
 from data_quest.ingestion.download import DownloadedFile
 from data_quest.ingestion.landing import (
+    BLS_REQUIRED_SOURCE_NAMES,
     execute_landing_plan,
     prepare_bls_landing,
+    prepare_source_landing,
 )
 from data_quest.ingestion.manifest import (
     ChangeType,
@@ -90,7 +92,7 @@ class PrepareBlsLandingTests(unittest.TestCase):
         }
 
         with TemporaryDirectory() as directory:
-            plan = prepare_bls_landing(
+            plan = prepare_source_landing(
                 [source("same"), source("new"), source("changed")],
                 [
                     current_entry("changed", b"old changed bytes"),
@@ -145,7 +147,7 @@ class PrepareBlsLandingTests(unittest.TestCase):
             )
 
         with self.assertRaisesRegex(SourceRequestError, "controlled"):
-            prepare_bls_landing(
+            prepare_source_landing(
                 [source("first"), source("second")],
                 [],
                 user_agent=USER_AGENT,
@@ -162,7 +164,7 @@ class PrepareBlsLandingTests(unittest.TestCase):
         downloader = Mock()
 
         with self.assertRaisesRegex(ValueError, "duplicate source relative_path"):
-            prepare_bls_landing(
+            prepare_source_landing(
                 [source("same"), source("same")],
                 [],
                 user_agent=USER_AGENT,
@@ -176,13 +178,158 @@ class PrepareBlsLandingTests(unittest.TestCase):
         downloader.assert_not_called()
 
 
+class PrepareBlsInventorySafetyTests(unittest.TestCase):
+    def test_missing_required_anchor_fails_before_download(self) -> None:
+        downloader = Mock()
+
+        with self.assertRaisesRegex(ValueError, "required BLS source"):
+            prepare_bls_landing(
+                [source("pr.series")],
+                [],
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader,
+                cleanup_tree=Mock(),
+            )
+
+        downloader.assert_not_called()
+
+    def test_removal_requires_second_inventory_confirmation(self) -> None:
+        names = [*BLS_REQUIRED_SOURCE_NAMES, "pr.measure"]
+        current = [current_entry(name, name.encode()) for name in names]
+
+        with self.assertRaisesRegex(ValueError, "confirmation"):
+            prepare_bls_landing(
+                [source(name) for name in BLS_REQUIRED_SOURCE_NAMES],
+                current,
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=Mock(),
+                cleanup_tree=Mock(),
+            )
+
+    def test_disagreeing_removal_inventories_fail_before_download(self) -> None:
+        current_names = [*BLS_REQUIRED_SOURCE_NAMES, "pr.measure", "pr.sector"]
+        current = [current_entry(name, name.encode()) for name in current_names]
+        first = [source(name) for name in [*BLS_REQUIRED_SOURCE_NAMES, "pr.measure"]]
+        second = [source(name) for name in [*BLS_REQUIRED_SOURCE_NAMES, "pr.sector"]]
+        downloader = Mock()
+
+        with self.assertRaisesRegex(ValueError, "inventories do not match"):
+            prepare_bls_landing(
+                first,
+                current,
+                confirmed_source_files=second,
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader,
+                cleanup_tree=Mock(),
+            )
+
+        downloader.assert_not_called()
+
+    def test_partial_two_of_twelve_inventory_cannot_publish_removals(self) -> None:
+        current_names = [
+            *BLS_REQUIRED_SOURCE_NAMES,
+            *(f"pr.lookup.{index}" for index in range(10)),
+        ]
+        current = [current_entry(name, name.encode()) for name in current_names]
+        partial = [source(name) for name in BLS_REQUIRED_SOURCE_NAMES]
+        downloader = Mock()
+
+        with self.assertRaisesRegex(ValueError, "mass removal"):
+            prepare_bls_landing(
+                partial,
+                current,
+                confirmed_source_files=partial,
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader,
+                cleanup_tree=Mock(),
+            )
+
+        downloader.assert_not_called()
+
+    def test_explicit_override_allows_confirmed_mass_removal(self) -> None:
+        current_names = [
+            *BLS_REQUIRED_SOURCE_NAMES,
+            *(f"pr.lookup.{index}" for index in range(10)),
+        ]
+        bodies = {name: name.encode() for name in BLS_REQUIRED_SOURCE_NAMES}
+        current = [current_entry(name, name.encode()) for name in current_names]
+        confirmed = [source(name) for name in BLS_REQUIRED_SOURCE_NAMES]
+
+        with TemporaryDirectory() as directory:
+            plan = prepare_bls_landing(
+                confirmed,
+                current,
+                confirmed_source_files=confirmed,
+                allow_mass_removal=True,
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader_for(
+                    bodies,
+                    staging_directory=Path(directory),
+                ),
+                cleanup_tree=Mock(),
+            )
+
+        removed = [
+            change.relative_path
+            for change in plan.changes
+            if change.change_type is ChangeType.REMOVED
+        ]
+        self.assertEqual(len(removed), 10)
+
+    def test_confirmed_single_removal_still_produces_tombstone(self) -> None:
+        bodies = {name: name.encode() for name in BLS_REQUIRED_SOURCE_NAMES}
+        current = [
+            *(current_entry(name, body) for name, body in bodies.items()),
+            current_entry("pr.retired", b"retired"),
+        ]
+        confirmed = [source(name) for name in BLS_REQUIRED_SOURCE_NAMES]
+
+        with TemporaryDirectory() as directory:
+            plan = prepare_bls_landing(
+                confirmed,
+                current,
+                confirmed_source_files=confirmed,
+                user_agent=USER_AGENT,
+                volume_source_root=VOLUME_ROOT,
+                run_id=RUN_ID,
+                ingested_at_utc=RUN_TIME,
+                downloader=downloader_for(
+                    bodies,
+                    staging_directory=Path(directory),
+                ),
+                cleanup_tree=Mock(),
+            )
+
+        removed = [
+            change.relative_path
+            for change in plan.changes
+            if change.change_type is ChangeType.REMOVED
+        ]
+        self.assertEqual(removed, ["pr.retired"])
+
+
 class ExecuteLandingPlanTests(unittest.TestCase):
     def test_promotes_before_publishing_and_skips_unchanged_bytes(self) -> None:
         bodies = {"new": b"new", "same": b"same"}
         events: list[str] = []
 
         with TemporaryDirectory() as directory:
-            plan = prepare_bls_landing(
+            plan = prepare_source_landing(
                 [source("new"), source("same")],
                 [current_entry("same", bodies["same"])],
                 user_agent=USER_AGENT,
@@ -226,7 +373,7 @@ class ExecuteLandingPlanTests(unittest.TestCase):
         publisher = Mock()
 
         with TemporaryDirectory() as directory:
-            plan = prepare_bls_landing(
+            plan = prepare_source_landing(
                 [source("new")],
                 [],
                 user_agent=USER_AGENT,
@@ -258,7 +405,7 @@ class ExecuteLandingPlanTests(unittest.TestCase):
         cleanup = Mock()
 
         with TemporaryDirectory() as directory:
-            plan = prepare_bls_landing(
+            plan = prepare_source_landing(
                 [source("same")],
                 [current_entry("same", bodies["same"])],
                 user_agent=USER_AGENT,

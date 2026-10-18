@@ -50,6 +50,12 @@ dbutils.widgets.text("contact_email", "", "BLS request contact email")
 dbutils.widgets.text("catalog", "workspace", "Unity Catalog catalog")
 dbutils.widgets.text("schema", "rearc_data_quest", "Project schema")
 dbutils.widgets.text("volume", "raw_landing", "Raw managed Volume")
+dbutils.widgets.dropdown(
+    "allow_mass_removal",
+    "false",
+    ["false", "true"],
+    "Allow reviewed BLS mass removal",
+)
 
 # COMMAND ----------
 
@@ -57,6 +63,9 @@ contact_email = dbutils.widgets.get("contact_email").strip()
 catalog = dbutils.widgets.get("catalog").strip()
 schema = dbutils.widgets.get("schema").strip()
 volume = dbutils.widgets.get("volume").strip()
+allow_mass_removal = (
+    dbutils.widgets.get("allow_mass_removal").strip().casefold() == "true"
+)
 
 if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", contact_email):
     raise ValueError("Enter a valid contact_email widget value before running")
@@ -93,16 +102,36 @@ source_files = discover_source_files(
     backoff_seconds=1.0,
 )
 current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+active_paths_before = {
+    entry.relative_path
+    for entry in current_manifest
+    if entry.status is ManifestStatus.ACTIVE
+}
+discovered_paths = {source.name for source in source_files}
+removal_candidates = active_paths_before - discovered_paths
+confirmed_source_files = None
+if removal_candidates:
+    confirmed_source_files = discover_source_files(
+        BLS_DIRECTORY_URL,
+        USER_AGENT,
+        timeout_seconds=30.0,
+        max_attempts=3,
+        backoff_seconds=1.0,
+    )
 
 print(f"Run: {run_id}")
 print(f"Discovered files: {len(source_files)}")
 print(f"Current manifest objects: {len(current_manifest)}")
+print(f"Removal candidates: {len(removal_candidates)}")
+print(f"Mass-removal override: {allow_mass_removal}")
 
 # COMMAND ----------
 
 landing_plan = prepare_bls_landing(
     source_files,
     current_manifest,
+    confirmed_source_files=confirmed_source_files,
+    allow_mass_removal=allow_mass_removal,
     user_agent=USER_AGENT,
     volume_source_root=VOLUME_SOURCE_ROOT,
     run_id=run_id,

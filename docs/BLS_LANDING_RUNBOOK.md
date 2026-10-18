@@ -15,6 +15,9 @@ single-writer: do not run two copies of the landing notebook concurrently.
   - catalog: `workspace`
   - schema: `rearc_data_quest`
   - Volume: `raw_landing`
+- Keep `allow_mass_removal` set to `false` for normal runs. Set it to `true`
+  only after reviewing a confirmed provider-side change that legitimately
+  removes more than half of the currently active source inventory.
 
 ## First-run evidence
 
@@ -56,6 +59,14 @@ changed bytes use content-addressed immutable paths, so an interrupted run may
 leave an unreferenced object but cannot overwrite bytes referenced by the last
 committed manifest. A retry with a new run ID reconciles against committed
 manifest truth.
+
+Before any proposed removal, the notebook performs a second independent BLS
+directory discovery and requires the two inventories to match. Both discoveries
+must include `pr.data.1.AllData` and `pr.series`. If more than half of the active
+paths would be removed, publication fails unless `allow_mass_removal` was
+explicitly enabled after operator review. Any failure occurs before downloads,
+promotion, or manifest publication, so the existing active state remains
+authoritative.
 
 ## Cleanup and retention
 
