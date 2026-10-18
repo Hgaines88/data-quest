@@ -153,7 +153,7 @@ Line numbers refer to the audited commit.
 **None.** I found no secret, credential, or personal data in tracked files or
 screenshot metadata. I also found no defect that corrupts immutable raw bytes
 or overwrites a version the manifest references. Content-addressed paths,
-post-promotion re-verification, and the append-then-promote ordering hold in
+post-promotion re-verification, and the promote-then-append ordering hold in
 code (`download.py:200-247`, `landing.py:172-238`).
 
 ### High
@@ -164,7 +164,7 @@ code (`download.py:200-247`, `landing.py:172-238`).
   - `landing.py:143-148` hard-codes `inventory_complete=True, downloads_complete=True`.
   - `manifest.py:169-235` turns every active path absent from the observed set into a `REMOVED` entry.
   - `discovery.py:184-187` rejects only an *empty* result.
-  - `notebooks/01_land_bls.py:276-283` and `:323-330` pass whatever discovery returns, and the notebook's reconciliation compares the manifest to the same discovery result.
+  - `notebooks/01_land_bls.py:88-94` discovers the files, `:103-113` prepares the landing, `:131-142` reconciles active paths to discovery, and `:144-149` verifies committed objects.
 - **Impact:**
   - If BLS returns a partial or degraded page (a proxy error page with one link, or a changed layout where only some anchors parse), the run succeeds. It writes tombstones for the files it did not see.
   - The reconciliation `assert` then passes, because active paths equal the (truncated) discovered paths.
@@ -186,7 +186,7 @@ code (`download.py:200-247`, `landing.py:172-238`).
 - **Where:**
   - `landing.py:194-216`: only `NEW` and `CHANGED` changes call the promoter.
   - `manifest.py:251-259`: matching size and SHA-256 gives `UNCHANGED`.
-  - `notebooks/01_land_bls.py:332-337` and `notebooks/02_land_datausa_population.py:141-146` verify the objects only *after* publication.
+  - `notebooks/01_land_bls.py:144-149` and `notebooks/02_land_datausa_population.py:141-146` verify the objects only *after* publication.
 - **Impact:**
   - If an object under `objects/<sha>/…` is lost or damaged (manual cleanup, Volume incident), the run just downloaded identical, verified bytes but discards them. The classification stays `UNCHANGED`.
   - The final verification raises `DownloadIntegrityError` on every rerun with no automated recovery path.
@@ -194,7 +194,9 @@ code (`download.py:200-247`, `landing.py:172-238`).
 - **Evidence:**
   - **Verified by reading:** no code path re-promotes bytes for an `UNCHANGED` entry.
   - **Verified by reading:** no test covers an `UNCHANGED` entry whose landed object is missing.
-- **Remediation:** for `UNCHANGED` entries, check the landed object's existence and size, or its digest, during planning or execution. If the object is missing or mismatched, promote the already-verified staged bytes (the promoter already refuses to overwrite conflicting content). Move the check before `publisher` so a bad object blocks publication.
+- **Remediation:**
+  - If the expected object is missing, verify the staged bytes against the manifest's size and digest, then promote them before publishing any transitions.
+  - If the destination exists but fails verification, do not retry the normal promoter: it deliberately refuses to overwrite conflicting bytes. Keep publication blocked and preserve the damaged object in quarantine. Restore the expected bytes from a trusted copy, or use a coordinated operator recovery with concurrent readers and writers stopped to quarantine the bad destination and promote the verified staged copy. Verify the restored size and digest before resuming; do not silently overwrite the immutable path.
 
 #### M-2. Discovery rebuilds source URLs from the percent-decoded path, so the requested URL can differ from the linked URL
 
@@ -219,21 +221,14 @@ code (`download.py:200-247`, `landing.py:172-238`).
   - Use a custom `HTTPRedirectHandler` (or `build_opener` with a redirect validator) that refuses off-origin and scheme-changing redirects *before* following them. Apply it to both discovery and download.
   - Use a distinct `User-Agent` for Data USA that does not include the personal email, or document that disclosure.
 
-#### M-4. The Data USA validator is materially weaker than the published contract, and accepts values the contract forbids
+#### M-4. Data USA accepts non-standard JSON numeric constants
 
-- **Where:** `datausa.py:54-65`, `:67-77`, `:85-111`, `:114-124`, versus `docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md` (`bronze_datausa_population` and `silver_population`) and `docs/REQUIRED_GOLD_CONTRACTS.md` (Question 1).
-- **Impact:** the contract says the update fails on "missing and additive schema drift", with exact top-level keys, exact page keys, ordered columns equal to the four named, and population "finite, nonnegative, and integral". The code does none of that. This is **verified by probe**:
-  - A population of `NaN` passes (`float('nan') < 0` is false). The validator returned a summary for `[{"Population": NaN}]`.
-  - Two records with the same `Nation ID` and `Year` pass (`record_count == 2`), although `nation_id + year` is the declared business key.
-  - `Year` values such as `99999` pass; there is no range check.
-  - Extra top-level keys, extra page keys, extra declared columns, and reordered columns pass.
-  - `annotations` values are never type-checked, and `limit` is parsed but never used.
-  - A response with a non-US nation passes. The contract confines that to Silver, so this is by design, but the validator and contract do not describe the same gate.
-  - Because the validator runs before promotion (`datausa.py:152-154`), bad bytes are rejected only for the checks that exist; the rest is deferred to an unbuilt pipeline.
+- **Where:** `datausa.py:45` uses Python's default `json.loads` parser; `:103-111` checks population type and nonnegativity but not finiteness.
+- **Impact:** Python's parser accepts `NaN`, `Infinity`, and `-Infinity`, although these are not JSON numeric values. **Verified by probe:** a record with `Population: NaN` passes validation because `NaN < 0` is false. Positive infinity also passes the shown type and nonnegative checks. This conflicts with `PROCESS.md:75`, which requires valid UTF-8 JSON before publication.
+- **Scope:** Exact top-level and pagination keys, ordered columns, and population finiteness/integrality are specified for Bronze and Silver in `SOURCE_SCHEMA_QUALITY_CONTRACT.md:137-150,218-239`; the document explicitly defers those pipeline rules to DQ-11–DQ-15 at `:249-253`. Their absence from raw landing is not a landing defect.
 - **Remediation:**
-  - Either tighten `validate_population_response` to the contract (finite and integral population, unique `(Nation ID, Year)`, exact key sets and ordered `columns`) or amend the contract to say that the ingestion gate is intentionally structural.
   - Parse with `parse_constant` raising on `NaN`, `Infinity`, and `-Infinity`.
-  - Add negative tests for each of those cases.
+  - Add negative tests confirming each constant is rejected before promotion.
 
 #### M-5. Several failure modes escape the bounded retry and error-wrapping design
 
@@ -253,16 +248,16 @@ code (`download.py:200-247`, `landing.py:172-238`).
 - `tests/test_spark_manifest.py:98-120`, "loads only the latest manifest state": the fake returns one canned row, so the ranking SQL is never executed. The test asserts that substrings appear in the SQL text. A wrong `ORDER BY`, a wrong partition key, or a broken tie-break would still pass.
 - The same file's `ensure_manifest_table`, append, and identifier tests assert on strings and on a fake writer. Nothing checks column order against the DDL or NOT NULL handling. No real Spark (local or Databricks) test exists in CI.
 - `test_rejects_cross_origin_redirect_before_writing` (see M-3) and `test_incomplete_inventory_cannot_publish_a_plan` (see H-1) test the guard but not the real scenario.
-- `tests/test_landing.py:180-256` never uses the real `promote_verified_file` with `execute_landing_plan`. Promotion is a `Mock`, so the `_staging`→`objects` flow, the `exists()` branch, and `_cleanup_tree` run in no test.
+- `tests/test_download.py:250-282` tests reuse of an existing matching object by the real promoter, and `:311-332` tests that conflicting existing bytes are refused. However, `tests/test_landing.py:180-256` mocks promotion, so no test exercises `execute_landing_plan` with the real promoter and filesystem together.
 - **Remediation:**
-  - Add a real-filesystem end-to-end test: stage, promote, publish to an in-memory fake, rerun, delete the object (M-1), and assert the repair.
+  - Add an orchestration test using the real promoter and filesystem: stage, promote, publish to an in-memory fake, then rerun with the unchanged object's path missing and verify the intended recovery before publication.
   - Add a local-Spark or Databricks CI job (or at least a documented manual gate) for the manifest query.
   - Remove or rename tests that claim more than they check.
 
 ### Low
 
 - **L-1. `ingested_at_utc` is the run *start* time, not the transition time.**
-  - `notebooks/01_land_bls.py:273` and `notebooks/02_land_datausa_population.py:88` capture it before discovery and downloads. `docs/INGESTION_MANIFEST_CONTRACT.md` defines it as "timestamp of the successful state transition".
+  - `notebooks/01_land_bls.py:85` and `notebooks/02_land_datausa_population.py:88` capture it before discovery and downloads. `docs/INGESTION_MANIFEST_CONTRACT.md` defines it as "timestamp of the successful state transition".
   - `spark_manifest.py:70-73` uses it, together with the lexical `run_id`, to pick the latest row. Overlapping runs (not supported) or a backward clock step can mis-order rows, and a duplicate `(relative_path, ingested_at_utc, run_id)` is non-deterministic.
   - Remediation: stamp at publish time, or add a monotonic sequence column. Add a unique `(relative_path, run_id)` check.
 - **L-2. Naive timestamps from Spark are relabelled UTC.** `spark_manifest.py:87-90` assumes any naive `datetime` is UTC. PySpark returns naive values in the Python process's local zone. The result is correct only if the driver zone is UTC, **inferred** from PySpark semantics and untested. Impact is limited because retained `UNCHANGED` entries are never rewritten. Remediation: set and assert `spark.sql.session.timeZone` and the driver TZ to UTC, or select `unix_micros`/an explicit UTC cast.
@@ -274,17 +269,17 @@ code (`download.py:200-247`, `landing.py:172-238`).
   - Remediation: centralize validators and add negative tests.
 - **L-5. Contact-email validation is weak and inconsistent.**
   - `discovery.py:225-229` and `download.py:315-319` duplicate a regex and reject only the literal `your-email@example.com`. Any `@example.com`, `@localhost.xx`, or `a@b.co` passes.
-  - The notebooks use a different regex (`notebooks/01_land_bls.py:249`, `notebooks/02_land_datausa_population.py:62`). **Verified:** `a@b.c` passes the notebooks but fails the library, so the failure surfaces late as a `ValueError` from deep in the run.
+  - The notebooks use a different regex (`notebooks/01_land_bls.py:61`, `notebooks/02_land_datausa_population.py:62`). **Verified:** `a@b.c` passes the notebooks but fails the library, so the failure surfaces late as a `ValueError` from deep in the run.
   - The `User-Agent` product token differs: `.env.example:3` says `data-quest/0.1`, the notebooks say `rearc-data-quest/0.1`.
   - Remediation: a single shared validator and constant.
-- **L-6. `.env.example` is dead configuration.** No code reads `BLS_BASE_URL`, `BLS_USER_AGENT`, `DATAUSA_POPULATION_URL`, or `DATABRICKS_*`. The notebooks hard-code the URLs, widget defaults, and catalog names. `docs/PROJECT_CONVENTIONS.md` says object names "must be read from pipeline configuration … rather than repeated". Remediation: either wire them up or delete the file and update the convention.
+- **L-6. `.env.example` is disconnected from the notebook configuration.** No code reads its `BLS_BASE_URL`, `BLS_USER_AGENT`, `DATAUSA_POPULATION_URL`, or `DATABRICKS_*` values. The notebooks accept deployment-specific catalog, schema, and Volume values through widgets (`01_land_bls.py:56-73`; `02_land_datausa_population.py:57-78`), so this does not establish that those object names are fixed deployment targets or violate the configuration convention. Remediation: document how the example settings map to supported widget inputs, or remove the unused example entries.
 - **L-7. Unbounded and unclosed reads.** `discovery.py:78` reads the entire directory page into memory with no size cap. `download.py` has no maximum object size, so a hostile or faulty source can fill the Volume. `discovery.py:79-93` does not `close()` an `HTTPError` (the download path does, at `download.py:152`). Remediation: add `max_bytes` limits and close the error.
 - **L-8. The `SourcePolicyError` text names BLS in all contexts.** `download.py:139-141` and `discovery.py:82-84` say "review the BLS access policy" even for a Data USA 403. Remediation: make the provider name a parameter.
 - **L-9. Maintainability and duplication.**
   - Copy-pasted: the run-ID regex (`manifest.py:19`, `landing.py:26`), the SHA-256 regex (`manifest.py:18`, `download.py`), the email check (L-5), `ObservedFile` and `ManifestEntry` validation, `_IDENTIFIER_PART` plus the notebooks' inline identifier regex, and the two notebooks (about 85 % identical).
   - Reconciliation logic is untested and lives only in the notebooks. `src/data_quest/validation/` is an empty package, although `docs/PROJECT_CONVENTIONS.md` says it holds "reconciliation and contract checks".
   - `execute_landing_plan` calls `_cleanup_tree` with `ignore_errors=True` (`landing.py:248-249`), so a cleanup failure is invisible.
-  - The notebooks use `assert` for post-publish reconciliation (`01_land_bls.py:326`, `02_…py:137`).
+  - The notebooks use `assert` for post-publish reconciliation (`01_land_bls.py:138`, `02_…py:137`).
   - `prepare_bls_landing` is a pass-through wrapper.
   - `ruff` (section 3, row 7) flags 35 mechanical issues.
 - **L-10. Display/evidence quirk.** `datausa.py:23-31` stores `columns` as a tuple. In `notebooks/02_land_datausa_population.py:118-127` and `:149-161`, `createDataFrame` turns the tuple into a **struct** with fields `_1`…`_4`, not an array. **Verified in evidence:** `docs/evidence/dq08_*.csv` and `dq08_reconciliation_schema.png` show `{"_1":"Nation ID","_2":…}`. The column names are readable but the schema is wrong. Remediation: pass `list(columns)`.
@@ -300,7 +295,7 @@ code (`download.py:200-247`, `landing.py:172-238`).
 | --- | --- |
 | 1. Functional correctness and edge cases | Findings: M-2, M-5, L-4. The core planner (`manifest.py`) and promoter are correct on all paths I exercised. |
 | 2. Ingestion idempotency, manifest and version transitions, deletion/change handling, partial-failure behavior, single-writer | Findings: H-1, M-1, L-1, L-3. The no-change rerun, the tombstone and reappearance semantics, and promote-before-publish are correct in code and consistent with the live runs. Single-writer is **unenforced** (no lock, no run-control table, no unique constraint). It is documented and accepted; see residual risk R-1. |
-| 3. BLS and Data USA parsing, schema drift, malformed records, typing, data-quality rules, provenance, reconciliation | BLS: **no findings in code, because no BLS parsing, typing, or quality code exists yet**. Only the contract (`docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md`) exists. Data USA: M-4, L-10. Reconciliation covers file bytes and manifest paths only, not rows. |
+| 3. BLS and Data USA parsing, schema drift, malformed records, typing, data-quality rules, provenance, reconciliation | BLS: **no findings in code, because no BLS parsing, typing, or quality code exists yet**. Only the contract (`docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md`) exists. Data USA: M-4 is the strict-JSON landing gap; the Bronze and Silver checks are pending DQ-11–DQ-15, not landing obligations. Also L-10. Reconciliation covers file bytes and manifest paths only, not rows. |
 | 4. Security and privacy | No secrets, hosts, or personal data in tracked files or image metadata (**verified**). SQL identifiers are regex-validated everywhere they are interpolated (`spark_manifest.py:140-148`, both notebooks). There is no injection path. Findings: M-3, L-5, L-7. |
 | 5. Test completeness | M-6 and the gaps in section 7. |
 | 6. Databricks/Spark compatibility | **No defect found, none provable here.** Live notebook runs recorded in `PROCESS.md` and the screenshots show that the Volume operations and the Delta append work on the Free Edition runtime (**the documents and images are verified; the runs themselves are inferred**). Remaining risk: L-2, L-3, and the untested Spark SQL. |
@@ -323,7 +318,7 @@ code (`download.py:200-247`, `landing.py:172-238`).
 
 Measured: 86 % statement and branch coverage. Missed lines:
 
-- `datausa.py`: 39-40, 52, 62, 69, 71, 81, 87, 91, 95, 100, 109, 118, 172, 182. That is the unreadable-file path, most error branches of the envelope, and every record-level check.
+- `datausa.py`: 39-40, 52, 62, 69, 71, 81, 87, 91, 95, 100, 109, 118, 172, 182. That is the unreadable-file path, most error branches of the envelope, and some record-level error branches.
 - `download.py`: 101-102, 109-110, 115-117, 142-150, 166, 185, 195, 215, 217, 258, 260, 277, 304, 317, 321-327, 338, 341-342, 346. That includes streaming `OSError`, write failures (`StagingWriteError`), HTTP 404 and 4xx, 5xx retry, and parts of `promote_verified_file`.
 - `manifest.py`: 73, 105, 107, 117, 213, 215, 302, 336, 341.
 - `landing.py`: 86, 113, 199, 212, 249.
@@ -333,10 +328,10 @@ Measured: 86 % statement and branch coverage. Missed lines:
 Missing negative or edge tests:
 
 - Truncated or partial listings and mass removal (H-1).
-- A missing or corrupt object for an `UNCHANGED` entry (M-1).
+- An `UNCHANGED` entry with a missing or corrupt object is not covered through landing orchestration (M-1); direct promoter reuse and conflicting-object behavior are covered in `test_download.py:250-282,311-332`.
 - `%`, space, and encoded-slash hrefs (M-2).
 - Off-origin or downgrade redirects, tested at the handler level, and discovery redirects (M-3).
-- `NaN`/`Infinity`, duplicates, year range, extra keys or columns, and reordered columns for Data USA (M-4).
+- Rejection of non-standard JSON constants (`NaN`, `Infinity`, `-Infinity`) in Data USA responses (M-4).
 - `IncompleteRead`, `InvalidURL`, and unbounded bodies (M-5, L-7).
 - A real filesystem `execute_landing_plan` with real promotion; a publisher that raises after promotion, asserting that the orphan object is not referenced and a rerun recovers.
 - Duplicate `(relative_path, run_id)` rows, an unknown `status`, and a naive timestamp in a non-UTC zone in the Spark adapter.
@@ -347,10 +342,10 @@ Missing negative or edge tests:
 
 | # | Document claim | Reality |
 | --- | --- | --- |
-| D-1 | `docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md` says the committed object's top-level and page keys are exact, `columns` equals the ordered four names, and population is "finite, nonnegative, and integral". | `datausa.py` enforces none of those (M-4). |
+| D-1 | `PROCESS.md:75` requires valid UTF-8 JSON before publication. The schema contract separately assigns exact-envelope checks to Bronze and finite/integral population plus normalized-key uniqueness to Silver (`:137-150,218-239`), deferring those rules to DQ-11–DQ-15 (`:249-253`). | `datausa.py:45` accepts non-standard JSON numeric constants and its population check at `:103-111` lets `NaN` pass (M-4). The Bronze and Silver rules are pending downstream work, not raw-landing obligations. |
 | D-2 | `docs/INGESTION_MANIFEST_CONTRACT.md` says `ingested_at_utc` is the "timestamp of the successful state transition". | The notebooks pass the run's start time (L-1). |
 | D-3 | The same document says the empty-listing rejection "prevents" mass removal, and that the planner "refuses to produce a plan for incomplete inventory". | Only zero links is rejected. The completeness flags are caller-asserted (H-1). |
-| D-4 | The same document's "Purpose and scope" and "Evidence and limits" sections say DQ-06 only defines the state model and that streaming, Volume writes, and Delta persistence are future (DQ-07 to DQ-09). `PROCESS.md:39-45` says "The planned Databricks implementation…". | DQ-07 to DQ-09 are implemented and live-run (`PROCESS.md:132-195`), so these passages are stale. |
+| D-4 | `PROCESS.md:39-45` still calls the Databricks implementation "planned". | DQ-07 through DQ-09 are implemented and have live-run evidence (`PROCESS.md:132-195`); only this `PROCESS.md` wording is stale. The manifest contract accurately says these behaviors are implemented and proven. |
 | D-5 | `docs/BLS_LANDING_RUNBOOK.md:14` says the email is "sent only in the BLS `User-Agent`". | Notebook 02 sends it to the Data USA host as well (M-3). |
 | D-6 | `docs/LOGICAL_DATA_MODEL.md` (`gold_series_annual_result`, `gold_population_summary`, `gold_series_population_context`) vs `docs/PROJECT_CONVENTIONS.md`, `docs/REQUIRED_GOLD_CONTRACTS.md`, and `docs/PRODUCT_ONE_PAGER.md` (`gold_bls_best_year_by_series`, `gold_population_summary_2013_2018`, `gold_bls_q01_population`). | Two different sets of Gold object names. |
 | D-7 | `docs/LOGICAL_DATA_MODEL.md` has a `SOURCE_OBJECT` with a unique `source_url`, `RAW_ARTIFACT_VERSION.source_last_modified` as a timestamp, `ingested_at`, `footnote_code`, `SILVER_POPULATION.source_url`, and `INGESTION_RUN` with counts. | `docs/INGESTION_MANIFEST_CONTRACT.md` says the URL is "provenance, not identity". The implemented manifest stores `source_last_modified` as `STRING` and uses `ingested_at_utc`. The Silver contract uses `footnote_codes`, `ingested_at_utc`, and `source_file`. No `ingestion_run` table exists. |
@@ -358,7 +353,7 @@ Missing negative or edge tests:
 | D-9 | `docs/SYSTEM_UML.md` shows one job and one manifest covering BLS and Data USA. | Two notebooks use two manifests (`PROCESS.md:69-73`). |
 | D-10 | `docs/BLS_SOURCE_PROFILE.md` types `value` as "decimal or double". | The Silver contract fixes `decimal(20, 6)` (minor). |
 | D-11 | `docs/QUALITY_ASSURANCE_PROTOCOL.md` Gate 3 refers to formatting, linting, and type checks "configured for the repository". | None is configured; CI runs only compile and unittest (L-11). |
-| D-12 | `docs/PROJECT_CONVENTIONS.md` says names come from configuration and `validation/` holds reusable reconciliation checks. | Names are hard-coded in notebooks, `.env.example` is unused, and `validation/` is empty (L-6, L-9). |
+| D-12 | `docs/PROJECT_CONVENTIONS.md` says `validation/` holds reusable reconciliation checks. | `src/data_quest/validation/` is still an empty package, and reconciliation remains in the notebooks (L-9). Notebook catalog, schema, and Volume values are widget-configurable, consistent with the convention's allowance for environment-specific settings. |
 | D-13 | `REQUIREMENTS_CHECKLIST.md` marks DQ-07 to DQ-10 `[x]` and leaves **every** box for DQ-01 to DQ-06 unchecked (121 unchecked and 19 checked overall). | `PROCESS.md` and the evidence show DQ-01 to DQ-06 delivered. The checklist has drifted. |
 | D-14 | `PROCESS.md` "Trade-offs" and "Retrospective" are placeholders; `PROCESS.md:170` and `docs/DATAUSA_LANDING_RUNBOOK.md:42` describe "11 records spanning 2013–2024". | The placeholders are expected at this stage. The 11-versus-12-year span is consistent with a missing year (likely 2020), but no document says so, and the validator has no year-continuity check. |
 | D-15 | `docs/evidence/README.md` and `docs/screenshots/README.md` describe the exported `columns` as "declared columns". | They are exported as a struct `_1`…`_4` (L-10). |
@@ -384,7 +379,7 @@ Consistent as claimed (**verified**):
 
 - For the *ingestion stage on its observed sources* the design is sound and the recorded live runs are credible. I rate it **ready for a remediation pass, not yet production-grade**.
   - One High finding (H-1) allows a silent bad-state publication.
-  - Six Mediums mean the failure handling and the Data USA gate do not match what the contracts promise.
+  - Six Medium findings remain, including retry/recovery gaps and the strict-JSON landing gap. Exact-envelope, finite/integral, and normalized-key checks belong to pending Bronze/Silver work, not raw landing.
   - M-6 means the Spark adapter, the part most exposed to platform behavior, has no executed test.
 - For the **overall quest deliverable** the repository is **not ready**. Most required deliverables (README steps 2 and 3, `PROCESS.md` sections, three Gold outputs, and screenshots) are still future work and are labelled so in the documents.
 - Recommended remediation order: H-1, M-1, M-4, M-3, M-2 and M-5, M-6, then the documentation reconciliation (section 8), then the Low items.
