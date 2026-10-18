@@ -1,6 +1,6 @@
 # Conceptual and logical data model
 
-This model separates provider artifacts, normalized economic entities, and stakeholder-facing analytical results. It is a design contract, not a claim that every table has already been implemented. Physical table names and selected data types will be finalized in DQ-10 after raw landing and schema validation.
+This model separates provider artifacts, normalized economic entities, and stakeholder-facing analytical results. It is a design contract, not a claim that every table has already been implemented. DQ-10 finalized the source schemas, selected data types, keys, and expectation actions in `docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md`.
 
 ## Layered model
 
@@ -79,14 +79,15 @@ erDiagram
         string series_id PK,FK
         int year PK
         string period_code PK,FK
-        decimal value
+        decimal(20,6) value
         string footnote_code
         string source_file
         timestamp ingested_at
     }
 
     SILVER_POPULATION {
-        string nation PK
+        string nation_id PK
+        string nation
         int year PK
         long population
         string source_url
