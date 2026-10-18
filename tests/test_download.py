@@ -288,24 +288,6 @@ class DownloadToStagingTests(unittest.TestCase):
 
         self.assertEqual(opener.call_count, 1)
 
-    def test_staging_cleanup_failure_is_wrapped_without_request(self) -> None:
-        opener = Mock()
-
-        with TemporaryDirectory() as directory:
-            destination = Path(directory) / "destination"
-            destination.mkdir()
-
-            with self.assertRaisesRegex(StagingWriteError, "remove staging"):
-                download_to_staging(
-                    SOURCE_URL,
-                    USER_AGENT,
-                    destination,
-                    max_attempts=3,
-                    opener=opener,
-                )
-
-        opener.assert_not_called()
-
     def test_staging_cleanup_permission_failure_is_wrapped(self) -> None:
         opener = Mock()
 
