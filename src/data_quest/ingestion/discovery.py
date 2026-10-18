@@ -142,8 +142,15 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
     base = _validate_directory_url(directory_url)
 
     directory_path = _normalized_directory_path(base.path)
+    encoded_directory_path = _normalized_encoded_directory_path(base.path)
     canonical_base = urlunsplit(
-        (base.scheme.casefold(), base.netloc.casefold(), directory_path, "", "")
+        (
+            base.scheme.casefold(),
+            base.netloc.casefold(),
+            encoded_directory_path,
+            "",
+            "",
+        )
     )
 
     parser = _AnchorParser()
@@ -152,13 +159,24 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
     discovered: dict[str, SourceFile] = {}
     for href in parser.hrefs:
         candidate = urlsplit(urljoin(canonical_base, href))
-        candidate_path = unquote(candidate.path)
+        encoded_path = candidate.path
+        candidate_path = unquote(encoded_path)
 
         if candidate.scheme.casefold() != base.scheme.casefold():
             continue
         if candidate.netloc.casefold() != base.netloc.casefold():
             continue
+        if any(
+            character.isspace() or ord(character) < 32
+            for character in encoded_path
+        ):
+            continue
         if candidate.query or candidate.fragment or candidate_path.endswith("/"):
+            continue
+
+        encoded_name = PurePosixPath(encoded_path).name
+        name = unquote(encoded_name)
+        if not _is_safe_decoded_name(name):
             continue
 
         normalized_path = str(PurePosixPath(candidate_path))
@@ -166,20 +184,21 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
         if candidate_parent != directory_path:
             continue
 
-        name = PurePosixPath(normalized_path).name
-        if not name or name in {".", ".."}:
-            continue
-
         canonical_url = urlunsplit(
             (
                 base.scheme.casefold(),
                 base.netloc.casefold(),
-                normalized_path,
+                encoded_path,
                 "",
                 "",
             )
         )
-        discovered[canonical_url] = SourceFile(name=name, url=canonical_url)
+        candidate_source = SourceFile(name=name, url=canonical_url)
+        existing = discovered.get(name)
+        if existing is None or _url_alias_order(candidate_source.url) < _url_alias_order(
+            existing.url
+        ):
+            discovered[name] = candidate_source
 
     if not discovered:
         raise DirectoryListingError(
@@ -189,10 +208,38 @@ def discover_file_links(html: str, directory_url: str) -> list[SourceFile]:
     return sorted(discovered.values())
 
 
+def _is_safe_decoded_name(name: str) -> bool:
+    """Reject decoded names whose URL or manifest identity is ambiguous."""
+
+    return bool(name) and name not in {".", ".."} and not any(
+        character in {"%", "/", "\\"}
+        or ord(character) < 32
+        or ord(character) == 127
+        for character in name
+    )
+
+
+def _url_alias_order(url: str) -> tuple[int, str]:
+    """Prefer the least encoded spelling, then make the choice deterministic."""
+
+    return url.count("%"), url
+
+
 def _normalized_directory_path(path: str) -> str:
     """Normalize a URL path and retain its trailing directory separator."""
 
     normalized = str(PurePosixPath(unquote(path or "/")))
+    if not normalized.startswith("/"):
+        normalized = f"/{normalized}"
+    if not normalized.endswith("/"):
+        normalized = f"{normalized}/"
+    return normalized
+
+
+def _normalized_encoded_directory_path(path: str) -> str:
+    """Normalize URL structure without decoding provider path octets."""
+
+    normalized = str(PurePosixPath(path or "/"))
     if not normalized.startswith("/"):
         normalized = f"/{normalized}"
     if not normalized.endswith("/"):
