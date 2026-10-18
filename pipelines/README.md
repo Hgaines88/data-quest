@@ -72,4 +72,6 @@ for the completed-run, graph, performance, and pipeline-association evidence.
 class, measure, duration, and seasonal lookup tables. Its label concatenates
 only provider descriptions. A fail-fast expectation requires every lookup to
 match and every `series_id` to remain one row after the joins, so missing labels
-or duplicate lookup keys cannot be hidden by a fallback description.
+or duplicate lookup keys cannot be hidden by a fallback description. Coverage
+years are integers, coverage periods must be `Q01` through `Q05`, and the
+provider's `-` base-year sentinel is published as a nullable integer.

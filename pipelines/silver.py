@@ -203,7 +203,7 @@ def silver_bls_series_candidates() -> DataFrame:
         F.trim("measure_code").alias("measure_code"),
         F.trim("duration_code").alias("duration_code"),
         F.trim("seasonal").alias("seasonal_code"),
-        F.trim("base_year").alias("base_year"),
+        F.expr("try_cast(nullif(trim(base_year), '-') as int)").alias("base_year"),
         F.when(F.length(F.trim("footnote_codes")) > 0, F.trim("footnote_codes"))
         .otherwise(F.lit(None).cast("string"))
         .alias("footnote_codes"),
@@ -269,8 +269,8 @@ def silver_bls_series_candidates() -> DataFrame:
             & F.col("series_id").isNotNull()
             & F.col("begin_year").isNotNull()
             & F.col("end_year").isNotNull()
-            & F.col("begin_period").isNotNull()
-            & F.col("end_period").isNotNull()
+            & F.col("begin_period").isin("Q01", "Q02", "Q03", "Q04", "Q05")
+            & F.col("end_period").isin("Q01", "Q02", "Q03", "Q04", "Q05")
             & F.col("source_path").isNotNull()
             & F.col("content_sha256").isNotNull()
             & F.col(descriptions[0]).isNotNull()

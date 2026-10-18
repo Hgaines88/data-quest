@@ -59,6 +59,18 @@ class SilverPipelineDefinitionTests(unittest.TestCase):
         self.assertIn('F.concat_ws(', self.source)
         self.assertNotIn("Unknown series", self.source)
 
+    def test_series_metadata_uses_contract_types_and_periods(self) -> None:
+        self.assertIn(
+            'F.expr("try_cast(nullif(trim(base_year), \'-\') as int)")',
+            self.source,
+        )
+        self.assertEqual(
+            self.source.count(
+                '.isin("Q01", "Q02", "Q03", "Q04", "Q05")'
+            ),
+            3,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -810,6 +810,12 @@ guessed fallback such as `Unknown series`. This produces one public
 `silver_bls_series` table while keeping the quality decision visible in the
 temporary candidate view.
 
+Copilot review caught two contract boundaries before deployment. The provider
+uses `-` when a series has no base year, so Silver now converts that sentinel to
+null and uses ANSI-safe `try_cast` to publish an integer. The coverage gate also
+checks both begin and end periods against `Q01` through `Q05`; a non-null but
+unsupported code can no longer pass merely because Bronze preserved it.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
