@@ -1,4 +1,6 @@
+from decimal import Decimal
 from pathlib import Path
+import re
 import unittest
 
 from data_quest.validation.bronze_contract import (
@@ -187,6 +189,50 @@ class PipelineDefinitionTests(unittest.TestCase):
     def test_population_view_supports_source_names_and_unlimited_pages(self) -> None:
         self.assertIn('"delta.columnMapping.mode": "name"', self.source)
         self.assertIn('(F.element_at("_page", "limit") == 0)', self.source)
+
+    def test_population_view_rejects_nonfinite_values(self) -> None:
+        self.assertIn('"population_is_finite_and_nonnegative"', self.source)
+        self.assertIn(
+            '"AND `Population` BETWEEN 0 AND 1.7976931348623157E308"',
+            self.source,
+        )
+        self.assertIn('"population_has_integral_numeric_form"', self.source)
+        self.assertIn('"_population_integral_form"', self.source)
+        self.assertIn("def _has_integral_numeric_form", self.source)
+        self.assertIn('"population_double_preserves_integer_value"', self.source)
+        self.assertIn('"population_does_not_underflow_to_zero"', self.source)
+        self.assertIn(
+            'F.element_at("_record", "Population").alias("_population_raw")',
+            self.source,
+        )
+
+    def test_fraction_that_double_rounds_to_integer_is_not_integral(self) -> None:
+        raw_population = Decimal("9007199254740992.25")
+
+        self.assertEqual(float(raw_population), 9007199254740992.0)
+        self.assertNotEqual(raw_population, raw_population.to_integral_value())
+
+    def test_integral_numeric_form_rejects_arbitrarily_small_fraction(self) -> None:
+        plain_integer = re.compile(r"^[0-9]+([.]0+)?$")
+        scientific_number = re.compile(
+            r"^([0-9]+)(?:[.]([0-9]+))?[eE][+]?([0-9]+)$"
+        )
+
+        def is_integral(value: str) -> bool:
+            if plain_integer.fullmatch(value):
+                return True
+            match = scientific_number.fullmatch(value)
+            if match is None:
+                return False
+            fractional_digits = (match.group(2) or "").rstrip("0")
+            return int(match.group(3)) >= len(fractional_digits)
+
+        self.assertFalse(is_integral("1e-19"))
+        self.assertFalse(is_integral("9007199254740992.25"))
+        self.assertFalse(is_integral("9.00719925474099225E15"))
+        self.assertTrue(is_integral("316128839.0"))
+        self.assertTrue(is_integral("3.16128839E8"))
+        self.assertTrue(is_integral("1e8"))
 
 
 if __name__ == "__main__":

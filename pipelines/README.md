@@ -79,3 +79,16 @@ provider's `-` base-year sentinel is published as a nullable integer.
 The DQ-13 target-runtime update published 282 series rows with zero errors or
 warnings while leaving the observation output unchanged. See the
 [Silver series live-validation record](../docs/evidence/dq13_silver_series_live_validation.md).
+
+`silver_population` normalizes the Bronze Data USA response to the documented
+United States national grain. Bronze first drops and measures fractional or
+lossy numeric values using the original source text. Silver publishes integer
+years and long population values, drops and measures non-US, negative, or
+malformed records, and fails rather than choosing an arbitrary row when
+`nation_id + year` is not unique. The reusable Silver table retains every valid
+available year; the required 2013–2018 completeness gate belongs to the Gold
+summary boundary.
+See the
+[Silver population live-validation record](../docs/evidence/dq14_silver_population_live_validation.md)
+for the completed update, 11-row output, graph, performance, and direct
+2013–2018 year-coverage result.

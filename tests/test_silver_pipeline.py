@@ -19,6 +19,7 @@ class SilverPipelineDefinitionTests(unittest.TestCase):
             "bronze_bls_measure",
             "bronze_bls_duration",
             "bronze_bls_seasonal",
+            "bronze_datausa_population",
         ):
             self.assertIn(f'"{table}"', self.source)
         self.assertNotIn("binaryFile", self.source)
@@ -47,9 +48,10 @@ class SilverPipelineDefinitionTests(unittest.TestCase):
         self.assertIn('spark.read.table("bls_current_consistency")', self.source)
 
     def test_publishes_explainable_silver_tables(self) -> None:
-        self.assertEqual(self.source.count("@dp.materialized_view("), 2)
+        self.assertEqual(self.source.count("@dp.materialized_view("), 3)
         self.assertIn('name="silver_bls_observation"', self.source)
         self.assertIn('name="silver_bls_series"', self.source)
+        self.assertIn('name="silver_population"', self.source)
 
     def test_series_labels_require_complete_unique_provider_lookups(self) -> None:
         self.assertIn(
@@ -70,6 +72,22 @@ class SilverPipelineDefinitionTests(unittest.TestCase):
             ),
             3,
         )
+
+    def test_population_enforces_us_integer_grain_and_uniqueness(self) -> None:
+        self.assertIn('(F.col("nation_id") == "01000US")', self.source)
+        self.assertIn('(F.col("nation") == "United States")', self.source)
+        self.assertIn(
+            'F.expr("try_cast(`Year` as int)").alias("year")', self.source
+        )
+        self.assertIn(
+            'F.expr("try_cast(`Population` as bigint)").alias("population")',
+            self.source,
+        )
+        self.assertIn(
+            '@dp.expect_or_fail("population_business_key_is_unique",',
+            self.source,
+        )
+        self.assertIn('_POPULATION_KEY = ("nation_id", "year")', self.source)
 
 
 if __name__ == "__main__":

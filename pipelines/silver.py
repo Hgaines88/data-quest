@@ -67,6 +67,18 @@ _SERIES_COLUMNS = (
     "run_id",
     "content_sha256",
 )
+_POPULATION_KEY = ("nation_id", "year")
+_POPULATION_COLUMNS = (
+    "nation_id",
+    "nation",
+    "year",
+    "population",
+    "source_file",
+    "source_path",
+    "ingested_at_utc",
+    "run_id",
+    "content_sha256",
+)
 
 
 def _normalized_observations(bronze_table: str) -> DataFrame:
@@ -289,4 +301,83 @@ def silver_bls_series_candidates() -> DataFrame:
 def silver_bls_series() -> DataFrame:
     return spark.read.table("silver_bls_series_candidates").select(
         *[F.col(column) for column in _SERIES_COLUMNS]
+    )
+
+
+_POPULATION_RULES = {
+    "record_is_us_national_total": "_nation_valid",
+    "year_is_exact_integer": "_year_valid",
+    "population_is_nonnegative_integer": "_population_valid",
+    "population_provenance_is_complete": "_provenance_valid",
+}
+
+
+@dp.temporary_view(name="silver_population_candidates")
+@dp.expect_all_or_drop(_POPULATION_RULES)
+def silver_population_candidates() -> DataFrame:
+    """Normalize the reusable US national population history."""
+
+    source = spark.read.table(SETTINGS.table_name("bronze_datausa_population"))
+    normalized = source.select(
+        F.trim(F.col("Nation ID")).alias("nation_id"),
+        F.trim(F.col("Nation")).alias("nation"),
+        F.col("Year").alias("_source_year"),
+        F.expr("try_cast(`Year` as int)").alias("year"),
+        F.col("Population").alias("_source_population"),
+        F.expr("try_cast(`Population` as bigint)").alias("population"),
+        F.col("_source_file").alias("source_file"),
+        F.col("_source_path").alias("source_path"),
+        F.col("_ingested_at_utc").alias("ingested_at_utc"),
+        F.col("_run_id").alias("run_id"),
+        F.col("_content_sha256").alias("content_sha256"),
+    )
+    return (
+        normalized.withColumn(
+            "_nation_valid",
+            (F.col("nation_id") == "01000US")
+            & (F.col("nation") == "United States"),
+        )
+        .withColumn(
+            "_year_valid",
+            F.col("year").isNotNull()
+            & (F.col("year").cast("long") == F.col("_source_year")),
+        )
+        .withColumn(
+            "_population_valid",
+            F.col("population").isNotNull()
+            & (F.col("population") >= 0)
+            & ~F.isnan("_source_population")
+            & (
+                F.col("population").cast("double")
+                == F.col("_source_population")
+            ),
+        )
+        .withColumn(
+            "_provenance_valid",
+            F.col("source_file").isNotNull()
+            & F.col("source_path").isNotNull()
+            & F.col("ingested_at_utc").isNotNull()
+            & F.col("run_id").isNotNull()
+            & F.col("content_sha256").isNotNull(),
+        )
+    )
+
+
+@dp.temporary_view(name="unique_silver_population")
+@dp.expect_or_fail("population_business_key_is_unique", "_key_count = 1")
+def unique_silver_population() -> DataFrame:
+    key_window = Window.partitionBy(*_POPULATION_KEY)
+    return spark.read.table("silver_population_candidates").withColumn(
+        "_key_count",
+        F.count(F.lit(1)).over(key_window),
+    )
+
+
+@dp.materialized_view(
+    name="silver_population",
+    comment="Typed annual United States national population history.",
+)
+def silver_population() -> DataFrame:
+    return spark.read.table("unique_silver_population").select(
+        *[F.col(column) for column in _POPULATION_COLUMNS]
     )

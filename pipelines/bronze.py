@@ -386,21 +386,48 @@ def bronze_source_contract_audit() -> DataFrame:
     return bls.unionByName(datausa).select(*_AUDIT_COLUMNS)
 
 
+def _has_integral_numeric_form(value: Column) -> Column:
+    """Recognize nonnegative whole numbers without a fixed decimal scale."""
+
+    plain_integer = F.regexp_like(value, F.lit(r"^[0-9]+([.]0+)?$"))
+    scientific_number = F.regexp_like(
+        value,
+        F.lit(r"^[0-9]+([.][0-9]+)?[eE][+]?[0-9]+$"),
+    )
+    fractional_digits = F.regexp_extract(
+        value,
+        r"^[0-9]+[.]([0-9]+)[eE]",
+        1,
+    )
+    significant_fractional_digits = F.length(
+        F.regexp_replace(fractional_digits, "0+$", "")
+    )
+    exponent = F.regexp_extract(value, r"[eE][+]?([0-9]+)$", 1).cast("int")
+    return plain_integer | (
+        scientific_number & (exponent >= significant_fractional_digits)
+    )
+
+
 def _datausa_rows() -> DataFrame:
     source = (
         spark.read.table("verified_datausa_source")
         .withColumn("_record", F.explode("_records"))
         .withColumn("_field_count_valid", F.col("_header_valid"))
     )
-    return rows_with_provenance(
+    rows = rows_with_provenance(
         source,
         [
             F.element_at("_record", "Nation ID").alias("Nation ID"),
             F.element_at("_record", "Nation").alias("Nation"),
             F.element_at("_record", "Year").cast("long").alias("Year"),
+            F.element_at("_record", "Population").alias("_population_raw"),
             F.element_at("_record", "Population").cast("double").alias("Population"),
         ],
         source_file=F.col("relative_path"),
+    )
+    return rows.withColumn(
+        "_population_integral_form",
+        _has_integral_numeric_form(F.col("_population_raw")),
     )
 
 
@@ -421,7 +448,20 @@ def _datausa_rows() -> DataFrame:
         "nation_id_is_not_blank": "trim(`Nation ID`) <> ''",
         "nation_is_not_blank": "trim(`Nation`) <> ''",
         "year_is_not_null": "`Year` IS NOT NULL",
-        "population_is_nonnegative": "`Population` IS NOT NULL AND `Population` >= 0",
+        "population_is_finite_and_nonnegative": (
+            "`Population` IS NOT NULL "
+            "AND `Population` BETWEEN 0 AND 1.7976931348623157E308"
+        ),
+        "population_has_integral_numeric_form": "_population_integral_form",
+        "population_double_preserves_integer_value": (
+            "try_cast(`_population_raw` AS DECIMAL(38, 0)) IS NOT NULL "
+            "AND CAST(`Population` AS DECIMAL(38, 0)) = "
+            "try_cast(`_population_raw` AS DECIMAL(38, 0))"
+        ),
+        "population_does_not_underflow_to_zero": (
+            "`Population` <> 0 OR NOT regexp_like("
+            "regexp_extract(`_population_raw`, '^[+-]?([^eE]+)', 1), '[1-9]')"
+        ),
     }
 )
 def bronze_datausa_population() -> DataFrame:

@@ -43,3 +43,10 @@ these exports support exact value inspection.
 - `dq13_silver_series_live_validation.md`: indexes the completed update,
   provider-lookup graph, exact 282-row result, observation regression evidence,
   attribution limitation, screenshot paths, and screenshot SHA-256 digests.
+
+## DQ-14 Silver population validation
+
+- `dq14_silver_population_live_validation.md`: indexes the completed update,
+  exact 11-row result, candidate and uniqueness gates, regression evidence for
+  the existing Silver outputs, direct 2013–2018 coverage, attribution
+  limitation, screenshot paths, and screenshot SHA-256 digests.

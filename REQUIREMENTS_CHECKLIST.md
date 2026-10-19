@@ -207,13 +207,13 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-11
 
-- [ ] Extract records from the Data USA response envelope.
-- [ ] Normalize year, nation, and population fields with explicit types.
-- [ ] Limit or validate the intended US national population grain.
-- [ ] Enforce non-null keys and deterministic deduplication.
-- [ ] Confirm the years needed for 2013 through 2018 are present.
+- [x] Extract records from the Data USA response envelope.
+- [x] Normalize year, nation, and population fields with explicit types.
+- [x] Limit or validate the intended US national population grain.
+- [x] Enforce non-null keys and deterministic deduplication.
+- [x] Confirm the years needed for 2013 through 2018 are present.
 
-**Done when:** Silver population contains one valid US population record per available year at the intended grain.
+**Done when:** Silver population contains one valid US population record per available year at the intended grain. The [completed Silver population update, graph, table, performance, and year-coverage evidence](docs/evidence/dq14_silver_population_live_validation.md) proves the published grain, runtime result, and one row for each requested year from 2013 through 2018.
 
 ### DQ-15: Validate Bronze-to-Silver quality
 

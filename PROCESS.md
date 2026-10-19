@@ -827,6 +827,72 @@ coverage and stable cardinality for this snapshot. The completed update, table
 result, graph, and performance evidence are preserved in
 [`docs/evidence/dq13_silver_series_live_validation.md`](docs/evidence/dq13_silver_series_live_validation.md).
 
+### DQ-14: normalize population without narrowing reusable history
+
+The population transform reads only `bronze_datausa_population` and retains the
+documented United States national record (`01000US`, `United States`). Bronze
+requires the parsed numeric text to represent a whole number, including when
+Databricks normalizes it to scientific notation, then verifies that the
+projected double preserves its value. This avoids a fixed decimal scale and
+prevents a fraction from rounding into an apparently valid population count.
+ANSI-safe Silver casts then produce integer years and long population values,
+while named drop expectations measure malformed, negative, non-US, or
+incomplete-provenance rows.
+
+A separate fail-fast window enforces one row per `nation_id + year`; the
+pipeline never chooses an arbitrary duplicate. The final `silver_population`
+table keeps every valid available year. The required 2013–2018 completeness
+check is intentionally deferred to the Gold Question 1 boundary so this
+reusable history is not shaped around one analytical request.
+
+After the final numeric-form correction, fresh target-runtime Bronze and Silver
+updates completed successfully on October 18, 2026. Bronze published all 11
+population rows with all 10 expectations met. The 11:00 PM EDT Silver update
+reported zero errors and zero warnings and published 11 population rows, 282
+series rows, and approximately 77,000 observation rows. The graph confirms the
+intended isolated population dependency chain and the intact BLS paths. The
+completed updates, table results, graph, and performance evidence are preserved in
+[`docs/evidence/dq14_silver_population_live_validation.md`](docs/evidence/dq14_silver_population_live_validation.md).
+
+A separate read-only SQL query returned exactly six ordered records for 2013
+through 2018, with one population value for each year. Engineering judgment
+keeps this confirmation distinct from the 11-row pipeline count: the pipeline
+run proves typed, quality-gated, uniquely keyed publication, while the query
+directly proves the requested year coverage. The later Gold pipeline will
+still enforce the six-year analytical range at its own publication boundary.
+
+Final review exposed numeric range edge cases outside the normal provider
+snapshot. Python's default JSON float parser converts valid exponent notation
+such as `1e400` to infinity and `1e-400` to zero before validation. Rejecting
+only JSON's nonstandard `Infinity` token was therefore insufficient. Landing
+now parses decimals losslessly, then rejects values that would overflow or
+underflow or change integer value when projected into Bronze's double type.
+Bronze retains the original numeric text and independently checks the finite
+range, positive-to-zero underflow, and integer round trip before retaining a
+row. Regression tests cover both range edges, the greater-than-53-bit integer
+case, and the pipeline rules. Silver already rejected overflow because its
+ANSI-safe long cast becomes null, but the earlier checks are needed to prevent
+underflow or double rounding from becoming a plausible publishable count.
+
+The live runtime then exposed a different boundary: Spark normalized the valid
+provider counts to scientific notation such as `3.16128839E8`. The initial
+lexical expectation understood only plain integer notation and therefore
+dropped all 11 rows. This was a safe failure—the pipeline published no
+population data and identified the single failing expectation—but it revealed
+that representation and value semantics had been conflated. The final rule
+accepts scientific notation only when its exponent shifts every significant
+fractional digit into the integer portion. The exact-decimal, range, underflow,
+and double-projection checks remain separate. This small correction supports
+Databricks' actual representation without broadly relaxing the contract.
+
+An attempted fresh read-only SQL verification after both corrected pipeline
+runs could not start because the free-edition serverless compute allowance was
+exhausted. The earlier six-row SQL result remains direct year-coverage evidence,
+while the fresh Bronze and Silver table counts prove successful publication on
+the reviewed commit. Recording this infrastructure limitation separately avoids
+mistaking unavailable compute for either successful query execution or a data
+defect.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
