@@ -176,6 +176,7 @@ This protocol is applied beginning with DQ-05. Later issues add domain-specific 
 - DQ-06 through DQ-09 emphasize state transitions, raw fidelity, idempotency, and failure recovery.
 - DQ-10 through DQ-15 emphasize schemas, keys, duplicate handling, lookup coverage, and layer reconciliation.
 - DQ-16 through DQ-19 emphasize deterministic analytics, independent SQL/PySpark agreement, and numerical semantics.
-- DQ-20 through DQ-23 emphasize documentation accuracy, evidence quality, reproducibility, and final audit.
-- Bonus work emphasizes stakeholder reconciliation, least privilege, deployment reproducibility, observability, and operational recovery.
+- DQ-20 through DQ-22 emphasize documentation accuracy and evidence quality.
+- DQ-24 through DQ-29 emphasize stakeholder reconciliation, least privilege, deployment reproducibility, observability, operational recovery, end-to-end validation, and a deliberate platform decision.
+- DQ-23 is deliberately last and certifies the completed repository's reproducibility, privacy, accessibility, and explainability.
 

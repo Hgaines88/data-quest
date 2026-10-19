@@ -342,7 +342,10 @@ check passing and no unexplained discrepancy.
 ### DQ-23: Perform final submission audit
 
 **Priority:** Required  
-**Depends on:** DQ-20, DQ-21, DQ-22
+**Depends on:** DQ-20, DQ-21, DQ-22, DQ-29
+**Execution note:** This is the final project-wide gate. See the
+[project completion roadmap](docs/PROJECT_ROADMAP.md); do not close DQ-23 while
+an implementation card or the platform decision gate remains open.
 
 - [ ] Run the complete ingestion and pipeline workflow from a documented starting state.
 - [ ] Re-run it to demonstrate idempotency.
@@ -356,27 +359,55 @@ check passing and no unexplained discrepancy.
 
 ## Epic 5: Optional enhancements
 
-These begin only after DQ-23 is functionally complete.
+These extend the completed required pipeline before DQ-23 certifies the final
+repository. Their execution order and QA gates are defined in the
+[project completion roadmap](docs/PROJECT_ROADMAP.md).
 
 ### DQ-24: Deploy with Databricks Asset Bundles
+
+**Depends on:** DQ-26
 
 - [ ] Define resources and environment configuration as code.
 - [ ] Validate the bundle and document deployment commands.
 
 ### DQ-25: Add stakeholder exploration
 
+**Depends on:** DQ-22
+
 - [ ] Create a focused dashboard or Genie space over the Gold layer.
 - [ ] Use plain-language labels and questions relevant to a non-technical stakeholder.
 
 ### DQ-26: Add Gold-layer access controls
+
+**Depends on:** DQ-25
 
 - [ ] Create an appropriate read-only analyst access pattern in Unity Catalog.
 - [ ] Document the principle-of-least-privilege rationale.
 
 ### DQ-27: Add operational observability
 
+**Depends on:** DQ-24
+
 - [ ] Surface freshness, file-processing, expectation, and pipeline-failure metrics.
 - [ ] Describe alerting and recovery behavior suitable for a client environment.
+
+### DQ-28: Validate the extended Databricks product end to end
+
+**Depends on:** DQ-24, DQ-25, DQ-26, DQ-27
+
+- [ ] Deploy and run the documented solution from its starting state.
+- [ ] Reconcile stakeholder answers to Gold and verify least-privilege access.
+- [ ] Confirm operational signals and recovery evidence are visible.
+- [ ] Reconcile the final documentation and evidence gallery to the implementation.
+
+### DQ-29: Reassess before adding Snowflake or Power BI
+
+**Depends on:** DQ-28
+
+- [ ] Evaluate whether an external platform serves a defensible unmet need.
+- [ ] Record cost, access, reuse, maintenance, and environment constraints.
+- [ ] Decide to stop with Databricks, build a separate adaptation, or add a narrowly scoped consumer.
+- [ ] Do not begin an external implementation before documenting the decision.
 
 ## Recommended execution order
 
@@ -385,8 +416,10 @@ These begin only after DQ-23 is functionally complete.
 3. DQ-07 through DQ-10
 4. DQ-11 through DQ-15
 5. DQ-16 through DQ-19
-6. DQ-20 through DQ-23
-7. One carefully selected bonus card if time and quality permit
+6. DQ-20 through DQ-22
+7. DQ-25, DQ-26, DQ-24, and DQ-27
+8. DQ-28 and DQ-29
+9. DQ-23 as the final project-wide audit
 
 ## Suggested first sprint
 
