@@ -183,6 +183,10 @@ boundary, and limitations are indexed in
 
 ## DQ-19 Gold cross-implementation evidence
 
+The `dq19_validation_*` images preserve the initial successful run before
+Copilot review hardening. They are historical review evidence, not the final
+acceptance run.
+
 - `dq19_validation_checks_overview.png`: successful 17-row validation result
   showing the named Question 1, Question 2, and Question 3 checks and their
   actual and expected values.
@@ -194,6 +198,14 @@ boundary, and limitations are indexed in
   checks are present, including Question 3 bounds, spot check, and key parity.
 - `dq19_validation_passed_complete.png`: the lower result rows with the
   `passed` column visible, directly confirming true outcomes through row 17.
+- `dq19_final_passed_rows_1_14.png`: corrected revision with true outcomes for
+  rows 1–14, including the independent Question 1 calculation.
+- `dq19_final_values_rows_1_14.png`: corrected actual values, including zero
+  Question 1 source discrepancies and `282,0` Question 2 inventory/metadata.
+- `dq19_final_values_rows_4_17.png`: corrected lower values, including
+  Question 3 preservation `39,39,1988,2026` and sample coverage `5,5,0`.
+- `dq19_final_passed_rows_4_17.png`: corrected revision with true outcomes for
+  rows 4–17, completing direct evidence that all 17 checks passed.
 
 The exact validation claims, intentional representation differences, evidence
 digests, and scope boundary are indexed in

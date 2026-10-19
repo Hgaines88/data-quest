@@ -1001,14 +1001,16 @@ governed materialized views. Storage order is intentionally excluded from the
 data contract; key uniqueness and the Question 2 earliest-year tie-break are
 validated, and reviewer-facing queries may order their output explicitly.
 
-On October 19, 2026, the tracked validation query completed in Databricks in
-31.036 seconds with all 85 tasks successful. It returned 17 checks—five for
+On October 19, 2026, the final tracked validation query completed in Databricks
+in 8.380 seconds with a green execution status. It returned 17 checks—five for
 Question 1 and six each for Questions 2 and 3—and every row reported
 `passed = true`. The output confirmed one Question 1 summary, the complete
-282-series Question 2 inventory, and all 39 Question 3 history rows. All value
-and independent source-check discrepancy counts were zero. This closes the
-three-contract Gold gate before dashboard or Genie work. The exact outputs,
-screenshots, SHA-256 digests, and claim boundaries are preserved in
+282-series Question 2 inventory with zero metadata violations, and all 39
+Question 3 history rows. All value and independent source-check discrepancy
+counts were zero, and all five documented Question 3 sample years were present
+in both inputs. This closes the three-contract Gold gate before dashboard or
+Genie work. The exact outputs, screenshots, SHA-256 digests, and claim
+boundaries are preserved in
 [`docs/evidence/dq19_gold_cross_implementation_validation.md`](docs/evidence/dq19_gold_cross_implementation_validation.md).
 
 ## Retrospective
