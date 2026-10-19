@@ -1182,3 +1182,25 @@ ordered DQ-25, DQ-26, DQ-24, DQ-27, DQ-28, DQ-29, and finally DQ-23. DQ-29 is a
 decision gate and does not assume that another platform will be added. The
 authoritative sequence, entry and exit gates, and per-card QA protocol are
 recorded in [`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md).
+
+### 2026-10-19: DQ-25 governed stakeholder exploration contract
+
+I converted the earlier stakeholder boundary into a buildable AI/BI dashboard
+contract for the Economic Strategy Director. Three explicit-column datasets
+read the three required Gold outputs at their published grains; the dashboard
+does not reach back into Silver or Bronze, silently remove unavailable series,
+replace missing population with zero, or place unlike BLS and population units
+on a shared axis. The design also states that historical context is not causal
+evidence.
+
+The checked-in acceptance query produces four named, machine-readable checks
+covering the population range and values, a representative BLS best-year row,
+and five boundary, matched, and internal-gap Q01 rows. The expected values are
+accepted 2026-10-19 regression anchors. They make provider revisions visible
+rather than authorizing an unexplained expectation change.
+
+This commit intentionally does not claim that DQ-25 is complete. A reviewer
+must still build the live dashboard, configure or explicitly document the
+available Genie behavior, run all four checks successfully, reconcile
+representative answers, and capture privacy-safe evidence according to
+[`docs/STAKEHOLDER_EXPLORATION.md`](docs/STAKEHOLDER_EXPLORATION.md).

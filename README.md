@@ -45,6 +45,12 @@ The detailed table grain, keys, and quality rules are documented in the
 [logical data model](docs/LOGICAL_DATA_MODEL.md), [source quality contract](docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md),
 and [Gold contracts](docs/REQUIRED_GOLD_CONTRACTS.md).
 
+The optional DQ-25 stakeholder layer is specified in the
+[stakeholder exploration guide](docs/STAKEHOLDER_EXPLORATION.md). Its three
+[dashboard dataset queries](sql/stakeholder/README.md) read only governed Gold
+tables, and its acceptance query keeps the live Databricks build and evidence
+as an explicit manual completion gate.
+
 ## Prerequisites
 
 - A Databricks workspace with Spark Declarative Pipelines, Unity Catalog, and a
