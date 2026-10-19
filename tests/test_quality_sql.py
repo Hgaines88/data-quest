@@ -54,6 +54,10 @@ class BronzeToSilverQualityQueryTests(unittest.TestCase):
             self.sql.lower(),
         )
 
+    def test_required_series_label_check_counts_null_and_blank_labels(self) -> None:
+        predicate = "series_label is null or trim(series_label) = ''"
+        self.assertEqual(self.sql.lower().count(predicate), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

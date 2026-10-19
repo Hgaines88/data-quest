@@ -106,7 +106,7 @@ checks AS (
   SELECT
     'series_required_nulls_or_blank_labels',
     count_if(
-      series_id IS NULL OR trim(series_label) = ''
+      series_id IS NULL OR series_label IS NULL OR trim(series_label) = ''
       OR sector_code IS NULL OR sector_name IS NULL
       OR class_code IS NULL OR class_text IS NULL
       OR measure_code IS NULL OR measure_text IS NULL
@@ -119,7 +119,7 @@ checks AS (
     ),
     0,
     count_if(
-      series_id IS NULL OR trim(series_label) = ''
+      series_id IS NULL OR series_label IS NULL OR trim(series_label) = ''
       OR sector_code IS NULL OR sector_name IS NULL
       OR class_code IS NULL OR class_text IS NULL
       OR measure_code IS NULL OR measure_text IS NULL
