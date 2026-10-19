@@ -27,6 +27,9 @@ SHA.
   uniqueness gate, and finally `silver_population`.
 - [Performance summary](../screenshots/dq14_silver_population_performance.png)
   shows three materialized-view refresh statements finishing successfully.
+- [2013–2018 coverage query](../screenshots/dq14_silver_population_2013_2018_coverage.png)
+  shows a successful read-only query returning exactly six ordered rows: one
+  each for 2013, 2014, 2015, 2016, 2017, and 2018.
 
 The committed screenshot SHA-256 digests are:
 
@@ -36,6 +39,7 @@ The committed screenshot SHA-256 digests are:
 | `dq14_silver_population_tables.png` | `c429412d45ef8490a25bf3fa6a7536f4e55ff63a387d436ac669bef501facbd8` |
 | `dq14_silver_population_graph.png` | `0e6175bf9bd471462a4f4ef0be99ef31fd08567137eb8bb49a86909ab960d9d2` |
 | `dq14_silver_population_performance.png` | `bc4df36e8bbed868a75866a45525e17a20368cc7580d304d523386268f6e8533` |
+| `dq14_silver_population_2013_2018_coverage.png` | `4b4598b4736ad1738da143b13b21c149836bfda8c3fce2c8fd82429ed627edde` |
 
 ## Quality interpretation
 
@@ -50,7 +54,8 @@ The UI labels the candidate rules as `4 defined` and the uniqueness rule as
 `1 defined`; it does not display separate numeric `met` counts in the captured
 table view. This record consequently makes no unsupported per-rule count claim.
 
-The screenshots also do not display the 11 individual year values. They prove
-the output count and its quality-gated publication, but not by themselves that
-every requested year from 2013 through 2018 is present. That narrow coverage
-claim remains pending a result-set capture and is not inferred from the count.
+The separate SQL result capture closes the year-coverage boundary without
+inferring it from the 11-row total. It directly shows exactly one published row
+for every requested year from 2013 through 2018. This establishes DQ-14's
+coverage requirement while leaving the later Gold pipeline responsible for
+enforcing the six-year analytical range at its own publication boundary.

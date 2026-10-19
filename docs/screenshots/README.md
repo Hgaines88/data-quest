@@ -83,8 +83,11 @@ The revision attribution, exact claims, limitations, and image digests are in
   uniqueness, and published-table dependency chain.
 - `dq14_silver_population_performance.png`: three successful materialized-view
   refresh statements.
+- `dq14_silver_population_2013_2018_coverage.png`: read-only SQL and six result
+  rows proving one published population value for every year from 2013 through
+  2018.
 
-The revision attribution, exact claims, limitations, year-coverage boundary,
-and image digests are in
+The revision attribution, exact claims, limitations, year-coverage result, and
+image digests are in
 `docs/evidence/dq14_silver_population_live_validation.md`.
 

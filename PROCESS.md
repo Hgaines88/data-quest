@@ -851,11 +851,12 @@ gates to the published table. The completed update, table result, graph, and
 performance evidence are preserved in
 [`docs/evidence/dq14_silver_population_live_validation.md`](docs/evidence/dq14_silver_population_live_validation.md).
 
-The captured UI does not show the individual year values. Engineering judgment
-therefore separates two claims: this run proves successful typed, quality-gated,
-uniquely keyed publication of 11 available records, but a direct result-set
-capture is still required before claiming that every year from 2013 through
-2018 is present.
+A separate read-only SQL query returned exactly six ordered records for 2013
+through 2018, with one population value for each year. Engineering judgment
+keeps this confirmation distinct from the 11-row pipeline count: the pipeline
+run proves typed, quality-gated, uniquely keyed publication, while the query
+directly proves the requested year coverage. The later Gold pipeline will
+still enforce the six-year analytical range at its own publication boundary.
 
 ## Retrospective
 

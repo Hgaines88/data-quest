@@ -88,5 +88,5 @@ unique. The reusable Silver table retains every valid available year; the
 required 2013–2018 completeness gate belongs to the Gold summary boundary.
 See the
 [Silver population live-validation record](../docs/evidence/dq14_silver_population_live_validation.md)
-for the completed update, 11-row output, graph, performance, and explicit
-year-coverage evidence boundary.
+for the completed update, 11-row output, graph, performance, and direct
+2013–2018 year-coverage result.

@@ -48,5 +48,5 @@ these exports support exact value inspection.
 
 - `dq14_silver_population_live_validation.md`: indexes the completed update,
   exact 11-row result, candidate and uniqueness gates, regression evidence for
-  the existing Silver outputs, attribution limitation, year-coverage boundary,
-  screenshot paths, and screenshot SHA-256 digests.
+  the existing Silver outputs, direct 2013–2018 coverage, attribution
+  limitation, screenshot paths, and screenshot SHA-256 digests.
