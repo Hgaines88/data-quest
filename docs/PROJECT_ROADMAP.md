@@ -7,8 +7,9 @@ before the optional product extensions.
 ## Governing rule
 
 **DQ-23 is the final project-wide audit. Do not close it until DQ-24 through
-DQ-29 are complete or DQ-29 explicitly records that a proposed extension will
-not be built.**
+DQ-29 are complete and no implementation card remains open. DQ-29 may conclude
+that no external-platform extension should be built; that decision does not
+waive or replace any preceding card.**
 
 This ordering keeps the repository-accessibility check, secrets and privacy
 scan, link and screenshot validation, reproducibility run, and explainability
