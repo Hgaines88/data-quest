@@ -78,6 +78,14 @@ class StakeholderSqlTest(unittest.TestCase):
         for year in [2012, 2013, 2020, 2024, 2026]:
             self.assertEqual(sql.count(f"({year},"), 1)
 
+    def test_stakeholder_copy_does_not_promise_complete_quarterly_years(self):
+        guide = (ROOT / "docs" / "STAKEHOLDER_EXPLORATION.md").read_text(
+            encoding="utf-8"
+        ).lower()
+        self.assertNotIn("complete quarterly", guide)
+        self.assertIn("best year by available quarterly sum", guide)
+        self.assertIn("observation count", guide)
+
 
 if __name__ == "__main__":
     unittest.main()

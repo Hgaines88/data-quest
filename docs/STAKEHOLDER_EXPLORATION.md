@@ -4,18 +4,18 @@
 
 The primary user is a **Director of Economic Strategy at a national consulting
 firm**. The workspace helps that user identify historical population context,
-find each governed productivity series' strongest complete quarterly year, and
-inspect whether selected first-quarter observations have a same-year population
-match. It supports exploration and client-question preparation; it does not
-claim causality, forecast future conditions, or compare unlike measures as if
-they shared units.
+find each governed productivity series' highest sum across its available
+Q01-Q04 observations, and inspect whether selected first-quarter observations
+have a same-year population match. It supports exploration and client-question
+preparation; it does not claim causality, forecast future conditions, or
+compare unlike measures as if they shared units.
 
 The stakeholder should be able to answer four plain-language questions:
 
 1. What were mean United States population and population standard deviation
    across the complete 2013-2018 range?
 2. For every governed BLS series, which year has the highest Q01-Q04 sum?
-3. Which series have no complete quarterly history available for selection?
+3. Which series have no quarterly observations available for selection?
 4. For `PRS30006032`, what is the Q01 value by year, and is a same-year United
    States population value available?
 
@@ -40,7 +40,7 @@ Create an AI/BI dashboard named **US Productivity Insight Workspace** with:
 | Mean US population, 2013-2018 | `population_summary.mean_population` | KPI card; people; integer/grouped formatting |
 | Population standard deviation | `population_summary.population_stddev` | KPI card; people; label explicitly says population stddev |
 | Coverage definition | range, count, semantics | Text or one-row table showing 2013-2018, six years, population semantics |
-| Best complete quarterly year | all `bls_best_year_by_series` fields | Searchable table; keep unavailable series visible |
+| Best year by available quarterly sum | all `bls_best_year_by_series` fields | Searchable table; keep the selected year's observation count and unavailable series visible |
 | Q01 with population context | all `q01_population_context` fields | Table with year, Q01 value, nullable people count, and match flag |
 | Interpretation boundary | dashboard text | “BLS Q01 values and population are different units. Proximity or co-movement is not evidence of causation.” |
 
@@ -60,11 +60,12 @@ If the workspace supports editable Genie instructions, use these boundaries:
 
 - Answer only from the three stakeholder Gold datasets.
 - State units and the row grain in every quantitative answer.
-- Treat missing population and missing quarterly history as unknown or
+- Treat missing population and absent quarterly observations as unknown or
   unavailable, never zero.
 - Describe historical associations only; do not infer causality or forecasts.
-- For “best year,” use the published `best_year` and explain that ties resolve
-  to the earliest year.
+- For “best year,” say that Gold ranks the sum of available Q01-Q04
+  observations, state the selected year's observation count, and explain that
+  ties resolve to the earliest year. Do not imply four-quarter completeness.
 - When asked outside this scope, say the governed data cannot answer it.
 
 Starter questions:
