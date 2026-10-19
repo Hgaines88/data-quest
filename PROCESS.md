@@ -293,9 +293,12 @@ AI output was never treated as execution proof.
 
 Several corrections materially changed the project. Source profiling disproved
 the assumption that the BLS `Current` file represented only the current year.
-Live Bronze failures exposed a header-contract mismatch, a Spark line-reader
-memory problem, and an incorrect regular-expression argument. Population
-validation was strengthened against floating-point overflow, underflow, and
+Live Bronze failures exposed a header-contract mismatch, a whole-file
+array/explode design that exhausted executor memory, and an incorrect
+regular-expression argument. Replacing the whole-file design with Spark's
+distributed line-oriented reader removed the pathological memory shape.
+Population validation was strengthened against floating-point overflow,
+underflow, and
 integer-rounding ambiguity. Reviews added mass-removal protection, immutable
 object recovery, redirect-origin checks, strict JSON constants, metadata
 cardinality gates, complete sample coverage, and analyzed schema comparison.
