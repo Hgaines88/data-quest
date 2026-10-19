@@ -302,14 +302,14 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-09, DQ-15, DQ-19
 
-- [ ] Explain Bronze, Silver, and Gold responsibilities and data flow.
-- [ ] Explain ingestion idempotency and handling of additions, changes, removals, and failures.
-- [ ] Explain why SQL or PySpark was selected as primary for each question.
-- [ ] Discuss real-client trade-offs: schema drift, scale, cost, security, access control, monitoring, and provider reliability.
-- [ ] Document AI use, corrections, and validation honestly.
-- [ ] Describe the hardest problem and what was learned.
+- [x] Explain Bronze, Silver, and Gold responsibilities and data flow.
+- [x] Explain ingestion idempotency and handling of additions, changes, removals, and failures.
+- [x] Explain why SQL or PySpark was selected as primary for each question.
+- [x] Discuss real-client trade-offs: schema drift, scale, cost, security, access control, monitoring, and provider reliability.
+- [x] Document AI use, corrections, and validation honestly.
+- [x] Describe the hardest problem and what was learned.
 
-**Done when:** The document answers every requested topic and accurately matches the implementation.
+**Done when:** The document answers every requested topic and accurately matches the implementation. The completed [`PROCESS.md`](PROCESS.md) records the implemented medallion flow, rerun contract, analytical API choices, production trade-offs, AI-assisted corrections, validation approach, and retrospective.
 
 ### DQ-21: Capture required screenshots
 

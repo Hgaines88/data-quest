@@ -82,16 +82,56 @@ the provider returned.
 
 ### Layered data flow
 
-Raw landing is implemented and verified. Bronze, Silver, and Gold remain the
-next planned layers:
+The implemented flow is a governed medallion pipeline with an immutable raw
+boundary:
 
-1. Discover and land raw BLS and Data USA files in the managed Volume.
-2. Read those source artifacts into Bronze tables with provenance and ingestion quality metrics.
-3. Normalize types, keys, nulls, duplicates, and provider metadata in Silver tables.
-4. Produce three deterministic Gold analytical outputs.
-5. Implement and compare every required analytical result in both Spark SQL and PySpark.
+1. The landing notebooks discover BLS files and fetch the assigned Data USA
+   response, validate the downloaded bytes, and promote changed content to
+   immutable, content-addressed Volume paths. Append-only Delta manifests
+   identify the current version of every source object.
+2. Bronze pipeline views read only manifest-authorized objects. They preserve
+   source-shaped strings and provenance, validate headers and row widths, and
+   expose rejected-row metrics before publishing reusable Bronze tables.
+3. Silver pipeline views parse intentional types, normalize provider
+   sentinels, enforce business keys and cross-file metadata coverage, and
+   publish separate observation, series, and population tables. Silver retains
+   reusable history such as `Q05`; question-specific filters belong in Gold.
+4. Gold pipeline views implement the three requested analytical contracts.
+   Candidate and input-validation views fail closed on incomplete or ambiguous
+   inputs before the final materialized views are published.
+5. Tracked Spark SQL alternatives independently recompute each result from
+   Silver. A final read-only report compares SQL and PySpark schemas, counts,
+   keys, values, invariants, and representative source calculations.
 
-This plan will be revised only when source profiling or verified platform behavior provides a concrete reason.
+Bronze therefore answers “what valid source-shaped records arrived?”, Silver
+answers “what normalized entities and observations are safe to reuse?”, and
+Gold answers the three bounded stakeholder questions. The live evidence for
+each boundary is indexed under `docs/evidence/`; a successful downstream layer
+does not retroactively prove an upstream contract that was not tested.
+
+### Primary analytical implementations
+
+PySpark is the primary implementation for all three Gold outputs. It integrates
+directly with the declarative pipeline graph, supports named fail-fast
+expectations and DataFrame-level transformations, and publishes governed
+materialized views that downstream consumers can reference consistently. The
+Spark SQL versions remain tracked, executable alternatives rather than pipeline
+sources. Keeping them outside source discovery prevents duplicate publication
+and preserves their value as an independently readable reconciliation path.
+
+- **Question 1:** PySpark publishes the six-year population summary only after
+  exact range and cardinality checks. SQL independently expresses the same
+  aggregate and makes the population-standard-deviation choice easy to review.
+- **Question 2:** PySpark makes the inventory-preserving left join and
+  deterministic window ranking explicit in the pipeline. SQL provides a terse
+  independent statement of the `Q01`–`Q04` sum and earliest-year tie break.
+- **Question 3:** PySpark publishes the left-join result and visible population
+  match flag behind input and output expectations. SQL independently confirms
+  that BLS history remains the driving side of the join.
+
+The choice is operational, not a claim that one API is intrinsically more
+correct. DQ-19 compares both implementations and requires agreement before the
+PySpark views are treated as the stakeholder contract.
 
 ### Product vision and stakeholder contract
 
@@ -207,7 +247,24 @@ The BLS policy states that automated clients may be blocked when their activity 
 
 ## Trade-offs
 
-This section will be expanded as implementation decisions are made. Current constraints include Free Edition platform capabilities, small source volume, external-provider reliability, and the need to keep the submission reproducible without exposing credentials or workspace-specific identifiers.
+The assessment is deliberately small, but a real client deployment would need
+to make the following operating decisions explicit:
+
+| Concern | Assessment choice | Production extension or trade-off |
+| --- | --- | --- |
+| Schema drift | Bronze fails closed on header and row-shape changes; Silver uses explicit casts and domain gates. | Alert on quarantined drift, version contracts, and provide a reviewed migration path instead of silently accepting new columns or meanings. |
+| Scale | Complete small files and tables are practical here, and clarity is favored over premature optimization. | Partition or cluster by useful access keys, compact small files, incrementally process manifest changes, and benchmark shuffles, joins, and state growth before selecting a strategy. |
+| Cost | Triggered Free Edition pipelines and bounded validations minimize idle compute. | Set workload budgets and tags, select job/serverless policies deliberately, schedule around freshness needs, and monitor cost per successful update rather than optimizing only runtime. |
+| Security | Secrets and personal contact data are excluded from tracked files; raw data is stored in Unity Catalog objects rather than local workspace paths. | Use service principals, secret scopes, private networking where required, encryption controls, and separate development, test, and production identities. |
+| Access control | The assessment uses one writable project catalog/schema and a single operator. | Grant least privilege by layer: ingestion may write manifests and raw objects, pipelines may read upstream/write owned schemas, and analysts should normally receive Gold-only access. Add row or column controls if the data becomes sensitive. |
+| Monitoring | Pipeline expectations, manifest reconciliation, automated tests, and evidence files provide explicit pass/fail signals. | Send alerts for failed freshness, drift, rejected rows, anomalous volumes, provider errors, and cost; retain run-level lineage and define ownership, escalation, and recovery objectives. |
+| Provider reliability | Requests use identifying clients, timeouts, bounded retries, redirect restrictions, exact-byte validation, and last-known-good manifests. | Add provider-specific service expectations, backoff with jitter, outage playbooks, cached replay, change notifications where available, and a policy for how long stale data may remain publishable. |
+
+Content-addressed raw storage improves auditability and recovery but consumes
+more storage than overwriting files. Full re-downloads make content identity
+independent of weak ETags but cost more network and provider capacity. The
+single-writer rule avoids races in this assessment; production concurrency
+would require orchestration locks or a transactional run-control protocol.
 
 ## Quality assurance protocol
 
@@ -218,6 +275,27 @@ The applicable depth depends on the risk of the change. Documentation changes st
 The protocol does not treat AI review, unit tests, or a successful Databricks run as sufficient on its own. Each tool provides one kind of evidence. Merge approval depends on the combined evidence and my ability to explain the implementation and its limitations.
 
 ## AI usage
+
+AI assistance was used throughout as a drafting, test-design, review, and
+diagnostic aid. It proposed decompositions, code and SQL changes, adversarial
+cases, documentation structure, and interpretations of platform errors. I made
+the implementation decisions, inspected the resulting diffs, ran the tests,
+executed the Databricks steps, and retained evidence only for observed results.
+AI output was never treated as execution proof.
+
+Several corrections materially changed the project. Source profiling disproved
+the assumption that the BLS `Current` file represented only the current year.
+Live Bronze failures exposed a header-contract mismatch, a Spark line-reader
+memory problem, and an incorrect regular-expression argument. Population
+validation was strengthened against floating-point overflow, underflow, and
+integer-rounding ambiguity. Reviews added mass-removal protection, immutable
+object recovery, redirect-origin checks, strict JSON constants, metadata
+cardinality gates, complete sample coverage, and analyzed schema comparison.
+The first independent variance formula also suffered catastrophic cancellation
+and was replaced with a two-pass calculation. Each accepted correction was
+covered by focused tests or structural assertions and, where it crossed the
+platform boundary, rerun in Databricks before its evidence was considered
+final.
 
 ### 2026-10-16: Requirements decomposition and repository foundation
 
@@ -1001,10 +1079,11 @@ governed materialized views. Storage order is intentionally excluded from the
 data contract; key uniqueness and the Question 2 earliest-year tie-break are
 validated, and reviewer-facing queries may order their output explicitly.
 
-On October 19, 2026, the final tracked validation query completed in Databricks
-in 8.380 seconds with a green execution status. It returned 17 checks—five for
-Question 1 and six each for Questions 2 and 3—and every row reported
-`passed = true`. The output confirmed one Question 1 summary, the complete
+On October 19, 2026, the final post-review validation query completed in
+Databricks in 35.092 seconds with a green execution status and 111 of 111 tasks
+completed. It returned 17 checks—five for Question 1 and six each for Questions
+2 and 3—and every row reported `passed = true`. The output confirmed analyzed
+SQL and published Gold schema agreement, one Question 1 summary, the complete
 282-series Question 2 inventory with zero metadata violations, and all 39
 Question 3 history rows. All value and independent source-check discrepancy
 counts were zero, and all five documented Question 3 sample years were present
@@ -1015,4 +1094,43 @@ boundaries are preserved in
 
 ## Retrospective
 
-This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
+The hardest problem was not any single transformation. It was preserving a
+credible chain of evidence across unreliable external inputs, immutable raw
+storage, declarative pipeline semantics, two analytical APIs, and a constrained
+Databricks environment. Many defects initially appeared downstream from their
+cause: one shared Bronze helper produced multiple failed nodes, an incomplete
+inventory could have looked like mass deletion, an inner comparison could have
+hidden missing rows, and a numerically plausible variance formula was unstable
+for large population values. Solving these required decomposing failures at the
+earliest boundary that could explain them and distinguishing “the code looks
+right” from “the target runtime demonstrated the contract.”
+
+The main lessons are:
+
+- Profile provider data before encoding semantic assumptions. Filenames,
+  headers, sentinel values, and period codes need evidence, not intuition.
+- Make absence visible. Tombstones, null-preserving joins, inventory-first
+  publication, full-outer comparisons, and explicit match flags prevent silent
+  data loss.
+- Fail closed before publication, but keep failures diagnosable through named
+  expectations, rejected-row metrics, stable validation rows, and clear claim
+  boundaries.
+- Separate reusable data quality from question-specific semantics. Silver
+  retains valid provider history; Gold applies the requested filters and tie
+  rules.
+- Use independent implementations only when their independence is real.
+  Comparing two expressions that share the same constants or joins can repeat
+  the same mistake; source calculations and analyzed schemas provide stronger
+  evidence.
+- Treat tests, reviews, and live runs as complementary. Local tests exercise
+  controlled failure paths, review challenges assumptions, and Databricks
+  proves target-runtime behavior. None is sufficient alone.
+- Record corrections honestly. The review trail is more useful when it explains
+  why an apparently reasonable first approach was changed and what now prevents
+  recurrence.
+
+The resulting project is still an assessment implementation: it is
+single-writer, uses a small public dataset, and does not claim production
+scheduling, service-level objectives, or causal inference. Within that scope,
+the ingestion, Bronze, Silver, and three Gold contracts are implemented,
+rerunnable, reconciled, and supported by traceable evidence.
