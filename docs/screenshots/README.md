@@ -181,3 +181,47 @@ The deployment attribution, exact results, evidence digests, causal claim
 boundary, and limitations are indexed in
 `docs/evidence/dq18_gold_bls_q01_population_validation.md`.
 
+## DQ-19 Gold cross-implementation evidence
+
+The `dq19_validation_*` images preserve the initial successful run before
+Copilot review hardening. They are historical review evidence, not the final
+acceptance run.
+
+- `dq19_validation_checks_overview.png`: successful 17-row validation result
+  showing the named Question 1, Question 2, and Question 3 checks and their
+  actual and expected values.
+- `dq19_validation_performance.png`: successful Databricks execution with 85 of
+  85 tasks completed.
+- `dq19_validation_passed.png`: the result's `passed` and `interpretation`
+  columns showing true outcomes for every displayed check.
+- `dq19_validation_checks_complete.png`: the final result rows proving all 17
+  checks are present, including Question 3 bounds, spot check, and key parity.
+- `dq19_validation_passed_complete.png`: the lower result rows with the
+  `passed` column visible, directly confirming true outcomes through row 17.
+- `dq19_final_passed_rows_1_14.png`: corrected revision with true outcomes for
+  rows 1–14, including the independent Question 1 calculation.
+- `dq19_final_values_rows_1_14.png`: corrected actual values, including zero
+  Question 1 source discrepancies and `282,0` Question 2 inventory/metadata.
+- `dq19_final_values_rows_4_17.png`: corrected lower values, including
+  Question 3 preservation `39,39,1988,2026` and sample coverage `5,5,0`.
+- `dq19_final_passed_rows_4_17.png`: corrected revision with true outcomes for
+  rows 4–17, completing direct evidence that all 17 checks passed.
+- `dq19_post_review_passed_rows_1_14.png`: final reviewed revision with true
+  outcomes for rows 1–14 and analyzed schema signatures.
+- `dq19_post_review_passed_rows_4_17.png`: final reviewed revision with true
+  outcomes for rows 4–17, completing direct proof that all 17 checks passed.
+- `dq19_post_review_values_rows_1_14.png`: final reviewed actual values for the
+  upper checks, including analyzed Question 1 and Question 2 schemas.
+- `dq19_post_review_values_rows_4_17.png`: final reviewed lower values,
+  including Question 3 preservation and five-year source coverage.
+- `dq19_post_review_performance.png`: successful final reviewed execution with
+  111 of 111 tasks completed.
+
+The `dq19_post_review_*` captures are the authoritative final acceptance run;
+the earlier `dq19_validation_*` and `dq19_final_*` images are retained as
+review history.
+
+The exact validation claims, intentional representation differences, evidence
+digests, and scope boundary are indexed in
+`docs/evidence/dq19_gold_cross_implementation_validation.md`.
+

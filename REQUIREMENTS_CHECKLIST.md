@@ -286,14 +286,14 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-16, DQ-17, DQ-18
 
-- [ ] Compare SQL and PySpark schemas, row counts, keys, and values for all three questions.
-- [ ] Use numeric tolerances where floating-point results require them.
-- [ ] Add invariants for expected year bounds, uniqueness, ordering assumptions, and join cardinality.
-- [ ] Independently spot-check representative results against source records or a simple calculation.
-- [ ] Document any intentional representational differences.
-- [ ] Confirm the three contracts in `docs/REQUIRED_GOLD_CONTRACTS.md` are complete before beginning dashboard or Genie implementation.
+- [x] Compare SQL and PySpark schemas, row counts, keys, and values for all three questions.
+- [x] Use numeric tolerances where floating-point results require them.
+- [x] Add invariants for expected year bounds, uniqueness, ordering assumptions, and join cardinality.
+- [x] Independently spot-check representative results against source records or a simple calculation.
+- [x] Document any intentional representational differences.
+- [x] Confirm the three contracts in `docs/REQUIRED_GOLD_CONTRACTS.md` are complete before beginning dashboard or Genie implementation.
 
-**Done when:** Equivalent implementations are demonstrated, not merely assumed.
+**Done when:** Equivalent implementations are demonstrated, not merely assumed. The [live 17-check reconciliation](docs/evidence/dq19_gold_cross_implementation_validation.md) confirms all three schemas, cardinalities, keys, values, invariants, and independent source checks before presentation-layer work.
 
 ## Epic 4: Documentation, evidence, and submission
 
