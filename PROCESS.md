@@ -827,6 +827,21 @@ coverage and stable cardinality for this snapshot. The completed update, table
 result, graph, and performance evidence are preserved in
 [`docs/evidence/dq13_silver_series_live_validation.md`](docs/evidence/dq13_silver_series_live_validation.md).
 
+### DQ-14: normalize population without narrowing reusable history
+
+The population transform reads only `bronze_datausa_population` and retains the
+documented United States national record (`01000US`, `United States`). ANSI-safe
+casts produce integer years and long population values. Exact comparisons back
+to the Bronze numeric fields prevent fractional values from being silently
+truncated, while named drop expectations measure malformed, negative, non-US,
+or incomplete-provenance rows.
+
+A separate fail-fast window enforces one row per `nation_id + year`; the
+pipeline never chooses an arbitrary duplicate. The final `silver_population`
+table keeps every valid available year. The required 2013–2018 completeness
+check is intentionally deferred to the Gold Question 1 boundary so this
+reusable history is not shaped around one analytical request.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
