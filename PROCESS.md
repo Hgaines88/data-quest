@@ -830,11 +830,12 @@ result, graph, and performance evidence are preserved in
 ### DQ-14: normalize population without narrowing reusable history
 
 The population transform reads only `bronze_datausa_population` and retains the
-documented United States national record (`01000US`, `United States`). ANSI-safe
-casts produce integer years and long population values. Exact comparisons back
-to the Bronze numeric fields prevent fractional values from being silently
-truncated, while named drop expectations measure malformed, negative, non-US,
-or incomplete-provenance rows.
+documented United States national record (`01000US`, `United States`). Bronze
+compares the original decimal text with both an integral decimal and the
+projected double, so a fractional value cannot round into an apparently valid
+population count. ANSI-safe Silver casts then produce integer years and long
+population values, while named drop expectations measure malformed, negative,
+non-US, or incomplete-provenance rows.
 
 A separate fail-fast window enforces one row per `nation_id + year`; the
 pipeline never chooses an arbitrary duplicate. The final `silver_population`

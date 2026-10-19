@@ -99,7 +99,7 @@ class PopulationValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(PopulationResponseError, "Population"):
                 validate_population_response(path)
 
-    def test_leaves_finite_fractional_filtering_to_silver(self) -> None:
+    def test_leaves_finite_fractional_filtering_to_the_pipeline(self) -> None:
         payload = valid_payload()
         payload["data"][0]["Population"] = 1.5
 

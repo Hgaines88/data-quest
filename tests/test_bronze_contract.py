@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pathlib import Path
 import unittest
 
@@ -194,12 +195,22 @@ class PipelineDefinitionTests(unittest.TestCase):
             '"AND `Population` BETWEEN 0 AND 1.7976931348623157E308"',
             self.source,
         )
-        self.assertIn('"population_double_preserves_integer_value"', self.source)
+        self.assertIn('"population_is_exact_integral_double"', self.source)
+        self.assertIn(
+            "try_cast(`_population_raw` AS DECIMAL(38, 18)) = ",
+            self.source,
+        )
         self.assertIn('"population_does_not_underflow_to_zero"', self.source)
         self.assertIn(
             'F.element_at("_record", "Population").alias("_population_raw")',
             self.source,
         )
+
+    def test_fraction_that_double_rounds_to_integer_is_not_integral(self) -> None:
+        raw_population = Decimal("9007199254740992.25")
+
+        self.assertEqual(float(raw_population), 9007199254740992.0)
+        self.assertNotEqual(raw_population, raw_population.to_integral_value())
 
 
 if __name__ == "__main__":
