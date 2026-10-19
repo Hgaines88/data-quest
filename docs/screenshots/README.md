@@ -74,6 +74,19 @@ The revision attribution, exact claims, limitations, and image digests are in
 
 ## DQ-14 Silver population evidence
 
+- `dq14_bronze_scientific_notation_fail_closed.png`: diagnostic Bronze run in
+  which the integral-form gate safely dropped all 11 scientific-notation rows.
+- `dq14_bronze_population_corrected_success.png`: corrected Bronze run with 11
+  population rows and all 10 expectations met.
+- `dq14_silver_corrected_completed.png`: fresh completed Silver update on the
+  reviewed correction with zero errors and warnings.
+- `dq14_silver_corrected_tables.png`: fresh 77K observation, 282 series, and 11
+  population results after full recompute.
+- `dq14_silver_corrected_graph.png`: all three corrected Silver dependency paths.
+- `dq14_silver_corrected_performance.png`: three successful corrected refresh
+  statements.
+- `dq14_sql_warehouse_capacity_limit.png`: recorded free-edition serverless
+  capacity limit that blocked the supplemental fresh SQL retry.
 - `dq14_silver_population_run_completed.png`: completed 8:14 PM EDT update with
   zero errors and warnings and all three Silver paths visible.
 - `dq14_silver_population_tables.png`: 11-row population result, defined
@@ -87,7 +100,7 @@ The revision attribution, exact claims, limitations, and image digests are in
   rows proving one published population value for every year from 2013 through
   2018.
 
-The revision attribution, exact claims, limitations, year-coverage result, and
-image digests are in
+The correction history, revision attribution, exact claims, limitations,
+year-coverage result, and image digests are in
 `docs/evidence/dq14_silver_population_live_validation.md`.
 

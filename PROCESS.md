@@ -845,13 +845,13 @@ table keeps every valid available year. The required 2013–2018 completeness
 check is intentionally deferred to the Gold Question 1 boundary so this
 reusable history is not shaped around one analytical request.
 
-The target-runtime update completed successfully on October 18, 2026 at 8:14
-PM EDT with zero errors and zero warnings. `silver_population` published 11
-rows in 6 seconds, while the existing observation and series outputs remained
-green with `No change`. The graph confirms the intended isolated dependency
-chain from the Bronze population table through the candidate and uniqueness
-gates to the published table. The completed update, table result, graph, and
-performance evidence are preserved in
+After the final numeric-form correction, fresh target-runtime Bronze and Silver
+updates completed successfully on October 18, 2026. Bronze published all 11
+population rows with all 10 expectations met. The 11:00 PM EDT Silver update
+reported zero errors and zero warnings and published 11 population rows, 282
+series rows, and approximately 77,000 observation rows. The graph confirms the
+intended isolated population dependency chain and the intact BLS paths. The
+completed updates, table results, graph, and performance evidence are preserved in
 [`docs/evidence/dq14_silver_population_live_validation.md`](docs/evidence/dq14_silver_population_live_validation.md).
 
 A separate read-only SQL query returned exactly six ordered records for 2013
@@ -873,6 +873,25 @@ row. Regression tests cover both range edges, the greater-than-53-bit integer
 case, and the pipeline rules. Silver already rejected overflow because its
 ANSI-safe long cast becomes null, but the earlier checks are needed to prevent
 underflow or double rounding from becoming a plausible publishable count.
+
+The live runtime then exposed a different boundary: Spark normalized the valid
+provider counts to scientific notation such as `3.16128839E8`. The initial
+lexical expectation understood only plain integer notation and therefore
+dropped all 11 rows. This was a safe failure—the pipeline published no
+population data and identified the single failing expectation—but it revealed
+that representation and value semantics had been conflated. The final rule
+accepts scientific notation only when its exponent shifts every significant
+fractional digit into the integer portion. The exact-decimal, range, underflow,
+and double-projection checks remain separate. This small correction supports
+Databricks' actual representation without broadly relaxing the contract.
+
+An attempted fresh read-only SQL verification after both corrected pipeline
+runs could not start because the free-edition serverless compute allowance was
+exhausted. The earlier six-row SQL result remains direct year-coverage evidence,
+while the fresh Bronze and Silver table counts prove successful publication on
+the reviewed commit. Recording this infrastructure limitation separately avoids
+mistaking unavailable compute for either successful query execution or a data
+defect.
 
 ## Retrospective
 
