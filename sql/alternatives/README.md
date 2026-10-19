@@ -18,3 +18,10 @@ to exactly one Silver metadata row. Live validation will
 compare its schema, row count, series keys, null behavior, and values with the
 primary PySpark output and independently spot-check a selected annual sum.
 
+`question_3_bls_q01_population.sql` is the runnable Spark SQL alternative for
+`gold_bls_q01_population`. It begins with `PRS30006032` `Q01` observations,
+validates a nonempty unique year history and exactly one provider metadata row,
+then left-joins annual United States population by year. Unmatched BLS years
+remain visible with nullable population and `population_match_found = false`.
+Population is contextual only; neither implementation makes a causal claim.
+

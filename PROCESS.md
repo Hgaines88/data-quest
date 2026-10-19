@@ -950,6 +950,39 @@ changing valid calculations. An independent Silver query also reconciled
 outputs, screenshots, digests, attribution boundary, and claim limits are in
 [`docs/evidence/dq17_gold_bls_best_year_validation.md`](docs/evidence/dq17_gold_bls_best_year_validation.md).
 
+### DQ-18: preserve BLS history while adding nullable population context
+
+Question 3 is implemented in both PySpark and Spark SQL from the governed
+Silver tables. Both implementations filter exactly `PRS30006032` and `Q01`,
+then use those BLS observations as the left side of the annual United States
+population join. This direction is intentional: population is optional context,
+so a missing population year must not erase a valid BLS observation. The
+published table exposes both nullable `population` and the explicit
+`population_match_found` flag and makes no causal claim.
+
+The PySpark version is the primary Gold materialized view. A fail-fast input
+view requires a nonempty, uniquely keyed Q01 history and exactly one provider
+metadata row. The candidate view separately requires one joined result per BLS
+year and agreement between population nullability and the visible match flag.
+The standalone SQL alternative contains equivalent input-cardinality checks and
+remains excluded from pipeline source discovery so it can be run independently.
+
+On October 19, 2026, the `data-quest-gold` update completed with zero displayed
+errors or warnings and published 39 ordered rows covering 1988 through 2026.
+Eleven rows matched available population records and 28 retained BLS years with
+null population. Both input expectations and both result expectations reported
+zero failed records. The SQL alternative also returned 39 rows. A null-safe
+full-outer comparison found 39 distinct keys in each implementation, identical
+28-row missing-population counts, and zero field-level mismatches.
+
+A separate direct Silver-to-Gold spot check sampled 2012, 2013, 2020, 2024,
+and 2026. This selection tests a pre-coverage year, the first match, an internal
+population gap, a later match, and a post-coverage BLS year. Source Q01 values,
+nullable population values, and match flags all reconciled. Exact outputs,
+screenshots, digests, attribution limits, and the non-causal scope boundary are
+preserved in
+[`docs/evidence/dq18_gold_bls_q01_population_validation.md`](docs/evidence/dq18_gold_bls_q01_population_validation.md).
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

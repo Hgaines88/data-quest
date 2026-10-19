@@ -77,5 +77,50 @@ class GoldBlsBestYearSqlTests(unittest.TestCase):
         self.assertIn("ON VALIDATION.METADATA_IS_VALID", self.source)
 
 
+class GoldBlsQ01PopulationSqlTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.source = (
+            Path(__file__).resolve().parents[1]
+            / "sql"
+            / "alternatives"
+            / "question_3_bls_q01_population.sql"
+        ).read_text(encoding="utf-8").upper()
+
+    def test_filters_exact_silver_series_and_period(self) -> None:
+        self.assertIn(
+            "FROM WORKSPACE.REARC_DATA_QUEST.SILVER_BLS_OBSERVATION",
+            self.source,
+        )
+        self.assertIn("SERIES_ID = 'PRS30006032'", self.source)
+        self.assertIn("PERIOD_CODE = 'Q01'", self.source)
+        self.assertNotIn("BRONZE_", self.source)
+
+    def test_validates_observation_and_metadata_cardinality(self) -> None:
+        self.assertIn("COUNT(DISTINCT YEAR)", self.source)
+        self.assertIn("INPUT.OBSERVATION_ROW_COUNT > 0", self.source)
+        self.assertIn(
+            "INPUT.DISTINCT_YEAR_COUNT = INPUT.OBSERVATION_ROW_COUNT",
+            self.source,
+        )
+        self.assertIn("METADATA.METADATA_ROW_COUNT = 1", self.source)
+        self.assertIn("RAISE_ERROR(", self.source)
+
+    def test_left_joins_population_and_exposes_match_status(self) -> None:
+        self.assertIn(
+            "FROM WORKSPACE.REARC_DATA_QUEST.SILVER_POPULATION", self.source
+        )
+        self.assertIn("NATION_ID = '01000US'", self.source)
+        self.assertIn("NATION = 'UNITED STATES'", self.source)
+        self.assertIn("LEFT JOIN US_POPULATION AS POPULATION", self.source)
+        self.assertIn(
+            "POPULATION.POPULATION IS NOT NULL AS POPULATION_MATCH_FOUND",
+            self.source,
+        )
+
+    def test_orders_reviewer_output_by_year(self) -> None:
+        self.assertIn("ORDER BY OBSERVATIONS.YEAR", self.source)
+
+
 if __name__ == "__main__":
     unittest.main()

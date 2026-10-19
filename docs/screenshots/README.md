@@ -153,3 +153,31 @@ The deployment attribution, exact validation claims, evidence digests, and
 scope boundaries are indexed in
 `docs/evidence/dq17_gold_bls_best_year_validation.md`.
 
+## DQ-18 Gold BLS Q01 population-context evidence
+
+- `dq18_gold_run_completed.png`: completed Gold update with the new Question 3
+  dependency paths and zero displayed errors or warnings.
+- `dq18_gold_tables.png`: 39-row published result, 8-second full recompute, and
+  unchanged green Question 1 and Question 2 outputs.
+- `dq18_gold_result_matches.png`: ordered BLS history showing both nullable
+  unmatched years and populated matched years with explicit status values.
+- `dq18_gold_columns.png`: the six published contract fields and their types.
+- `dq18_candidate_expectations.png`: result cardinality and match-indicator
+  expectations with zero failures.
+- `dq18_input_expectations.png`: nonempty unique history and exact metadata
+  cardinality expectations with zero failures.
+- `dq18_sql_result.png`: successful excluded Spark SQL alternative returning
+  39 rows.
+- `dq18_sql_pyspark_parity_counts.png`: matching SQL/PySpark row and distinct-key
+  counts.
+- `dq18_sql_pyspark_parity_outcome.png`: matching 28-row missing-population
+  counts and zero field-level mismatches.
+- `dq18_independent_spot_check_values.png`: five direct Silver-to-Gold value and
+  nullable-population comparisons.
+- `dq18_independent_spot_check_matches.png`: all three comparison booleans true
+  for all five representative rows.
+
+The deployment attribution, exact results, evidence digests, causal claim
+boundary, and limitations are indexed in
+`docs/evidence/dq18_gold_bls_q01_population_validation.md`.
+
