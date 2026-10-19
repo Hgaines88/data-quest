@@ -863,11 +863,13 @@ snapshot. Python's default JSON float parser converts valid exponent notation
 such as `1e400` to infinity and `1e-400` to zero before validation. Rejecting
 only JSON's nonstandard `Infinity` token was therefore insufficient. Landing
 now parses decimals losslessly, then rejects values that would overflow or
-underflow when projected into Bronze's double type. Bronze independently bounds
-population to the finite nonnegative double range. Regression tests cover both
-range edges and the pipeline rule. Silver already rejected overflow because its
-ANSI-safe long cast becomes null, but the lossless landing check is also needed
-to prevent underflow from silently becoming a publishable zero.
+underflow or change integer value when projected into Bronze's double type.
+Bronze retains the original numeric text and independently checks the finite
+range, positive-to-zero underflow, and integer round trip before retaining a
+row. Regression tests cover both range edges, the greater-than-53-bit integer
+case, and the pipeline rules. Silver already rejected overflow because its
+ANSI-safe long cast becomes null, but the earlier checks are needed to prevent
+underflow or double rounding from becoming a plausible publishable count.
 
 ## Retrospective
 

@@ -398,6 +398,7 @@ def _datausa_rows() -> DataFrame:
             F.element_at("_record", "Nation ID").alias("Nation ID"),
             F.element_at("_record", "Nation").alias("Nation"),
             F.element_at("_record", "Year").cast("long").alias("Year"),
+            F.element_at("_record", "Population").alias("_population_raw"),
             F.element_at("_record", "Population").cast("double").alias("Population"),
         ],
         source_file=F.col("relative_path"),
@@ -424,6 +425,15 @@ def _datausa_rows() -> DataFrame:
         "population_is_finite_and_nonnegative": (
             "`Population` IS NOT NULL "
             "AND `Population` BETWEEN 0 AND 1.7976931348623157E308"
+        ),
+        "population_double_preserves_integer_value": (
+            "try_cast(`_population_raw` AS DECIMAL(38, 0)) IS NOT NULL "
+            "AND CAST(`Population` AS DECIMAL(38, 0)) = "
+            "try_cast(`_population_raw` AS DECIMAL(38, 0))"
+        ),
+        "population_does_not_underflow_to_zero": (
+            "`Population` <> 0 OR NOT regexp_like("
+            "regexp_extract(`_population_raw`, '^[+-]?([^eE]+)', 1), '[1-9]')"
         ),
     }
 )

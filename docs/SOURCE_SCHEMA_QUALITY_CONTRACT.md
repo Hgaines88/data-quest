@@ -149,7 +149,10 @@ reader schema to silently discard new fields. After exploding `data`, the
 pipeline drops and measures rows with blank `Nation ID` or `Nation`, null `Year`,
 null `Population`, or a non-finite or negative population. Landing validation
 parses JSON decimals losslessly and rejects exponent values that would overflow
-to infinity or underflow to zero when projected into Bronze's double type.
+to infinity, underflow to zero, or round to a different integer when projected
+into Bronze's double type. Bronze retains the original numeric text in an
+underscore-prefixed audit column and independently applies the same range,
+underflow, and integer-preservation boundaries before publishing a row.
 
 ## Silver contracts
 

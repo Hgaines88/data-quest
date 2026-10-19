@@ -151,7 +151,15 @@ def _is_valid_population_number(value: object) -> bool:
         projected = float(value)
     except (OverflowError, ValueError):
         return False
-    return math.isfinite(projected) and (value == 0 or projected != 0.0)
+    decimal_value = value if isinstance(value, Decimal) else Decimal(value)
+    return (
+        math.isfinite(projected)
+        and (value == 0 or projected != 0.0)
+        and (
+            decimal_value != decimal_value.to_integral_value()
+            or Decimal.from_float(projected) == decimal_value
+        )
+    )
 
 
 def prepare_population_landing(

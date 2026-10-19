@@ -194,6 +194,12 @@ class PipelineDefinitionTests(unittest.TestCase):
             '"AND `Population` BETWEEN 0 AND 1.7976931348623157E308"',
             self.source,
         )
+        self.assertIn('"population_double_preserves_integer_value"', self.source)
+        self.assertIn('"population_does_not_underflow_to_zero"', self.source)
+        self.assertIn(
+            'F.element_at("_record", "Population").alias("_population_raw")',
+            self.source,
+        )
 
 
 if __name__ == "__main__":

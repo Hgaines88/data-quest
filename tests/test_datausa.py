@@ -88,6 +88,29 @@ class PopulationValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(PopulationResponseError, "Population"):
                 validate_population_response(path)
 
+    def test_rejects_population_integer_that_double_would_round(self) -> None:
+        payload = valid_payload()
+        payload["data"][0]["Population"] = 9_007_199_254_740_993
+
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "population.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+
+            with self.assertRaisesRegex(PopulationResponseError, "Population"):
+                validate_population_response(path)
+
+    def test_leaves_finite_fractional_filtering_to_silver(self) -> None:
+        payload = valid_payload()
+        payload["data"][0]["Population"] = 1.5
+
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "population.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+
+            result = validate_population_response(path)
+
+        self.assertEqual(result.record_count, 2)
+
     def test_datausa_user_agent_contains_no_contact_email(self) -> None:
         self.assertNotIn("@", DATAUSA_USER_AGENT)
         self.assertIn("Data USA", DATAUSA_USER_AGENT)
