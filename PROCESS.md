@@ -89,7 +89,10 @@ boundary:
    response, validate the downloaded bytes, and promote changed content to
    immutable, content-addressed Volume paths. Append-only Delta manifests
    identify the current version of every source object.
-2. Bronze pipeline views read only manifest-authorized objects. They preserve
+2. Bronze pipeline views publish rows only from objects authorized by the
+   latest active manifest state. Their static binary and text source readers
+   can still physically enumerate or read historical and unreferenced landing
+   objects before the manifest join removes them. Published rows preserve
    source-shaped strings and provenance, validate headers and row widths, and
    expose rejected-row metrics before publishing reusable Bronze tables.
 3. Silver pipeline views parse intentional types, normalize provider
@@ -265,6 +268,11 @@ more storage than overwriting files. Full re-downloads make content identity
 independent of weak ETags but cost more network and provider capacity. The
 single-writer rule avoids races in this assessment; production concurrency
 would require orchestration locks or a transactional run-control protocol.
+The Bronze manifest join governs publication, not physical source discovery:
+static reader globs may scan historical or unreferenced immutable objects.
+That is acceptable for this bounded assessment history, but a larger deployment
+should monitor bytes scanned and consider a manifest-driven pruning design if
+the extra read cost becomes operationally significant.
 
 ## Quality assurance protocol
 
