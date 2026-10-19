@@ -63,3 +63,10 @@ these exports support exact value inspection.
   update, six-year completeness gate, exact one-row PySpark result, independent
   Spark SQL result, numeric-tolerance comparison, independent calculation,
   screenshot paths, and screenshot SHA-256 digests.
+
+## DQ-17 Gold BLS best-year validation
+
+- `dq17_gold_bls_best_year_validation.md`: indexes the completed Gold update,
+  282-series inventory, zero-failure expectations, SQL/PySpark null-safe parity,
+  independent four-quarter source calculation, screenshot paths, and screenshot
+  SHA-256 digests.
