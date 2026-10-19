@@ -395,7 +395,8 @@ repository. Their execution order and QA gates are defined in the
 
 **Depends on:** DQ-24, DQ-25, DQ-26, DQ-27
 
-- [ ] Deploy and run the documented solution from its starting state.
+- [ ] Deploy and run the documented solution from its starting state using the Asset Bundle where supported.
+- [ ] For unsupported Free Edition resources, validate the bundle configuration, exercise the documented equivalent resource, and record the limitation without claiming deployment.
 - [ ] Reconcile stakeholder answers to Gold and verify least-privilege access.
 - [ ] Confirm operational signals and recovery evidence are visible.
 - [ ] Reconcile the final documentation and evidence gallery to the implementation.

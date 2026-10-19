@@ -22,9 +22,9 @@ those checks before the remaining work would make the audit immediately stale.
 |---:|---|---|---|---|
 | 1 | DQ-25 | Add stakeholder exploration over governed Gold outputs. | Required pipeline and Gold contracts are complete. | Representative dashboard or Genie answers reconcile to Gold and reviewer evidence is captured. |
 | 2 | DQ-26 | Apply least-privilege Gold-layer access controls. | The stakeholder experience and its required objects are known. | Read-only use succeeds; prohibited reads and writes fail. |
-| 3 | DQ-24 | Encode the verified solution as a Databricks Asset Bundle. | Resources and required permissions are known. | Version-controlled configuration validates and deploys or all Free Edition constraints are documented with evidence. |
+| 3 | DQ-24 | Encode the verified solution as a Databricks Asset Bundle. | Resources and required permissions are known. | The bundle validates; supported resources deploy successfully; unsupported Free Edition resources have explicit constraint evidence and a documented equivalent validation path. |
 | 4 | DQ-27 | Add operational observability and recovery guidance. | The deployable resource model is known. | Freshness, processing, quality, and failure signals are visible; a safe recovery path is evidenced. |
-| 5 | DQ-28 | Validate the extended Databricks product end to end. | DQ-24 through DQ-27 are complete. | Deployment, operation, governance, stakeholder use, and evidence reconcile as one product. |
+| 5 | DQ-28 | Validate the extended Databricks product end to end. | DQ-24 through DQ-27 are complete. | Supported bundle deployment, documented equivalents for unsupported resources, operation, governance, stakeholder use, and evidence reconcile as one product without overstating Free Edition capabilities. |
 | 6 | DQ-29 | Decide whether Snowflake or Power BI adds defensible value. | The Databricks-native product has been fully evaluated. | A documented decision either ends the extension work or defines a narrowly scoped additional consumer. |
 | 7 | DQ-23 | Perform the final submission audit. | DQ-29 is complete and no implementation card remains open. | The final repository is reproducible, reviewable, explainable, privacy-safe, and accessible to Rearc reviewers. |
 
@@ -32,8 +32,11 @@ DQ-24 retains its technical dependency on DQ-26 because the bundle should
 encode the final access model. DQ-27 retains its dependency on DQ-24 because
 deployment and recovery evidence should exercise the version-controlled
 resource definition. DQ-28 remains the integration gate for DQ-24 through
-DQ-27. DQ-29 remains a decision gate, not an automatic commitment to another
-platform.
+DQ-27. Where Free Edition cannot deploy a modeled resource, DQ-28 must validate
+the bundle configuration and exercise the documented equivalent resource; it
+must record the limitation and must not claim that the unsupported deployment
+occurred. DQ-29 remains a decision gate, not an automatic commitment to
+another platform.
 
 ## QA gate for every card
 
