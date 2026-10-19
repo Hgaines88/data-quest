@@ -108,6 +108,8 @@ year-coverage result, and image digests are in
 
 - `dq16_gold_tables.png`: candidate expectation, successful published
   materialized view, one output record, and zero displayed errors or warnings.
+- `dq16_gold_expectation_passed.png`: candidate expectation evaluated with
+  fail action, zero percent failures, and zero failed records.
 - `dq16_gold_performance.png`: successful materialized-view refresh and zero
   displayed errors or warnings.
 - `dq16_gold_pipeline_graph.png`: Silver source, candidate gate, and published

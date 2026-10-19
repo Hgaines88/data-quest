@@ -911,12 +911,15 @@ for numerical reconciliation.
 
 On October 19, 2026, the `data-quest-gold` triggered update completed in the
 target Databricks workspace with zero displayed errors or warnings and one
-published result. The tracked SQL alternative then read six rows and returned
+published result. The candidate expectation panel reported action `FAIL`, zero
+percent failures, and zero failed records. The tracked SQL alternative then
+read six rows and returned
 the same bounds, count, mean, semantic label, and population standard deviation
-within `1e-6`. A simple independent calculation from the six annual source
-values produced the same mean and standard deviation. The completed update,
-graph, exact outputs, SQL execution, screenshot digests, and evidence limits are
-preserved in
+within a manually applied `1e-6` comparison tolerance. The structural tests do
+not execute that live numerical comparison. A simple independent calculation
+from the six annual source values produced the same mean and standard
+deviation. The completed update, graph, exact outputs, SQL execution,
+screenshot digests, and evidence limits are preserved in
 [`docs/evidence/dq16_gold_population_summary_validation.md`](docs/evidence/dq16_gold_population_summary_validation.md).
 
 ## Retrospective
