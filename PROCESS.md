@@ -842,6 +842,21 @@ table keeps every valid available year. The required 2013–2018 completeness
 check is intentionally deferred to the Gold Question 1 boundary so this
 reusable history is not shaped around one analytical request.
 
+The target-runtime update completed successfully on October 18, 2026 at 8:14
+PM EDT with zero errors and zero warnings. `silver_population` published 11
+rows in 6 seconds, while the existing observation and series outputs remained
+green with `No change`. The graph confirms the intended isolated dependency
+chain from the Bronze population table through the candidate and uniqueness
+gates to the published table. The completed update, table result, graph, and
+performance evidence are preserved in
+[`docs/evidence/dq14_silver_population_live_validation.md`](docs/evidence/dq14_silver_population_live_validation.md).
+
+The captured UI does not show the individual year values. Engineering judgment
+therefore separates two claims: this run proves successful typed, quality-gated,
+uniquely keyed publication of 11 available records, but a direct result-set
+capture is still required before claiming that every year from 2013 through
+2018 is present.
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

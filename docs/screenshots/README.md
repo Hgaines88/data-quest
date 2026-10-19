@@ -72,3 +72,19 @@ interpretation are indexed in
 The revision attribution, exact claims, limitations, and image digests are in
 `docs/evidence/dq13_silver_series_live_validation.md`.
 
+## DQ-14 Silver population evidence
+
+- `dq14_silver_population_run_completed.png`: completed 8:14 PM EDT update with
+  zero errors and warnings and all three Silver paths visible.
+- `dq14_silver_population_tables.png`: 11-row population result, defined
+  candidate and uniqueness expectations, and unchanged green observation and
+  series results.
+- `dq14_silver_population_graph.png`: isolated Bronze population-to-candidate,
+  uniqueness, and published-table dependency chain.
+- `dq14_silver_population_performance.png`: three successful materialized-view
+  refresh statements.
+
+The revision attribution, exact claims, limitations, year-coverage boundary,
+and image digests are in
+`docs/evidence/dq14_silver_population_live_validation.md`.
+
