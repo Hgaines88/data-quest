@@ -153,10 +153,12 @@ that would overflow to infinity, underflow to zero, or round to a different
 integer when projected into Bronze's double type. Bronze retains the original
 numeric text in an underscore-prefixed audit column and independently applies
 the same range, underflow, integrality, and integer-preservation boundaries
-before publishing a row. A numeric-form check on the original text rejects any
-fractional coefficient or negative exponent without imposing a fixed decimal
-scale. The separate value comparison then prevents an integer that changes
-during `double` conversion from being published as a fabricated count.
+before publishing a row. A numeric-form check on the parsed text accepts plain
+integers and scientific notation only when the exponent moves every significant
+fractional digit into the integer portion. It therefore avoids a fixed decimal
+scale while supporting Databricks' normalized scientific representation. The
+separate value comparison then prevents an integer that changes during `double`
+conversion from being published as a fabricated count.
 
 ## Silver contracts
 
