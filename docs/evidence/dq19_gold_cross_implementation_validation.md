@@ -2,7 +2,7 @@
 
 ## Validation identity
 
-- Git revision: `eeaa0f522fe71a6c036024aa1f256358fce921f4`
+- Git revision: `8e9f91bb724029ef7fcbcb9bbb3cc68bac640e7e`
 - Branch: `codex/dq-19-cross-validation`
 - Query: `sql/quality/validate_gold_cross_implementation.sql`
 - Validated on: October 19, 2026
@@ -14,10 +14,10 @@ not independently prove the remote commit identity.
 
 ## Live validation outcome
 
-After review hardening and a numerically stable source calculation, the
-read-only query completed successfully at 4:55 PM EDT in 8.380 seconds,
-returned exactly 17 checks, and displayed `passed = true` for every check. The
-editor displayed a green execution status and no query error.
+After the final Copilot review fixes, the read-only query completed
+successfully at 5:15 PM EDT in 35.092 seconds, returned exactly 17 checks, and
+displayed `passed = true` for every check. The editor displayed a green
+execution status, no query error, and 111 of 111 completed execution tasks.
 
 The checks cover all three required Gold questions:
 
@@ -51,6 +51,11 @@ five documented years exist in both inputs with zero mismatches, while its
 preservation check reports matching `39,39,1988,2026` actual and expected
 values.
 
+The three schema checks display analyzed `struct<...>` signatures derived from
+the SQL result CTEs and matching ordered signatures reconstructed from the
+published Gold metadata. This directly validates the post-review change that
+removed fixed SQL-side schema constants.
+
 ## Intentional representation differences
 
 The primary outputs are governed PySpark materialized views, while the SQL
@@ -65,14 +70,16 @@ nullable population, and boolean fields are compared exactly and null-safely.
 
 | Screenshot | SHA-256 |
 | --- | --- |
-| `dq19_final_passed_rows_1_14.png` | `1b101322e36a906b32f1e2596620b88e2f6b34973f28ddc647f915a4a85fcaeb` |
-| `dq19_final_values_rows_1_14.png` | `40079ac8bb0e4d567a7a176b4e23fc2544ba790522eec7a4b9ea7e43d83cda4e` |
-| `dq19_final_values_rows_4_17.png` | `529ffe2eeb7aa3dbfaf2782eaa6dca2c791b969e3e71f235ca8ec653626034e6` |
-| `dq19_final_passed_rows_4_17.png` | `449f4b5c54f9d4e0338d3183d3295d7c4f92222618c42c4fd30c3bb88bbf153f` |
+| `dq19_post_review_passed_rows_1_14.png` | `ab85bc9a58da6c104b33fd9c983098a37817de8fa13e71626f835fa91936fdfb` |
+| `dq19_post_review_passed_rows_4_17.png` | `78d41cfbc11c6ee1bac1b03fe4d8bf188b86667995393a6409e920c8afa0bec5` |
+| `dq19_post_review_values_rows_1_14.png` | `02f400b2eaab6d3c03ea7f67388e1037656d3b827c1b327952d3a2efb6fbde31` |
+| `dq19_post_review_values_rows_4_17.png` | `30c85a19310306b7242e9d828d9e846e9bee84a79602976c022430d16c140022` |
+| `dq19_post_review_performance.png` | `8918d29c5204b5ab5bd7d33639fa8205c3818153e3a0246cfdc4f7297a9014b8` |
 
-The earlier `dq19_validation_*` captures are retained as review history for the
-initial implementation. The `dq19_final_*` captures above are the authoritative
-evidence for the corrected revision.
+The earlier `dq19_validation_*` and `dq19_final_*` captures are retained as
+review history for the pre-review and first corrected implementations. The
+`dq19_post_review_*` captures above are the authoritative evidence for the
+final reviewed revision.
 
 ## Contract gate
 

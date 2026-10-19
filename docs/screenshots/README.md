@@ -206,6 +206,20 @@ acceptance run.
   Question 3 preservation `39,39,1988,2026` and sample coverage `5,5,0`.
 - `dq19_final_passed_rows_4_17.png`: corrected revision with true outcomes for
   rows 4–17, completing direct evidence that all 17 checks passed.
+- `dq19_post_review_passed_rows_1_14.png`: final reviewed revision with true
+  outcomes for rows 1–14 and analyzed schema signatures.
+- `dq19_post_review_passed_rows_4_17.png`: final reviewed revision with true
+  outcomes for rows 4–17, completing direct proof that all 17 checks passed.
+- `dq19_post_review_values_rows_1_14.png`: final reviewed actual values for the
+  upper checks, including analyzed Question 1 and Question 2 schemas.
+- `dq19_post_review_values_rows_4_17.png`: final reviewed lower values,
+  including Question 3 preservation and five-year source coverage.
+- `dq19_post_review_performance.png`: successful final reviewed execution with
+  111 of 111 tasks completed.
+
+The `dq19_post_review_*` captures are the authoritative final acceptance run;
+the earlier `dq19_validation_*` and `dq19_final_*` images are retained as
+review history.
 
 The exact validation claims, intentional representation differences, evidence
 digests, and scope boundary are indexed in
