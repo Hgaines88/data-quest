@@ -421,7 +421,10 @@ def _datausa_rows() -> DataFrame:
         "nation_id_is_not_blank": "trim(`Nation ID`) <> ''",
         "nation_is_not_blank": "trim(`Nation`) <> ''",
         "year_is_not_null": "`Year` IS NOT NULL",
-        "population_is_nonnegative": "`Population` IS NOT NULL AND `Population` >= 0",
+        "population_is_finite_and_nonnegative": (
+            "`Population` IS NOT NULL "
+            "AND `Population` BETWEEN 0 AND 1.7976931348623157E308"
+        ),
     }
 )
 def bronze_datausa_population() -> DataFrame:

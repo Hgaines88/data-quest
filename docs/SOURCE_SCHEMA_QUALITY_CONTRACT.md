@@ -147,7 +147,9 @@ parser checks fail, or when pagination indicates an incomplete response. This
 detects both missing and additive schema drift instead of allowing an explicit
 reader schema to silently discard new fields. After exploding `data`, the
 pipeline drops and measures rows with blank `Nation ID` or `Nation`, null `Year`,
-null `Population`, or a negative population.
+null `Population`, or a non-finite or negative population. Landing validation
+also rejects finite-number overflow such as JSON exponent notation that Python
+would otherwise decode as infinity.
 
 ## Silver contracts
 

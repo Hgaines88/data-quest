@@ -188,6 +188,13 @@ class PipelineDefinitionTests(unittest.TestCase):
         self.assertIn('"delta.columnMapping.mode": "name"', self.source)
         self.assertIn('(F.element_at("_page", "limit") == 0)', self.source)
 
+    def test_population_view_rejects_nonfinite_values(self) -> None:
+        self.assertIn('"population_is_finite_and_nonnegative"', self.source)
+        self.assertIn(
+            '"AND `Population` BETWEEN 0 AND 1.7976931348623157E308"',
+            self.source,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 import json
+import math
 from pathlib import Path
 from typing import Any, Callable
 
@@ -108,6 +109,7 @@ def validate_population_response(path: str | Path) -> PopulationResponseSummary:
         if (
             isinstance(population, bool)
             or not isinstance(population, (int, float))
+            or (isinstance(population, float) and not math.isfinite(population))
             or population < 0
         ):
             raise PopulationResponseError(
