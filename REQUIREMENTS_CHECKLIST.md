@@ -255,16 +255,16 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-12, DQ-13
 
-- [ ] Filter to quarterly periods `Q01` through `Q04`; explicitly exclude `Q05` because it is an annual average, not an additional quarter.
-- [ ] Sum quarterly `value` by `series_id` and year.
-- [ ] Select the largest annual sum for every series in Spark SQL.
-- [ ] Implement the same logic with the PySpark DataFrame API.
-- [ ] Break ties deterministically by selecting the earliest tied year.
-- [ ] Include the human-readable series label.
-- [ ] Reconcile the expected series inventory and visibly flag a series with no quarterly observations rather than silently omitting it.
-- [ ] Compare both implementations and designate the primary Gold-table version.
+- [x] Filter to quarterly periods `Q01` through `Q04`; explicitly exclude `Q05` because it is an annual average, not an additional quarter.
+- [x] Sum quarterly `value` by `series_id` and year.
+- [x] Select the largest annual sum for every series in Spark SQL.
+- [x] Implement the same logic with the PySpark DataFrame API.
+- [x] Break ties deterministically by selecting the earliest tied year.
+- [x] Include the human-readable series label.
+- [x] Reconcile the expected series inventory and visibly flag a series with no quarterly observations rather than silently omitting it.
+- [x] Compare both implementations and designate the primary Gold-table version.
 
-**Done when:** Each series has a deterministic best year, annual sum, and readable label, with equivalent SQL and PySpark results.
+**Done when:** Each series has a deterministic best year, annual sum, and readable label, with equivalent SQL and PySpark results. The [completed Gold pipeline, metadata-resolution gate, SQL/PySpark parity comparison, and independent source calculation](docs/evidence/dq17_gold_bls_best_year_validation.md) establish the result for the validated snapshot.
 
 ### DQ-18: Answer Question 3 in Spark SQL and PySpark
 
