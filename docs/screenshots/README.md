@@ -104,3 +104,27 @@ The correction history, revision attribution, exact claims, limitations,
 year-coverage result, and image digests are in
 `docs/evidence/dq14_silver_population_live_validation.md`.
 
+## DQ-16 Gold population summary evidence
+
+- `dq16_gold_tables.png`: candidate expectation, successful published
+  materialized view, one output record, and zero displayed errors or warnings.
+- `dq16_gold_expectation_passed.png`: candidate expectation evaluated with
+  fail action, zero percent failures, and zero failed records.
+- `dq16_gold_performance.png`: successful materialized-view refresh and zero
+  displayed errors or warnings.
+- `dq16_gold_pipeline_graph.png`: Silver source, candidate gate, and published
+  Gold materialized view.
+- `dq16_gold_result_bounds.png`: Gold result start year, end year, year count,
+  mean, and population standard deviation.
+- `dq16_gold_result_semantics.png`: complementary Gold result view showing the
+  population standard-deviation semantic.
+- `dq16_sql_result_bounds.png`: successful tracked SQL-file execution and the
+  left side of its one-row result.
+- `dq16_sql_result_semantics.png`: complementary SQL result view showing the
+  right side and population semantic.
+- `dq16_sql_performance.png`: one completed SQL task and six source rows read.
+
+The exact values, numerical comparison, revision attribution, evidence digests,
+and claim boundaries are in
+`docs/evidence/dq16_gold_population_summary_validation.md`.
+

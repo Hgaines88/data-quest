@@ -893,6 +893,35 @@ the reviewed commit. Recording this infrastructure limitation separately avoids
 mistaking unavailable compute for either successful query execution or a data
 defect.
 
+### DQ-16: publish and independently reconcile the population summary
+
+Question 1 is implemented twice from the same governed Silver source. The
+primary PySpark pipeline filters the normalized United States record to 2013
+through 2018, then uses a fail-fast candidate view to require six rows, six
+distinct years, and the requested inclusive bounds before publication. This
+prevents a partial interval from producing a plausible but unsupported average.
+The published materialized view carries the bounds, year count, mean,
+population standard deviation, and an explicit `population` semantic label.
+
+The separate Spark SQL implementation is a read-only analytical alternative,
+not another pipeline source. It applies the same filters and returns no row
+unless the same completeness conditions hold. Keeping it outside the Gold
+pipeline avoids duplicate publication while providing an independent API path
+for numerical reconciliation.
+
+On October 19, 2026, the `data-quest-gold` triggered update completed in the
+target Databricks workspace with zero displayed errors or warnings and one
+published result. The candidate expectation panel reported action `FAIL`, zero
+percent failures, and zero failed records. The tracked SQL alternative then
+read six rows and returned
+the same bounds, count, mean, semantic label, and population standard deviation
+within a manually applied `1e-6` comparison tolerance. The structural tests do
+not execute that live numerical comparison. A simple independent calculation
+from the six annual source values produced the same mean and standard
+deviation. The completed update, graph, exact outputs, SQL execution,
+screenshot digests, and evidence limits are preserved in
+[`docs/evidence/dq16_gold_population_summary_validation.md`](docs/evidence/dq16_gold_population_summary_validation.md).
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

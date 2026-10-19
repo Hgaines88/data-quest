@@ -92,3 +92,22 @@ See the
 [Silver population live-validation record](../docs/evidence/dq14_silver_population_live_validation.md)
 for the completed update, 11-row output, graph, performance, and direct
 2013–2018 year-coverage result.
+
+## Gold population summary
+
+`gold.py` uses the PySpark DataFrame API as the primary implementation of the
+Question 1 population summary. Before publication, a fail-fast temporary view
+requires six input rows, six distinct years, and observed bounds of 2013 and
+2018. Because the input is filtered to that inclusive range, these conditions
+prove that exactly one normalized US row exists for every requested year.
+
+The published one-row `gold_population_summary_2013_2018` view reports the
+inclusive bounds, year count, mean annual population, population standard
+deviation, and the explicit `population` standard-deviation semantic. Population
+standard deviation is intentional because the six years are the full finite
+range requested, not a sample of that range.
+
+The DQ-16 target-runtime update published the expected one-row result, and the
+independent Spark SQL alternative agreed within the declared numeric tolerance.
+See the [Gold population live-validation record](../docs/evidence/dq16_gold_population_summary_validation.md)
+for the completed update, graph, exact values, SQL parity, and evidence limits.
