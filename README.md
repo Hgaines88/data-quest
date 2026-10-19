@@ -52,8 +52,10 @@ and [Gold contracts](docs/REQUIRED_GOLD_CONTRACTS.md).
 - Outbound HTTPS access to the BLS and Data USA public endpoints.
 - A valid contact email for the BLS request `User-Agent`. Enter it only in the
   notebook widget; do not commit it or any token, profile, or workspace URL.
-- Python 3 for optional local contract tests. Runtime pipeline modules require
-  Databricks' `pyspark.pipelines` API and are not executed locally.
+- Python 3 for optional local contract tests; they use the standard-library
+  `unittest` runner and require no third-party test package. Runtime pipeline
+  modules require Databricks' `pyspark.pipelines` API and are not executed
+  locally.
 
 No Databricks access token is required by the checked-in code. The
 [`.env.example`](.env.example) file contains public URLs, placeholder contact
@@ -112,6 +114,16 @@ landing notebook concurrently.
    and [`sql/quality/validate_gold_cross_implementation.sql`](sql/quality/validate_gold_cross_implementation.sql)
    in Databricks SQL. Every Gold validation row must report `passed = true`.
 
+   For a non-default deployment, retarget every
+   `workspace.rearc_data_quest` reference in the validation scripts and the
+   three SQL alternatives to the configured catalog and schema. In the Gold
+   validator, also replace `workspace.information_schema.columns` with the
+   target catalog's `information_schema.columns` and each
+   `table_schema = 'rearc_data_quest'` predicate with the deployed schema. Keep
+   these substitutions aligned so schema checks and value checks inspect the
+   same tables. The [quality SQL guide](sql/quality/README.md) records the full
+   rule.
+
 The pipeline implementation details and expected table counts are collected in
 [`pipelines/README.md`](pipelines/README.md).
 
@@ -134,7 +146,7 @@ in the [DQ-19 validation record](docs/evidence/dq19_gold_cross_implementation_va
 Run the local deterministic checks from the repository root:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m pytest -q
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v
 python -m compileall -q src pipelines notebooks tests
 git diff --check
 ```
