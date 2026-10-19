@@ -63,7 +63,7 @@ class GoldCrossImplementationQualityQueryTests(unittest.TestCase):
 
     def test_applies_tolerance_only_to_double_aggregates(self) -> None:
         self.assertIn("CAST(0.000001 AS DOUBLE) AS double_tolerance", self.sql)
-        self.assertEqual(self.sql.count("settings.double_tolerance"), 2)
+        self.assertEqual(self.sql.count("settings.double_tolerance"), 4)
         self.assertIn(
             "NOT (sql_result.mean_population <=> pyspark_result.mean_population)",
             self.sql,
@@ -82,16 +82,39 @@ class GoldCrossImplementationQualityQueryTests(unittest.TestCase):
         self.assertIn("MIN(annual.year) AS expected_best_year", self.sql)
         self.assertIn("LEFT JOIN workspace.rearc_data_quest.silver_population", self.sql)
         self.assertIn("COUNT_IF(population_match_found <> (population IS NOT NULL))", self.sql)
+        self.assertIn("q2_metadata_violations AS", self.sql)
+        self.assertIn("HAVING COUNT(metadata.series_id) <> 1", self.sql)
+
+    def test_compares_published_names_types_and_order(self) -> None:
+        self.assertEqual(self.sql.count("workspace.information_schema.columns"), 3)
+        self.assertEqual(self.sql.count("ORDER BY ordinal_position"), 3)
+        for column_signature in (
+            "start_year:int",
+            "series_id:string",
+            "q01_value:decimal(20,6)",
+        ):
+            with self.subTest(column_signature=column_signature):
+                self.assertIn(column_signature, self.sql)
+
+    def test_stable_checks_do_not_depend_on_result_rows(self) -> None:
+        self.assertIn("COUNT(*) = 1\n      AND MIN(start_year) = 2013", self.sql)
+        self.assertNotIn("FROM q1_sql\n),\nq1_pyspark_schema", self.sql)
 
     def test_contains_independent_source_spot_checks(self) -> None:
+        self.assertIn("q1_source_calculation AS", self.sql)
+        self.assertIn("SUM(POW(CAST(population AS DOUBLE), 2))", self.sql)
+        self.assertIn("q1_source_mismatches AS", self.sql)
         self.assertIn("result.series_id = 'PRS30006032'", self.sql)
         self.assertIn("best_year = 1994", self.sql)
         self.assertIn("source.year IN (2012, 2013, 2020, 2024, 2026)", self.sql)
+        self.assertIn("source_sample_count = 5", self.sql)
+        self.assertIn("result_sample_count = 5", self.sql)
 
     def test_compares_values_in_both_directions(self) -> None:
-        self.assertEqual(self.lowered.count("full outer join"), 3)
+        self.assertEqual(self.lowered.count("full outer join"), 5)
         expected_references = {
-            "q1_value_mismatches": 3,
+            "q1_value_mismatches": 2,
+            "q1_source_mismatches": 2,
             "q2_value_mismatches": 2,
             "q3_value_mismatches": 2,
         }

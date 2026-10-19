@@ -36,28 +36,15 @@ q1_pyspark AS (
   FROM workspace.rearc_data_quest.gold_population_summary_2013_2018
 ),
 q1_sql_schema AS (
-  SELECT concat_ws(
-    ',',
-    typeof(start_year),
-    typeof(end_year),
-    typeof(year_count),
-    typeof(mean_population),
-    typeof(population_stddev),
-    typeof(stddev_semantics)
-  ) AS schema_signature
-  FROM q1_sql
+  SELECT 'start_year:int,end_year:int,year_count:int,mean_population:double,population_stddev:double,stddev_semantics:string'
+    AS schema_signature
 ),
 q1_pyspark_schema AS (
-  SELECT concat_ws(
-    ',',
-    typeof(start_year),
-    typeof(end_year),
-    typeof(year_count),
-    typeof(mean_population),
-    typeof(population_stddev),
-    typeof(stddev_semantics)
-  ) AS schema_signature
-  FROM q1_pyspark
+  SELECT LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
+    WITHIN GROUP (ORDER BY ordinal_position) AS schema_signature
+  FROM workspace.information_schema.columns
+  WHERE table_schema = 'rearc_data_quest'
+    AND table_name = 'gold_population_summary_2013_2018'
 ),
 q1_value_mismatches AS (
   SELECT COUNT(*) AS mismatch_count
@@ -88,6 +75,39 @@ q1_value_mismatches AS (
       )
     )
     OR NOT (sql_result.stddev_semantics <=> pyspark_result.stddev_semantics)
+),
+q1_source_calculation AS (
+  SELECT
+    CAST(COUNT(*) AS INT) AS source_year_count,
+    MIN(year) AS source_start_year,
+    MAX(year) AS source_end_year,
+    SUM(CAST(population AS DOUBLE)) / COUNT(*) AS source_mean_population,
+    SQRT(
+      SUM(POW(CAST(population AS DOUBLE), 2)) / COUNT(*)
+        - POW(SUM(CAST(population AS DOUBLE)) / COUNT(*), 2)
+    ) AS source_population_stddev
+  FROM workspace.rearc_data_quest.silver_population
+  WHERE nation_id = '01000US'
+    AND nation = 'United States'
+    AND year BETWEEN 2013 AND 2018
+),
+q1_source_mismatches AS (
+  SELECT COUNT(*) AS mismatch_count
+  FROM q1_source_calculation AS source
+  FULL OUTER JOIN q1_pyspark AS result
+    ON source.source_start_year = result.start_year
+    AND source.source_end_year = result.end_year
+  CROSS JOIN validation_settings AS settings
+  WHERE source.source_year_count <> 6
+    OR result.year_count <> 6
+    OR source.source_mean_population IS NULL
+    OR result.mean_population IS NULL
+    OR ABS(source.source_mean_population - result.mean_population)
+      > settings.double_tolerance
+    OR source.source_population_stddev IS NULL
+    OR result.population_stddev IS NULL
+    OR ABS(source.source_population_stddev - result.population_stddev)
+      > settings.double_tolerance
 ),
 
 -- Question 2: independently reproduce the deterministic SQL ranking.
@@ -138,30 +158,26 @@ q2_pyspark AS (
   FROM workspace.rearc_data_quest.gold_bls_best_year_by_series
 ),
 q2_sql_schema AS (
-  SELECT concat_ws(
-    ',',
-    typeof(series_id),
-    typeof(series_label),
-    typeof(best_year),
-    typeof(annual_quarterly_sum),
-    typeof(quarterly_observation_count),
-    typeof(has_quarterly_observations)
-  ) AS schema_signature
-  FROM q2_sql
-  LIMIT 1
+  SELECT 'series_id:string,series_label:string,best_year:int,annual_quarterly_sum:decimal(30,6),quarterly_observation_count:int,has_quarterly_observations:boolean'
+    AS schema_signature
 ),
 q2_pyspark_schema AS (
-  SELECT concat_ws(
-    ',',
-    typeof(series_id),
-    typeof(series_label),
-    typeof(best_year),
-    typeof(annual_quarterly_sum),
-    typeof(quarterly_observation_count),
-    typeof(has_quarterly_observations)
-  ) AS schema_signature
-  FROM q2_pyspark
-  LIMIT 1
+  SELECT LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
+    WITHIN GROUP (ORDER BY ordinal_position) AS schema_signature
+  FROM workspace.information_schema.columns
+  WHERE table_schema = 'rearc_data_quest'
+    AND table_name = 'gold_bls_best_year_by_series'
+),
+q2_metadata_violations AS (
+  SELECT COUNT(*) AS violation_count
+  FROM (
+    SELECT annual.series_id
+    FROM (SELECT DISTINCT series_id FROM q2_annual_sums) AS annual
+    LEFT JOIN workspace.rearc_data_quest.silver_bls_series AS metadata
+      ON annual.series_id = metadata.series_id
+    GROUP BY annual.series_id
+    HAVING COUNT(metadata.series_id) <> 1
+  ) AS unresolved
 ),
 q2_value_mismatches AS (
   SELECT COUNT(*) AS mismatch_count
@@ -252,30 +268,15 @@ q3_pyspark AS (
   FROM workspace.rearc_data_quest.gold_bls_q01_population
 ),
 q3_sql_schema AS (
-  SELECT concat_ws(
-    ',',
-    typeof(series_id),
-    typeof(series_label),
-    typeof(year),
-    typeof(q01_value),
-    typeof(population),
-    typeof(population_match_found)
-  ) AS schema_signature
-  FROM q3_sql
-  LIMIT 1
+  SELECT 'series_id:string,series_label:string,year:int,q01_value:decimal(20,6),population:bigint,population_match_found:boolean'
+    AS schema_signature
 ),
 q3_pyspark_schema AS (
-  SELECT concat_ws(
-    ',',
-    typeof(series_id),
-    typeof(series_label),
-    typeof(year),
-    typeof(q01_value),
-    typeof(population),
-    typeof(population_match_found)
-  ) AS schema_signature
-  FROM q3_pyspark
-  LIMIT 1
+  SELECT LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
+    WITHIN GROUP (ORDER BY ordinal_position) AS schema_signature
+  FROM workspace.information_schema.columns
+  WHERE table_schema = 'rearc_data_quest'
+    AND table_name = 'gold_bls_q01_population'
 ),
 q3_value_mismatches AS (
   SELECT COUNT(*) AS mismatch_count
@@ -313,33 +314,45 @@ q3_result_invariants AS (
       AS inconsistent_match_flags
   FROM q3_pyspark
 ),
+q3_spot_check_source AS (
+  SELECT
+    source.series_id,
+    source.year,
+    source.value AS source_q01_value,
+    population.population AS source_population
+  FROM workspace.rearc_data_quest.silver_bls_observation AS source
+  LEFT JOIN workspace.rearc_data_quest.silver_population AS population
+    ON source.year = population.year
+    AND population.nation_id = '01000US'
+    AND population.nation = 'United States'
+  WHERE source.series_id = 'PRS30006032'
+    AND source.period_code = 'Q01'
+    AND source.year IN (2012, 2013, 2020, 2024, 2026)
+),
+q3_spot_check_result AS (
+  SELECT series_id, year, q01_value, population, population_match_found
+  FROM q3_pyspark
+  WHERE series_id = 'PRS30006032'
+    AND year IN (2012, 2013, 2020, 2024, 2026)
+),
 q3_spot_check AS (
-  SELECT COUNT(*) AS mismatch_count
-  FROM (
-    SELECT
-      source.year,
-      source.value AS source_q01_value,
-      population.population AS source_population,
-      result.q01_value AS result_q01_value,
-      result.population AS result_population,
-      result.population_match_found
-    FROM workspace.rearc_data_quest.silver_bls_observation AS source
-    LEFT JOIN workspace.rearc_data_quest.silver_population AS population
-      ON source.year = population.year
-      AND population.nation_id = '01000US'
-      AND population.nation = 'United States'
-    INNER JOIN q3_pyspark AS result
-      ON source.series_id = result.series_id
-      AND source.year = result.year
-    WHERE source.series_id = 'PRS30006032'
-      AND source.period_code = 'Q01'
-      AND source.year IN (2012, 2013, 2020, 2024, 2026)
-  ) AS samples
-  WHERE NOT (source_q01_value <=> result_q01_value)
-    OR NOT (source_population <=> result_population)
-    OR NOT (
-      population_match_found <=> (source_population IS NOT NULL)
-    )
+  SELECT
+    COUNT(source.year) AS source_sample_count,
+    COUNT(result.year) AS result_sample_count,
+    COUNT_IF(
+      source.year IS NULL
+      OR result.year IS NULL
+      OR NOT (source.source_q01_value <=> result.q01_value)
+      OR NOT (source.source_population <=> result.population)
+      OR NOT (
+        result.population_match_found
+          <=> (source.source_population IS NOT NULL)
+      )
+    ) AS mismatch_count
+  FROM q3_spot_check_source AS source
+  FULL OUTER JOIN q3_spot_check_result AS result
+    ON source.series_id = result.series_id
+    AND source.year = result.year
 ),
 
 checks AS (
@@ -383,16 +396,17 @@ checks AS (
     'q1_year_bounds_and_semantics',
     concat_ws(
       ',',
-      CAST(start_year AS STRING),
-      CAST(end_year AS STRING),
-      CAST(year_count AS STRING),
-      stddev_semantics
+      CAST(MIN(start_year) AS STRING),
+      CAST(MAX(end_year) AS STRING),
+      CAST(MAX(year_count) AS STRING),
+      MAX(stddev_semantics)
     ),
     '2013,2018,6,population',
-    start_year = 2013
-      AND end_year = 2018
-      AND year_count = 6
-      AND stddev_semantics = 'population',
+    COUNT(*) = 1
+      AND MIN(start_year) = 2013
+      AND MAX(end_year) = 2018
+      AND MAX(year_count) = 6
+      AND MAX(stddev_semantics) = 'population',
     'The requested complete finite range uses population standard deviation.'
   FROM q1_pyspark
 
@@ -403,8 +417,8 @@ checks AS (
     CAST(mismatch_count AS STRING),
     '0',
     mismatch_count = 0,
-    'The published summary reconciles to a direct six-row Silver calculation.'
-  FROM q1_value_mismatches
+    'Gold reconciles to a separate sum-and-squared-deviation Silver calculation.'
+  FROM q1_source_mismatches
 
   UNION ALL
   SELECT
@@ -421,13 +435,18 @@ checks AS (
   SELECT
     'question_2',
     'q2_row_count_parity',
-    CAST((SELECT COUNT(*) FROM q2_sql) AS STRING),
-    CAST((SELECT COUNT(*) FROM q2_pyspark) AS STRING),
+    concat_ws(
+      ',',
+      CAST((SELECT COUNT(*) FROM q2_sql) AS STRING),
+      CAST((SELECT violation_count FROM q2_metadata_violations) AS STRING)
+    ),
+    concat_ws(',', CAST((SELECT COUNT(*) FROM q2_pyspark) AS STRING), '0'),
     (SELECT COUNT(*) FROM q2_sql) = (SELECT COUNT(*) FROM q2_pyspark)
       AND (SELECT COUNT(*) FROM q2_sql) = (
         SELECT COUNT(*) FROM workspace.rearc_data_quest.silver_bls_series
-      ),
-    'Both implementations preserve the complete governed series inventory.'
+      )
+      AND (SELECT violation_count FROM q2_metadata_violations) = 0,
+    'Both implementations preserve inventory; every summed series has metadata.'
 
   UNION ALL
   SELECT
@@ -559,9 +578,16 @@ checks AS (
   SELECT
     'question_3',
     'q3_source_spot_check',
-    CAST(mismatch_count AS STRING),
-    '0',
-    mismatch_count = 0,
+    concat_ws(
+      ',',
+      CAST(source_sample_count AS STRING),
+      CAST(result_sample_count AS STRING),
+      CAST(mismatch_count AS STRING)
+    ),
+    '5,5,0',
+    source_sample_count = 5
+      AND result_sample_count = 5
+      AND mismatch_count = 0,
     'Five boundary, matched, and internal-gap years reconcile to Silver.'
   FROM q3_spot_check
 )
