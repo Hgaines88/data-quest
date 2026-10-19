@@ -262,6 +262,9 @@ checks AS (
       OR measure_code IS NULL OR measure_text IS NULL
       OR duration_code IS NULL OR duration_text IS NULL
       OR seasonal_code IS NULL OR seasonal_text IS NULL
+      OR series_label <> concat_ws(
+        ' | ', sector_name, class_text, measure_text, duration_text, seasonal_text
+      )
       OR begin_year IS NULL OR begin_period IS NULL
       OR end_year IS NULL OR end_period IS NULL
       OR begin_period NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
@@ -277,6 +280,9 @@ checks AS (
       OR measure_code IS NULL OR measure_text IS NULL
       OR duration_code IS NULL OR duration_text IS NULL
       OR seasonal_code IS NULL OR seasonal_text IS NULL
+      OR series_label <> concat_ws(
+        ' | ', sector_name, class_text, measure_text, duration_text, seasonal_text
+      )
       OR begin_year IS NULL OR begin_period IS NULL
       OR end_year IS NULL OR end_period IS NULL
       OR begin_period NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
@@ -284,7 +290,7 @@ checks AS (
       OR source_file IS NULL OR source_path IS NULL OR ingested_at_utc IS NULL
       OR run_id IS NULL OR content_sha256 IS NULL
     ) = 0,
-    'Every series requires valid periods, provider-grounded labels, and complete provenance.'
+    'Every series requires valid periods, the provider-composed label, and complete provenance.'
   FROM workspace.rearc_data_quest.silver_bls_series
 
   UNION ALL

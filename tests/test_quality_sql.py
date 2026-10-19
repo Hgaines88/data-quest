@@ -61,6 +61,12 @@ class BronzeToSilverQualityQueryTests(unittest.TestCase):
         predicate = "series_label is null or trim(series_label) = ''"
         self.assertEqual(self.sql.lower().count(predicate), 2)
 
+    def test_series_label_matches_the_provider_description_composition(self) -> None:
+        label_rule = """series_label <> concat_ws(
+        ' | ', sector_name, class_text, measure_text, duration_text, seasonal_text
+      )"""
+        self.assertEqual(self.sql.count(label_rule), 2)
+
     def test_population_check_enforces_the_documented_us_grain(self) -> None:
         self.assertEqual(self.sql.count("nation_id <> '01000US'"), 2)
         self.assertEqual(self.sql.count("nation <> 'United States'"), 2)
