@@ -102,7 +102,11 @@ class GoldCrossImplementationQualityQueryTests(unittest.TestCase):
 
     def test_contains_independent_source_spot_checks(self) -> None:
         self.assertIn("q1_source_calculation AS", self.sql)
-        self.assertIn("SUM(POW(CAST(population AS DOUBLE), 2))", self.sql)
+        self.assertIn("q1_source_mean AS", self.sql)
+        self.assertIn(
+            "SUM(POW(values.population - mean.source_mean_population, 2))",
+            self.sql,
+        )
         self.assertIn("q1_source_mismatches AS", self.sql)
         self.assertIn("result.series_id = 'PRS30006032'", self.sql)
         self.assertIn("best_year = 1994", self.sql)

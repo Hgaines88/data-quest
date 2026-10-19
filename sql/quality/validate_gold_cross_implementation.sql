@@ -76,20 +76,38 @@ q1_value_mismatches AS (
     )
     OR NOT (sql_result.stddev_semantics <=> pyspark_result.stddev_semantics)
 ),
-q1_source_calculation AS (
-  SELECT
-    CAST(COUNT(*) AS INT) AS source_year_count,
-    MIN(year) AS source_start_year,
-    MAX(year) AS source_end_year,
-    SUM(CAST(population AS DOUBLE)) / COUNT(*) AS source_mean_population,
-    SQRT(
-      SUM(POW(CAST(population AS DOUBLE), 2)) / COUNT(*)
-        - POW(SUM(CAST(population AS DOUBLE)) / COUNT(*), 2)
-    ) AS source_population_stddev
+q1_source_values AS (
+  SELECT year, CAST(population AS DOUBLE) AS population
   FROM workspace.rearc_data_quest.silver_population
   WHERE nation_id = '01000US'
     AND nation = 'United States'
     AND year BETWEEN 2013 AND 2018
+),
+q1_source_mean AS (
+  SELECT
+    CAST(COUNT(*) AS INT) AS source_year_count,
+    MIN(year) AS source_start_year,
+    MAX(year) AS source_end_year,
+    SUM(population) / COUNT(*) AS source_mean_population
+  FROM q1_source_values
+),
+q1_source_calculation AS (
+  SELECT
+    mean.source_year_count,
+    mean.source_start_year,
+    mean.source_end_year,
+    mean.source_mean_population,
+    SQRT(
+      SUM(POW(values.population - mean.source_mean_population, 2))
+        / mean.source_year_count
+    ) AS source_population_stddev
+  FROM q1_source_values AS values
+  CROSS JOIN q1_source_mean AS mean
+  GROUP BY
+    mean.source_year_count,
+    mean.source_start_year,
+    mean.source_end_year,
+    mean.source_mean_population
 ),
 q1_source_mismatches AS (
   SELECT COUNT(*) AS mismatch_count
