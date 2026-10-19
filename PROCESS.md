@@ -1171,3 +1171,14 @@ single-writer, uses a small public dataset, and does not claim production
 scheduling, service-level objectives, or causal inference. Within that scope,
 the ingestion, Bronze, Silver, and three Gold contracts are implemented,
 rerunnable, reconciled, and supported by traceable evidence.
+
+### Roadmap correction: reserve DQ-23 for the completed repository
+
+The initial plan placed the required final submission audit before the optional
+product extensions. That order would make its secrets, privacy, links,
+screenshots, reproducibility, accessibility, and explainability conclusions
+stale as soon as later work changed the repository. The remaining work is now
+ordered DQ-25, DQ-26, DQ-24, DQ-27, DQ-28, DQ-29, and finally DQ-23. DQ-29 is a
+decision gate and does not assume that another platform will be added. The
+authoritative sequence, entry and exit gates, and per-card QA protocol are
+recorded in [`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md).

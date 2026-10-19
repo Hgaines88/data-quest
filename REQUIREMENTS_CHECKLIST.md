@@ -342,7 +342,11 @@ check passing and no unexplained discrepancy.
 ### DQ-23: Perform final submission audit
 
 **Priority:** Required  
-**Depends on:** DQ-20, DQ-21, DQ-22
+**Depends on:** DQ-20, DQ-21, DQ-22, DQ-29
+
+**Execution note:** This is the final project-wide gate. See the
+[project completion roadmap](docs/PROJECT_ROADMAP.md); do not close DQ-23 while
+an implementation card or the platform decision gate remains open.
 
 - [ ] Run the complete ingestion and pipeline workflow from a documented starting state.
 - [ ] Re-run it to demonstrate idempotency.
@@ -356,27 +360,101 @@ check passing and no unexplained discrepancy.
 
 ## Epic 5: Optional enhancements
 
-These begin only after DQ-23 is functionally complete.
+These extend the completed required pipeline before DQ-23 certifies the final
+repository. Their execution order and QA gates are defined in the
+[project completion roadmap](docs/PROJECT_ROADMAP.md).
 
 ### DQ-24: Deploy with Databricks Asset Bundles
 
-- [ ] Define resources and environment configuration as code.
-- [ ] Validate the bundle and document deployment commands.
+**Priority:** Bonus
+**Depends on:** DQ-26
+
+- [ ] Inventory the pipeline, jobs, notebooks or source files, schemas, variables, permissions, and other resources that belong in the bundle.
+- [ ] Define environment-specific configuration without committing credentials, personal workspace identifiers, or secrets.
+- [ ] Add bundle targets appropriate for local validation and the authorized Databricks workspace.
+- [ ] Validate the bundle configuration before deployment.
+- [ ] Deploy or update supported resources through the bundle and confirm that the resulting pipeline still passes its tests.
+- [ ] For unsupported Free Edition resources, capture constraint evidence and document an equivalent validation path without claiming deployment.
+- [ ] Document validate, deploy, run, update, and teardown or rollback commands.
+
+**Done when:** The project can be validated and reproducibly deployed from version-controlled configuration for supported resources, every unsupported resource has an evidenced limitation and equivalent validation path, and no required manual UI reconstruction is left undocumented.
 
 ### DQ-25: Add stakeholder exploration
 
-- [ ] Create a focused dashboard or Genie space over the Gold layer.
-- [ ] Use plain-language labels and questions relevant to a non-technical stakeholder.
+**Priority:** Bonus
+**Depends on:** DQ-22
+
+- [ ] Define the intended stakeholder, the decisions they need to make, and a small set of plain-language business questions.
+- [ ] Confirm that each visual or Genie response is supported by a governed Gold table at the correct grain.
+- [ ] Build a focused Databricks dashboard, a Genie space, or both when the workspace supports them.
+- [ ] Add clear titles, units, filters, definitions, and source/freshness context.
+- [ ] Configure Genie instructions and sample questions so answers remain within the documented semantic scope.
+- [ ] Validate representative dashboard values and Genie answers against Gold-layer queries.
+- [ ] Capture reviewer-facing evidence and document any Free Edition limitations.
+
+**Done when:** A non-technical stakeholder can answer the chosen questions without writing code, and representative answers have been reconciled to the Gold layer.
 
 ### DQ-26: Add Gold-layer access controls
 
-- [ ] Create an appropriate read-only analyst access pattern in Unity Catalog.
-- [ ] Document the principle-of-least-privilege rationale.
+**Priority:** Bonus
+**Depends on:** DQ-25
+
+- [ ] Define the read-only analyst persona and the exact objects required for the dashboard or Genie space.
+- [ ] Create or document an appropriate group or role-based access pattern without granting ownership or write privileges.
+- [ ] Grant only the required catalog, schema, table, view, warehouse, and dashboard or Genie permissions.
+- [ ] Prefer governed Gold views or tables rather than exposing Bronze, Silver, raw files, or implementation details.
+- [ ] Test that the analyst can query the intended Gold objects and use the stakeholder experience.
+- [ ] Test that writes and access to unauthorized layers are denied.
+- [ ] Record the grants, validation evidence, limitations, and least-privilege rationale in `PROCESS.md`.
+
+**Done when:** The stakeholder experience works for a read-only analyst while unauthorized reads and all writes remain blocked.
 
 ### DQ-27: Add operational observability
 
-- [ ] Surface freshness, file-processing, expectation, and pipeline-failure metrics.
-- [ ] Describe alerting and recovery behavior suitable for a client environment.
+**Priority:** Bonus
+**Depends on:** DQ-24
+
+- [ ] Surface source and Gold-layer freshness.
+- [ ] Surface discovered, downloaded, skipped, changed, removed, and failed-file counts.
+- [ ] Surface pipeline expectation results and rejected or quarantined records.
+- [ ] Make pipeline, ingestion, and deployment failures diagnosable without exposing secrets or personal information.
+- [ ] Define practical warning and failure thresholds for the available metrics.
+- [ ] Document alerting options, rerun behavior, rollback or recovery steps, and ownership expectations.
+- [ ] Demonstrate one controlled failure and successful recovery when safe and feasible.
+
+**Done when:** A reviewer can determine whether the product is fresh and healthy, diagnose a representative failure, and follow documented recovery guidance.
+
+### DQ-28: Validate the extended Databricks product end to end
+
+**Priority:** Bonus
+**Depends on:** DQ-24, DQ-25, DQ-26, DQ-27
+
+- [ ] Deploy and run the documented solution from its starting state using the Asset Bundle where supported.
+- [ ] For unsupported Free Edition resources, validate the bundle configuration, exercise the documented equivalent resource, and record the limitation without claiming deployment.
+- [ ] Run ingestion and the Spark Declarative Pipeline through Gold.
+- [ ] Reconcile dashboard and representative Genie answers to Gold queries.
+- [ ] Verify read-only analyst access and confirm prohibited access remains denied.
+- [ ] Confirm freshness, expectation, file-processing, and failure signals are visible.
+- [ ] Review runtime, compute selection, cleanup, and likely cost drivers.
+- [ ] Update the README, architecture diagram, `PROCESS.md`, AI-usage log, and evidence gallery to match the final implementation.
+- [ ] Perform a final secrets, privacy, reproducibility, and explainability review.
+
+**Done when:** The extended product can be deployed where supported, equivalently validated where deployment is unsupported, operated, governed, used, and explained end to end with supporting evidence.
+
+### DQ-29: Reassess before adding Snowflake or Power BI
+
+**Priority:** Decision gate
+**Depends on:** DQ-28
+
+- [ ] Summarize which stakeholder, governance, deployment, observability, and operational needs Databricks already satisfies.
+- [ ] Identify any remaining requirement that Databricks does not satisfy well enough for this use case.
+- [ ] Evaluate whether Snowflake or Power BI would serve a defensible consumer, interoperability, semantic-modeling, or reporting need.
+- [ ] Estimate added build time, Windows requirements, cost, credentials, duplicated storage or compute, and maintenance burden.
+- [ ] Confirm what Rearc permits to be reused or discussed outside the assessment context.
+- [ ] Record a clear decision: stop with Databricks, build a separate public-data adaptation, or add a narrowly scoped external consumer.
+- [ ] Do not begin an external implementation before documenting the decision.
+
+**Done when:** Any later platform extension has a stated user and architectural purpose, or the project is intentionally closed as a complete Databricks product.
 
 ## Recommended execution order
 
@@ -385,8 +463,10 @@ These begin only after DQ-23 is functionally complete.
 3. DQ-07 through DQ-10
 4. DQ-11 through DQ-15
 5. DQ-16 through DQ-19
-6. DQ-20 through DQ-23
-7. One carefully selected bonus card if time and quality permit
+6. DQ-20 through DQ-22
+7. DQ-25, DQ-26, DQ-24, and DQ-27
+8. DQ-28 and DQ-29
+9. DQ-23 as the final project-wide audit
 
 ## Suggested first sprint
 
