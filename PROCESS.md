@@ -922,6 +922,34 @@ deviation. The completed update, graph, exact outputs, SQL execution,
 screenshot digests, and evidence limits are preserved in
 [`docs/evidence/dq16_gold_population_summary_validation.md`](docs/evidence/dq16_gold_population_summary_validation.md).
 
+### DQ-17: publish deterministic BLS best-year results
+
+Question 2 is implemented in both PySpark and Spark SQL from the governed
+Silver observation and series tables. Both versions include only `Q01` through
+`Q04`, sum values by series and year, rank the largest annual sum first, and
+select the earliest year when sums tie. The PySpark materialized view is the
+primary governed output. It starts from the complete 282-series metadata
+inventory so series without quarterly history remain visible with an explicit
+false status rather than disappearing.
+
+Review identified a cross-table integrity boundary that the original
+inventory-first joins could hide: a quarterly observation whose `series_id`
+did not resolve to metadata would be silently omitted. The final PySpark graph
+therefore contains a fail-fast metadata-validation view, and the standalone SQL
+alternative uses an equivalent `RAISE_ERROR` guard. Both require exactly one
+metadata row for every retained quarterly series before returning results.
+
+On October 19, 2026, the final `data-quest-gold` update completed in the target
+Databricks workspace with zero displayed errors or warnings. The metadata gate
+and both result expectations passed, and the published best-year table retained
+282 series. The guarded SQL alternative then completed with 282 rows. The
+earlier null-safe full-outer comparison found 282 SQL rows, 282 PySpark rows,
+and zero field-level mismatches; the guard changes failure behavior without
+changing valid calculations. An independent Silver query also reconciled
+`PRS30006032` year 1994 from four quarterly values to `14.600000`. The exact
+outputs, screenshots, digests, attribution boundary, and claim limits are in
+[`docs/evidence/dq17_gold_bls_best_year_validation.md`](docs/evidence/dq17_gold_bls_best_year_validation.md).
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

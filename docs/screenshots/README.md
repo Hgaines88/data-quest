@@ -130,18 +130,20 @@ and claim boundaries are in
 
 ## DQ-17 Gold BLS best-year evidence
 
-- `dq17_gold_run_completed.png`: completed Gold update, four discovered objects,
-  282 published best-year rows, and zero displayed errors or warnings.
+- `dq17_gold_run_completed.png`: completed final Gold update with the metadata
+  validation dependency and zero displayed errors or warnings.
 - `dq17_gold_expectations.png`: both candidate expectations using the fail
   action with zero percent failures and zero failed records.
+- `dq17_metadata_validation_run.png`: completed final update showing the new
+  metadata-validation view and its fail-fast expectation in the table list.
 - `dq17_gold_pipeline_graph.png`: both governed Silver sources feeding the
   candidate and published best-year materialized view.
 - `dq17_gold_result_labels.png`: 282-row result with provider-grounded labels,
   selected years, annual quarterly sums, and visibly retained null selections.
 - `dq17_gold_result_status.png`: quarterly counts and explicit observation
   availability flags, including the zero/false missing-history state.
-- `dq17_sql_result.png`: successful excluded Spark SQL alternative with 282 rows
-  and readable labels.
+- `dq17_sql_result.png`: successful final excluded Spark SQL alternative with
+  its orphan-series guard, 282 rows, and readable labels.
 - `dq17_sql_pyspark_parity.png`: read-only comparison returning 282 SQL rows,
   282 PySpark rows, and zero field-level mismatches.
 - `dq17_independent_spot_check.png`: direct four-quarter Silver observations for

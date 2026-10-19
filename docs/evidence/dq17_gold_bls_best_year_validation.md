@@ -2,7 +2,7 @@
 
 ## Deployment identity
 
-- Git revision: `18a6992bd9050deab585d28a3cecd345658eaa85`
+- Git revision: `5009e0c2c2fea025b79df856c2026dffe1e232b7`
 - Branch: `codex/dq-17-bls-best-year`
 - Pipeline: `data-quest-gold`
 - Pipeline ID: `c0fba073-4bb3-4c3a-b91a-dcfb1356ec0b`
@@ -15,11 +15,17 @@ Git commit identity.
 
 ## Pipeline result
 
-The triggered Gold update completed with zero displayed errors or warnings.
+The final triggered Gold update completed at 2:45 PM EDT with zero displayed
+errors or warnings.
 `gold_bls_best_year_by_series` published 282 rows while the existing population
 summary remained green and unchanged. The dependency graph shows validated
 `silver_bls_observation` and `silver_bls_series` feeding the candidate view and
 published materialized view.
+
+The final graph also contains `gold_bls_series_metadata_validation`, which
+requires every quarterly observation series to resolve to exactly one Silver
+metadata row before the Gold candidate can publish. Its fail-fast expectation
+passed as part of the completed update.
 
 Both candidate expectations used the `FAIL` action and recorded zero percent
 failures and zero failed records:
@@ -35,9 +41,10 @@ remain visible with null year and sum, count zero, and the flag set to false.
 
 ## Independent SQL parity
 
-The excluded, reviewer-visible
+After the metadata guard was added, the excluded, reviewer-visible
 `sql/alternatives/question_2_bls_best_year.sql` query ran successfully against
-the same governed Silver tables and returned 282 rows. A separate read-only
+the same governed Silver tables at 2:49 PM EDT and returned 282 rows without
+raising its orphan-series error. A separate read-only
 full-outer comparison used null-safe equality across the label, year, sum,
 observation count, and availability flag. It returned:
 
@@ -72,12 +79,13 @@ annual sums descending and years ascending, so the earliest year wins any tie.
 
 | Screenshot | SHA-256 |
 | --- | --- |
-| `dq17_gold_run_completed.png` | `3326ca83d4228ff75174282f0b922ce6f926e8ba4a2b976765080019ca0a29d0` |
+| `dq17_gold_run_completed.png` | `35e08a54bc04b99a25ed952ce65b35180e54818f1c705d5c74b2e2f812cc4337` |
 | `dq17_gold_expectations.png` | `63b94ffefad4d22c2ac2e414e969d2b1676013a3ead7ac049f9c9bcc2df27bca` |
+| `dq17_metadata_validation_run.png` | `4f5b43f5bda65938af13e000eec21926dbec2794be7d7ab3dd87293a2c0c08c0` |
 | `dq17_gold_pipeline_graph.png` | `c45351116b65afef3e73aeb3f1ee9d3ca557de87b106afc92a3a590c44da84a5` |
 | `dq17_gold_result_labels.png` | `02c0c2bdafd35fa673c38a505c6577797a75e5155926101591cde3649507035d` |
 | `dq17_gold_result_status.png` | `8c774e14c6c753858544edd9bac4fe2f2a6e1b5968d7d1bd396a4970389f0aa2` |
-| `dq17_sql_result.png` | `39c19f2722300a95a26b3ec003f2fe0911d4a6d740f666d36d457448e3f5bc4d` |
+| `dq17_sql_result.png` | `78e872594df511f446cdef714e446014b31071d60b9e02fb26d07f5c053eb131` |
 | `dq17_sql_pyspark_parity.png` | `1acd417edefb5932c97d1a78bb6d3baec818a7d8de7448e42a2b8ce5ea6c579b` |
 | `dq17_independent_spot_check.png` | `eeb772d4c4862361aeb3ccad1adf2a1848ebe740ea0502132868bf688862f706` |
 
