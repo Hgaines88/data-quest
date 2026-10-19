@@ -331,13 +331,13 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-20, DQ-21
 
-- [ ] Summarize the solution and architecture.
-- [ ] Provide configuration and execution instructions.
-- [ ] Identify the pipeline entry point, ingestion entry point, Gold outputs, SQL alternatives, and evidence.
-- [ ] Document prerequisites without exposing credentials.
-- [ ] Link to `PROCESS.md` and screenshots.
+- [x] Summarize the solution and architecture.
+- [x] Provide configuration and execution instructions.
+- [x] Identify the pipeline entry point, ingestion entry point, Gold outputs, SQL alternatives, and evidence.
+- [x] Document prerequisites without exposing credentials.
+- [x] Link to `PROCESS.md` and screenshots.
 
-**Done when:** A reviewer can navigate and understand the submission without verbal guidance.
+**Done when:** A reviewer can navigate and understand the submission without verbal guidance. The reviewer path begins in the [repository README](README.md), which covers architecture, prerequisites, configuration, execution order, outputs, alternatives, QA, and evidence links.
 
 ### DQ-23: Perform final submission audit
 

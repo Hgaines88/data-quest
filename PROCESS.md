@@ -1117,6 +1117,18 @@ The original implementation evidence remains available for the chronological
 audit trail, while reviewers can verify the required deliverables from the
 privacy-reviewed set without live workspace access.
 
+### DQ-22: replace the assignment brief with a reviewer-facing guide
+
+The root README now leads with the implemented solution rather than repeating
+the prompt. It gives a reviewer one ordered path through the medallion
+architecture, non-secret configuration, landing notebooks, separate Bronze,
+Silver, and Gold pipeline sources, three published Gold outputs, independent
+SQL alternatives, local QA, and live evidence. Runtime-only BLS contact data is
+documented as a notebook widget and is never supplied as an example credential.
+The original acceptance criteria remain traceable in
+[`REQUIREMENTS_CHECKLIST.md`](REQUIREMENTS_CHECKLIST.md), while the README links
+directly to this process record and the curated screenshot set.
+
 ## Retrospective
 
 The hardest problem was not any single transformation. It was preserving a
