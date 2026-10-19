@@ -220,13 +220,17 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-12, DQ-13, DQ-14
 
-- [ ] Reconcile row counts and explain expected differences between layers.
-- [ ] Check uniqueness and non-null keys.
-- [ ] Check type conversions and rejected or quarantined rows.
-- [ ] Check label coverage and population year coverage.
-- [ ] Save compact validation queries or tests that can be rerun.
+- [x] Reconcile row counts and explain expected differences between layers.
+- [x] Check uniqueness and non-null keys.
+- [x] Check type conversions and rejected or quarantined rows.
+- [x] Check label coverage and population year coverage.
+- [x] Save compact validation queries or tests that can be rerun.
 
-**Done when:** Each Silver table has repeatable quality checks and all discrepancies are explained.
+**Done when:** Each Silver table has repeatable quality checks and all
+discrepancies are explained. The [completed 14-check Databricks
+report](docs/evidence/dq15_bronze_to_silver_quality_validation.md) reconciles
+77,126 observation rows, 282 series rows, and 11 population rows with every
+check passing and no unexplained discrepancy.
 
 ## Epic 3: Gold analytical outputs in both APIs
 
