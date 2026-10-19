@@ -137,13 +137,17 @@ checks AS (
   SELECT
     'population_required_nulls_or_invalid_values',
     count_if(
-      nation_id IS NULL OR nation IS NULL OR year IS NULL OR population IS NULL
+      nation_id IS NULL OR nation_id <> '01000US'
+      OR nation IS NULL OR nation <> 'United States'
+      OR year IS NULL OR population IS NULL
       OR population < 0 OR source_file IS NULL OR source_path IS NULL
       OR ingested_at_utc IS NULL OR run_id IS NULL OR content_sha256 IS NULL
     ),
     0,
     count_if(
-      nation_id IS NULL OR nation IS NULL OR year IS NULL OR population IS NULL
+      nation_id IS NULL OR nation_id <> '01000US'
+      OR nation IS NULL OR nation <> 'United States'
+      OR year IS NULL OR population IS NULL
       OR population < 0 OR source_file IS NULL OR source_path IS NULL
       OR ingested_at_utc IS NULL OR run_id IS NULL OR content_sha256 IS NULL
     ) = 0,
