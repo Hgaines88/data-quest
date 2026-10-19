@@ -271,15 +271,15 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-12, DQ-14
 
-- [ ] Filter BLS observations to `series_id = PRS30006032` and `period = Q01`.
-- [ ] Join population by year while preserving BLS years without a population match.
-- [ ] Use the filtered BLS observations as the left side of the join and expose an explicit population-match indicator or equivalent visible missing-value behavior.
-- [ ] Implement the result in Spark SQL.
-- [ ] Implement the same result with the PySpark DataFrame API.
-- [ ] Compare both implementations and designate the primary Gold-table version.
-- [ ] Order output by year for readability.
+- [x] Filter BLS observations to `series_id = PRS30006032` and `period = Q01`.
+- [x] Join population by year while preserving BLS years without a population match.
+- [x] Use the filtered BLS observations as the left side of the join and expose an explicit population-match indicator or equivalent visible missing-value behavior.
+- [x] Implement the result in Spark SQL.
+- [x] Implement the same result with the PySpark DataFrame API.
+- [x] Compare both implementations and designate the primary Gold-table version.
+- [x] Order output by year for readability.
 
-**Done when:** The output shows annual Q01 values and population where available without silently dropping unmatched BLS years.
+**Done when:** The output shows annual Q01 values and population where available without silently dropping unmatched BLS years. The [completed Gold pipeline, fail-fast expectations, SQL/PySpark parity comparison, and representative source checks](docs/evidence/dq18_gold_bls_q01_population_validation.md) validate all 39 BLS years while preserving 28 unmatched population rows.
 
 ### DQ-19: Add cross-implementation and result validation
 
