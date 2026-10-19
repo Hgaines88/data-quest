@@ -32,5 +32,40 @@ class GoldPopulationSummarySqlTests(unittest.TestCase):
         self.assertIn("'POPULATION' AS STDDEV_SEMANTICS", self.source)
 
 
+class GoldBlsBestYearSqlTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.source = (
+            Path(__file__).resolve().parents[1]
+            / "sql"
+            / "alternatives"
+            / "question_2_bls_best_year.sql"
+        ).read_text(encoding="utf-8").upper()
+
+    def test_uses_only_quarterly_silver_observations(self) -> None:
+        self.assertIn(
+            "FROM WORKSPACE.REARC_DATA_QUEST.SILVER_BLS_OBSERVATION", self.source
+        )
+        self.assertIn("PERIOD_CODE IN ('Q01', 'Q02', 'Q03', 'Q04')", self.source)
+        where_clause = self.source.split("WHERE PERIOD_CODE", 1)[1]
+        self.assertNotIn("Q05", where_clause)
+        self.assertNotIn("BRONZE_", self.source)
+
+    def test_uses_deterministic_best_year_ranking(self) -> None:
+        self.assertIn("SUM(VALUE) AS ANNUAL_QUARTERLY_SUM", self.source)
+        self.assertIn("PARTITION BY SERIES_ID", self.source)
+        self.assertIn("ORDER BY ANNUAL_QUARTERLY_SUM DESC, YEAR ASC", self.source)
+        self.assertIn("RANKED.RESULT_RANK = 1", self.source)
+
+    def test_preserves_and_flags_the_expected_series_inventory(self) -> None:
+        self.assertIn(
+            "FROM WORKSPACE.REARC_DATA_QUEST.SILVER_BLS_SERIES AS SERIES",
+            self.source,
+        )
+        self.assertIn("LEFT JOIN RANKED_YEARS AS RANKED", self.source)
+        self.assertIn("AS HAS_QUARTERLY_OBSERVATIONS", self.source)
+        self.assertIn("COALESCE(RANKED.QUARTERLY_OBSERVATION_COUNT, 0)", self.source)
+
+
 if __name__ == "__main__":
     unittest.main()
