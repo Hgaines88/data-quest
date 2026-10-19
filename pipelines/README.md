@@ -106,3 +106,8 @@ inclusive bounds, year count, mean annual population, population standard
 deviation, and the explicit `population` standard-deviation semantic. Population
 standard deviation is intentional because the six years are the full finite
 range requested, not a sample of that range.
+
+The DQ-16 target-runtime update published the expected one-row result, and the
+independent Spark SQL alternative agreed within the declared numeric tolerance.
+See the [Gold population live-validation record](../docs/evidence/dq16_gold_population_summary_validation.md)
+for the completed update, graph, exact values, SQL parity, and evidence limits.

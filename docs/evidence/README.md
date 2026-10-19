@@ -56,3 +56,10 @@ these exports support exact value inspection.
 - `dq15_bronze_to_silver_quality_validation.md`: indexes the live 14-check
   reconciliation result, exact layer counts, zero-exception outcomes,
   successful task execution, screenshot paths, and screenshot SHA-256 digests.
+
+## DQ-16 Gold population summary validation
+
+- `dq16_gold_population_summary_validation.md`: indexes the completed Gold
+  update, six-year completeness gate, exact one-row PySpark result, independent
+  Spark SQL result, numeric-tolerance comparison, independent calculation,
+  screenshot paths, and screenshot SHA-256 digests.

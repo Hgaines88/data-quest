@@ -239,16 +239,16 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-14
 
-- [ ] Filter annual US population to 2013 through 2018 inclusive.
-- [ ] Confirm exactly one normalized US population row exists for each of the six requested years.
-- [ ] Compute mean and standard deviation in Spark SQL.
-- [ ] Compute the same result with the PySpark DataFrame API.
-- [ ] Use and document population standard deviation (`stddev_pop`) because the requested six-year range is the complete finite set being summarized.
-- [ ] Publish the inclusive bounds, year count, mean, standard deviation, and standard-deviation semantics in `gold_population_summary_2013_2018`.
-- [ ] Compare both implementations using an appropriate numeric tolerance.
-- [ ] Select and document the primary implementation feeding the Gold table.
+- [x] Filter annual US population to 2013 through 2018 inclusive.
+- [x] Confirm exactly one normalized US population row exists for each of the six requested years.
+- [x] Compute mean and standard deviation in Spark SQL.
+- [x] Compute the same result with the PySpark DataFrame API.
+- [x] Use and document population standard deviation (`stddev_pop`) because the requested six-year range is the complete finite set being summarized.
+- [x] Publish the inclusive bounds, year count, mean, standard deviation, and standard-deviation semantics in `gold_population_summary_2013_2018`.
+- [x] Compare both implementations using an appropriate numeric tolerance.
+- [x] Select and document the primary implementation feeding the Gold table.
 
-**Done when:** Both versions agree and the Gold output clearly identifies the range and statistic semantics.
+**Done when:** Both versions agree and the Gold output clearly identifies the range and statistic semantics. The [completed Gold pipeline and independent Spark SQL validation](docs/evidence/dq16_gold_population_summary_validation.md) show one matching summary row, explicit population-standard-deviation semantics, and numerical agreement within tolerance.
 
 ### DQ-17: Answer Question 2 in Spark SQL and PySpark
 
