@@ -37,3 +37,9 @@ these exports support exact value inspection.
 - `dq12_silver_live_validation.md`: indexes the operator-recorded branch
   revision, completed update, output scale, dependency graph, pipeline-selector
   interpretation, screenshot paths, and screenshot SHA-256 digests.
+
+## DQ-13 Silver series validation
+
+- `dq13_silver_series_live_validation.md`: indexes the completed update,
+  provider-lookup graph, exact 282-row result, observation regression evidence,
+  attribution limitation, screenshot paths, and screenshot SHA-256 digests.

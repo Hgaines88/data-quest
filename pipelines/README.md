@@ -75,3 +75,7 @@ match and every `series_id` to remain one row after the joins, so missing labels
 or duplicate lookup keys cannot be hidden by a fallback description. Coverage
 years are integers, coverage periods must be `Q01` through `Q05`, and the
 provider's `-` base-year sentinel is published as a nullable integer.
+
+The DQ-13 target-runtime update published 282 series rows with zero errors or
+warnings while leaving the observation output unchanged. See the
+[Silver series live-validation record](../docs/evidence/dq13_silver_series_live_validation.md).

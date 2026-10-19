@@ -816,6 +816,17 @@ null and uses ANSI-safe `try_cast` to publish an integer. The coverage gate also
 checks both begin and end periods against `Q01` through `Q05`; a non-null but
 unsupported code can no longer pass merely because Bronze preserved it.
 
+The target-runtime update completed successfully on October 18, 2026 at 7:55
+PM EDT with zero errors and zero warnings. `silver_bls_series` published 282
+rows in 7 seconds, exactly matching the previously recorded Bronze series
+inventory. Its dependency graph shows all five lookups feeding the candidate
+gate, and the existing observation table remained green with `No change`.
+Because the published series table depends on the fail-fast completeness and
+one-row-per-series condition, successful publication establishes full lookup
+coverage and stable cardinality for this snapshot. The completed update, table
+result, graph, and performance evidence are preserved in
+[`docs/evidence/dq13_silver_series_live_validation.md`](docs/evidence/dq13_silver_series_live_validation.md).
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
