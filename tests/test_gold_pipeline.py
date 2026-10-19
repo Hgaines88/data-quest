@@ -120,5 +120,59 @@ class GoldBlsBestYearDefinitionTests(unittest.TestCase):
             self.assertIn(f'"{field}"', self.source)
 
 
+class GoldBlsQ01PopulationDefinitionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.source = (
+            Path(__file__).resolve().parents[1] / "pipelines" / "gold.py"
+        ).read_text(encoding="utf-8")
+
+    def test_filters_the_exact_series_and_q01_period(self) -> None:
+        self.assertIn('_Q01_SERIES_ID = "PRS30006032"', self.source)
+        self.assertIn('_Q01_PERIOD_CODE = "Q01"', self.source)
+        self.assertIn(
+            '(F.col("series_id") == _Q01_SERIES_ID)', self.source
+        )
+        self.assertIn(
+            '(F.col("period_code") == _Q01_PERIOD_CODE)', self.source
+        )
+
+    def test_fails_on_empty_duplicate_or_ambiguous_inputs(self) -> None:
+        self.assertIn(
+            'name="gold_bls_q01_population_input_validation"', self.source
+        )
+        self.assertIn(
+            '"selected_q01_history_is_nonempty_and_uniquely_keyed"',
+            self.source,
+        )
+        self.assertIn('"_observation_row_count > 0 "', self.source)
+        self.assertIn('"_metadata_row_count = 1"', self.source)
+
+    def test_preserves_bls_years_with_a_population_left_join(self) -> None:
+        self.assertIn(
+            '.join(us_population, "year", "left")', self.source
+        )
+        self.assertIn(
+            '"population_match_found", F.col("population").isNotNull()',
+            self.source,
+        )
+        self.assertIn(
+            '"population_match_indicator_is_consistent"', self.source
+        )
+
+    def test_publishes_the_ordered_q01_population_contract(self) -> None:
+        self.assertIn('name="gold_bls_q01_population"', self.source)
+        for field in (
+            "series_id",
+            "series_label",
+            "year",
+            "q01_value",
+            "population",
+            "population_match_found",
+        ):
+            self.assertIn(f'"{field}"', self.source)
+        self.assertIn('.orderBy("year")', self.source)
+
+
 if __name__ == "__main__":
     unittest.main()

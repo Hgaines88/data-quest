@@ -10,6 +10,8 @@ from pyspark.sql.window import Window
 _START_YEAR = 2013
 _END_YEAR = 2018
 _EXPECTED_YEAR_COUNT = _END_YEAR - _START_YEAR + 1
+_Q01_SERIES_ID = "PRS30006032"
+_Q01_PERIOD_CODE = "Q01"
 
 
 @dp.temporary_view(name="gold_population_summary_2013_2018_candidate")
@@ -158,4 +160,110 @@ def gold_bls_best_year_by_series() -> DataFrame:
         "annual_quarterly_sum",
         "quarterly_observation_count",
         "has_quarterly_observations",
+    )
+
+
+@dp.temporary_view(name="gold_bls_q01_population_input_validation")
+@dp.expect_or_fail(
+    "selected_q01_history_is_nonempty_and_uniquely_keyed",
+    "_observation_row_count > 0 "
+    "AND _distinct_year_count = _observation_row_count",
+)
+@dp.expect_or_fail(
+    "selected_series_has_exactly_one_metadata_row",
+    "_metadata_row_count = 1",
+)
+def gold_bls_q01_population_input_validation() -> DataFrame:
+    """Prove the selected history and its provider metadata are unambiguous."""
+
+    selected_observations = (
+        spark.read.table("silver_bls_observation")
+        .filter(
+            (F.col("series_id") == _Q01_SERIES_ID)
+            & (F.col("period_code") == _Q01_PERIOD_CODE)
+        )
+        .agg(
+            F.count(F.lit(1)).alias("_observation_row_count"),
+            F.countDistinct("year").alias("_distinct_year_count"),
+        )
+    )
+    selected_metadata = (
+        spark.read.table("silver_bls_series")
+        .filter(F.col("series_id") == _Q01_SERIES_ID)
+        .agg(F.count(F.lit(1)).alias("_metadata_row_count"))
+    )
+    return selected_observations.crossJoin(selected_metadata)
+
+
+@dp.temporary_view(name="gold_bls_q01_population_candidate")
+@dp.expect_or_fail("one_result_row_per_bls_year", "_year_row_count = 1")
+@dp.expect_or_fail(
+    "population_match_indicator_is_consistent",
+    "(population_match_found AND population IS NOT NULL) "
+    "OR (NOT population_match_found AND population IS NULL)",
+)
+def gold_bls_q01_population_candidate() -> DataFrame:
+    """Add nullable US population context without dropping any BLS year."""
+
+    validation = spark.read.table(
+        "gold_bls_q01_population_input_validation"
+    )
+    selected_observations = (
+        spark.read.table("silver_bls_observation")
+        .filter(
+            (F.col("series_id") == _Q01_SERIES_ID)
+            & (F.col("period_code") == _Q01_PERIOD_CODE)
+        )
+        .select(
+            "series_id",
+            "year",
+            F.col("value").alias("q01_value"),
+        )
+    )
+    selected_metadata = (
+        spark.read.table("silver_bls_series")
+        .filter(F.col("series_id") == _Q01_SERIES_ID)
+        .select("series_id", "series_label")
+    )
+    us_population = (
+        spark.read.table("silver_population")
+        .filter(
+            (F.col("nation_id") == "01000US")
+            & (F.col("nation") == "United States")
+        )
+        .select("year", "population")
+    )
+    return (
+        selected_observations.join(selected_metadata, "series_id", "inner")
+        .join(us_population, "year", "left")
+        .crossJoin(validation)
+        .withColumn(
+            "population_match_found", F.col("population").isNotNull()
+        )
+        .withColumn(
+            "_year_row_count",
+            F.count(F.lit(1)).over(Window.partitionBy("series_id", "year")),
+        )
+    )
+
+
+@dp.materialized_view(
+    name="gold_bls_q01_population",
+    comment=(
+        "Q01 values for BLS series PRS30006032 with nullable annual United "
+        "States population context; no causal relationship is implied."
+    ),
+)
+def gold_bls_q01_population() -> DataFrame:
+    return (
+        spark.read.table("gold_bls_q01_population_candidate")
+        .select(
+            "series_id",
+            "series_label",
+            "year",
+            "q01_value",
+            "population",
+            "population_match_found",
+        )
+        .orderBy("year")
     )
