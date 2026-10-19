@@ -70,3 +70,18 @@ these exports support exact value inspection.
   282-series inventory, fail-fast metadata resolution, zero-failure
   expectations, SQL/PySpark null-safe parity, independent four-quarter source
   calculation, screenshot paths, and screenshot SHA-256 digests.
+
+## DQ-18 Gold BLS Q01 population-context validation
+
+- `dq18_gold_bls_q01_population_validation.md`: indexes the completed Gold
+  update, 39-row preserved BLS history, nullable population context,
+  fail-fast expectations, SQL/PySpark parity, representative source checks,
+  screenshot paths, and screenshot SHA-256 digests.
+
+## DQ-19 Gold cross-implementation validation
+
+- `dq19_gold_cross_implementation_validation.md`: indexes the live 17-check
+  reconciliation across all three Gold questions, explicit numeric tolerance,
+  invariant and source checks, successful 85-task execution, intentional
+  representation differences, screenshot paths, and screenshot SHA-256
+  digests.

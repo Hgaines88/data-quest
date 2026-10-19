@@ -181,3 +181,21 @@ The deployment attribution, exact results, evidence digests, causal claim
 boundary, and limitations are indexed in
 `docs/evidence/dq18_gold_bls_q01_population_validation.md`.
 
+## DQ-19 Gold cross-implementation evidence
+
+- `dq19_validation_checks_overview.png`: successful 17-row validation result
+  showing the named Question 1, Question 2, and Question 3 checks and their
+  actual and expected values.
+- `dq19_validation_performance.png`: successful Databricks execution with 85 of
+  85 tasks completed.
+- `dq19_validation_passed.png`: the result's `passed` and `interpretation`
+  columns showing true outcomes for every displayed check.
+- `dq19_validation_checks_complete.png`: the final result rows proving all 17
+  checks are present, including Question 3 bounds, spot check, and key parity.
+- `dq19_validation_passed_complete.png`: the lower result rows with the
+  `passed` column visible, directly confirming true outcomes through row 17.
+
+The exact validation claims, intentional representation differences, evidence
+digests, and scope boundary are indexed in
+`docs/evidence/dq19_gold_cross_implementation_validation.md`.
+

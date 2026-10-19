@@ -983,6 +983,34 @@ screenshots, digests, attribution limits, and the non-causal scope boundary are
 preserved in
 [`docs/evidence/dq18_gold_bls_q01_population_validation.md`](docs/evidence/dq18_gold_bls_q01_population_validation.md).
 
+### DQ-19: reconcile every Gold SQL and PySpark implementation
+
+The final Gold quality query independently recomputes all three SQL alternatives
+from the governed Silver tables and compares them with the primary PySpark
+materialized views. It emits machine-readable checks for ordered schemas, row
+counts, unique keys, values, year bounds, join preservation, deterministic
+tie-breaking, and representative source calculations. Full-outer comparisons
+make missing rows visible in either direction instead of allowing an inner join
+to hide them.
+
+Question 1 DOUBLE aggregates use an explicit absolute `1e-6` tolerance and
+one-sided-null detection. Question 2 DECIMAL results and Question 3 DECIMAL,
+nullable population, and boolean values use exact null-safe equality. The SQL
+alternatives are ephemeral reviewer calculations while the PySpark results are
+governed materialized views. Storage order is intentionally excluded from the
+data contract; key uniqueness and the Question 2 earliest-year tie-break are
+validated, and reviewer-facing queries may order their output explicitly.
+
+On October 19, 2026, the tracked validation query completed in Databricks in
+31.036 seconds with all 85 tasks successful. It returned 17 checks—five for
+Question 1 and six each for Questions 2 and 3—and every row reported
+`passed = true`. The output confirmed one Question 1 summary, the complete
+282-series Question 2 inventory, and all 39 Question 3 history rows. All value
+and independent source-check discrepancy counts were zero. This closes the
+three-contract Gold gate before dashboard or Genie work. The exact outputs,
+screenshots, SHA-256 digests, and claim boundaries are preserved in
+[`docs/evidence/dq19_gold_cross_implementation_validation.md`](docs/evidence/dq19_gold_cross_implementation_validation.md).
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.
