@@ -1,5 +1,6 @@
 from decimal import Decimal
 from pathlib import Path
+import re
 import unittest
 
 from data_quest.validation.bronze_contract import (
@@ -195,11 +196,12 @@ class PipelineDefinitionTests(unittest.TestCase):
             '"AND `Population` BETWEEN 0 AND 1.7976931348623157E308"',
             self.source,
         )
-        self.assertIn('"population_is_exact_integral_double"', self.source)
+        self.assertIn('"population_has_integral_numeric_form"', self.source)
         self.assertIn(
-            "try_cast(`_population_raw` AS DECIMAL(38, 18)) = ",
+            "'^[0-9]+([.]0+)?([eE][+]?[0-9]+)?$'",
             self.source,
         )
+        self.assertIn('"population_double_preserves_integer_value"', self.source)
         self.assertIn('"population_does_not_underflow_to_zero"', self.source)
         self.assertIn(
             'F.element_at("_record", "Population").alias("_population_raw")',
@@ -211,6 +213,14 @@ class PipelineDefinitionTests(unittest.TestCase):
 
         self.assertEqual(float(raw_population), 9007199254740992.0)
         self.assertNotEqual(raw_population, raw_population.to_integral_value())
+
+    def test_integral_numeric_form_rejects_arbitrarily_small_fraction(self) -> None:
+        integral_form = re.compile(r"^[0-9]+([.]0+)?([eE][+]?[0-9]+)?$")
+
+        self.assertIsNone(integral_form.fullmatch("1e-19"))
+        self.assertIsNone(integral_form.fullmatch("9007199254740992.25"))
+        self.assertIsNotNone(integral_form.fullmatch("316128839.0"))
+        self.assertIsNotNone(integral_form.fullmatch("1e8"))
 
 
 if __name__ == "__main__":

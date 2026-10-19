@@ -426,10 +426,12 @@ def _datausa_rows() -> DataFrame:
             "`Population` IS NOT NULL "
             "AND `Population` BETWEEN 0 AND 1.7976931348623157E308"
         ),
-        "population_is_exact_integral_double": (
-            "try_cast(`_population_raw` AS DECIMAL(38, 18)) IS NOT NULL "
-            "AND try_cast(`_population_raw` AS DECIMAL(38, 18)) = "
-            "try_cast(`_population_raw` AS DECIMAL(38, 0)) "
+        "population_has_integral_numeric_form": (
+            "regexp_like(`_population_raw`, "
+            "'^[0-9]+([.]0+)?([eE][+]?[0-9]+)?$')"
+        ),
+        "population_double_preserves_integer_value": (
+            "try_cast(`_population_raw` AS DECIMAL(38, 0)) IS NOT NULL "
             "AND CAST(`Population` AS DECIMAL(38, 0)) = "
             "try_cast(`_population_raw` AS DECIMAL(38, 0))"
         ),

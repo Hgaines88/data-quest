@@ -153,9 +153,10 @@ that would overflow to infinity, underflow to zero, or round to a different
 integer when projected into Bronze's double type. Bronze retains the original
 numeric text in an underscore-prefixed audit column and independently applies
 the same range, underflow, integrality, and integer-preservation boundaries
-before publishing a row. Checking integrality against the original decimal text
-prevents a fraction that rounds to an integer `double` from being published as
-a fabricated count.
+before publishing a row. A numeric-form check on the original text rejects any
+fractional coefficient or negative exponent without imposing a fixed decimal
+scale. The separate value comparison then prevents an integer that changes
+during `double` conversion from being published as a fabricated count.
 
 ## Silver contracts
 

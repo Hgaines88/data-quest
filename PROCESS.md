@@ -831,11 +831,12 @@ result, graph, and performance evidence are preserved in
 
 The population transform reads only `bronze_datausa_population` and retains the
 documented United States national record (`01000US`, `United States`). Bronze
-compares the original decimal text with both an integral decimal and the
-projected double, so a fractional value cannot round into an apparently valid
-population count. ANSI-safe Silver casts then produce integer years and long
-population values, while named drop expectations measure malformed, negative,
-non-US, or incomplete-provenance rows.
+requires the original numeric text to have an integral form, then verifies that
+the projected double preserves its value. This avoids a fixed decimal scale and
+prevents a fraction from rounding into an apparently valid population count.
+ANSI-safe Silver casts then produce integer years and long population values,
+while named drop expectations measure malformed, negative, non-US, or
+incomplete-provenance rows.
 
 A separate fail-fast window enforces one row per `nation_id + year`; the
 pipeline never chooses an arbitrary duplicate. The final `silver_population`
