@@ -1,6 +1,45 @@
 # Reviewer Evidence
 
-Required screenshots of the Databricks pipeline, representative tables, and all three analytical outputs will be stored here. Images must be descriptively named and reviewed for sensitive information before they are committed.
+## DQ-21 curated submission set
+
+These nine screenshots are the minimum reviewer-facing set for the assignment.
+They are losslessly cropped copies of the authoritative live evidence described
+later in this index. The crops remove browser chrome, the workspace hostname,
+the operator avatar, pipeline identifiers, and account email while preserving
+the pipeline status, tables, result values, and relevant Databricks context.
+No result pixels were synthesized or retouched.
+
+| Requirement | Curated evidence |
+| --- | --- |
+| Successful Spark Declarative Pipeline | [`dq21_pipeline_completed.png`](dq21_pipeline_completed.png) |
+| Representative Bronze tables | [`dq21_bronze_tables.png`](dq21_bronze_tables.png) |
+| Representative Silver tables | [`dq21_silver_tables.png`](dq21_silver_tables.png) |
+| Representative Gold tables | [`dq21_gold_tables.png`](dq21_gold_tables.png) |
+| Question 1 values | [`dq21_question_1_values.png`](dq21_question_1_values.png) |
+| Question 1 population-standard-deviation semantic | [`dq21_question_1_semantics.png`](dq21_question_1_semantics.png) |
+| Question 2 readable labels and values | [`dq21_question_2_labels.png`](dq21_question_2_labels.png) |
+| Question 2 observation status | [`dq21_question_2_status.png`](dq21_question_2_status.png) |
+| Question 3 Q01 values and nullable population matches | [`dq21_question_3_values.png`](dq21_question_3_values.png) |
+
+SHA-256 digests for the curated files:
+
+| Screenshot | SHA-256 |
+| --- | --- |
+| `dq21_pipeline_completed.png` | `91e4e76c6d6a688aa832c57528f69de32c696a12e36d235e89e9cbf48f3b13da` |
+| `dq21_bronze_tables.png` | `b24a5462df7c3a32b74a7584bb503edf9706b06c7a31ba0fc9bbd3b6fd8e5a7c` |
+| `dq21_silver_tables.png` | `a83ce17d7ebe838bfee46743403243d4d63d51e9b026739a3a18ae34a470918b` |
+| `dq21_gold_tables.png` | `3caf9a30bf60a7fdecc263ede6a46c7e7a856f30751f50b7f818fe947b82cac0` |
+| `dq21_question_1_values.png` | `ed3151351aa779308aab7ef7c8235837be984029ff299b32cc5b209d72ff7bf1` |
+| `dq21_question_1_semantics.png` | `2536e045c76e2a0b88d16e192f97772690bd7e3dbc2946b9b09f172a8bf161c8` |
+| `dq21_question_2_labels.png` | `9c1b4e3b95e39c87985ef321cc92689a2b5ed902112b21489c1b0456b89263f2` |
+| `dq21_question_2_status.png` | `5169b9d742b92493f5a2482e2faf3c548ddb24791d51ae09c1e767fba42a6f92` |
+| `dq21_question_3_values.png` | `e77a709905b88f0f06e8c71d0f27c23f920558a9ee167da4291df7cc04a79e14` |
+
+## Detailed implementation evidence
+
+The remaining screenshots preserve the chronological implementation and review
+record. They are indexed by card below, with exact claims and limitations in
+`docs/evidence/`.
 
 ## DQ-07 BLS landing evidence
 

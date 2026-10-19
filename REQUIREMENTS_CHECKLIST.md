@@ -316,15 +316,15 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-11, DQ-15, DQ-19
 
-- [ ] Capture the successful Spark Declarative Pipeline graph or run.
-- [ ] Capture representative Bronze, Silver, and Gold tables.
-- [ ] Capture the output of Question 1.
-- [ ] Capture the output of Question 2 with readable labels.
-- [ ] Capture the output of Question 3.
-- [ ] Redact workspace identifiers, tokens, email addresses, or other unnecessary private information.
-- [ ] Give screenshots descriptive filenames and reference them from the README or `PROCESS.md`.
+- [x] Capture the successful Spark Declarative Pipeline graph or run.
+- [x] Capture representative Bronze, Silver, and Gold tables.
+- [x] Capture the output of Question 1.
+- [x] Capture the output of Question 2 with readable labels.
+- [x] Capture the output of Question 3.
+- [x] Redact workspace identifiers, tokens, email addresses, or other unnecessary private information.
+- [x] Give screenshots descriptive filenames and reference them from the README or `PROCESS.md`.
 
-**Done when:** A reviewer without workspace access can verify the pipeline and all three outputs.
+**Done when:** A reviewer without workspace access can verify the pipeline and all three outputs. The [curated DQ-21 submission set](docs/screenshots/README.md#dq-21-curated-submission-set) provides nine descriptively named, privacy-reviewed screenshots covering the successful pipeline, representative Bronze/Silver/Gold tables, and all three required analytical outputs.
 
 ### DQ-22: Write the reviewer-facing README
 

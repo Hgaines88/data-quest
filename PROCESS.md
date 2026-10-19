@@ -1103,6 +1103,20 @@ Genie work. The exact outputs, screenshots, SHA-256 digests, and claim
 boundaries are preserved in
 [`docs/evidence/dq19_gold_cross_implementation_validation.md`](docs/evidence/dq19_gold_cross_implementation_validation.md).
 
+### DQ-21: curate privacy-reviewed submission screenshots
+
+The implementation cards already produced live Databricks evidence for the
+pipeline, layer tables, and all three analytical outputs. For the final
+submission I selected the minimum authoritative views and created nine
+losslessly cropped copies. The crops remove browser chrome, the workspace
+hostname, operator identity, pipeline identifiers, and account email; they do
+not alter the displayed execution state, table names, row counts, labels, or
+result values. SHA-256 digests and direct links are recorded in the
+[`docs/screenshots/` index](docs/screenshots/README.md#dq-21-curated-submission-set).
+The original implementation evidence remains available for the chronological
+audit trail, while reviewers can verify the required deliverables from the
+privacy-reviewed set without live workspace access.
+
 ## Retrospective
 
 The hardest problem was not any single transformation. It was preserving a
