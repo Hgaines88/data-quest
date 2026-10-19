@@ -858,15 +858,16 @@ run proves typed, quality-gated, uniquely keyed publication, while the query
 directly proves the requested year coverage. The later Gold pipeline will
 still enforce the six-year analytical range at its own publication boundary.
 
-Final review exposed a numeric edge case outside the normal provider snapshot:
-valid JSON exponent notation such as `1e400` decodes to positive infinity in
-Python, so rejecting only JSON's nonstandard `Infinity` token was insufficient.
-The correction is deliberately layered and small. Landing validation now uses
-an explicit finite-number check, while Bronze independently bounds population
-to the finite nonnegative double range. Regression tests cover both the raw
-overflow input and the pipeline rule. Silver already rejected this value
-because its ANSI-safe long cast becomes null, but fixing the earlier boundaries
-prevents invalid data from being accepted or retained unnecessarily.
+Final review exposed numeric range edge cases outside the normal provider
+snapshot. Python's default JSON float parser converts valid exponent notation
+such as `1e400` to infinity and `1e-400` to zero before validation. Rejecting
+only JSON's nonstandard `Infinity` token was therefore insufficient. Landing
+now parses decimals losslessly, then rejects values that would overflow or
+underflow when projected into Bronze's double type. Bronze independently bounds
+population to the finite nonnegative double range. Regression tests cover both
+range edges and the pipeline rule. Silver already rejected overflow because its
+ANSI-safe long cast becomes null, but the lossless landing check is also needed
+to prevent underflow from silently becoming a publishable zero.
 
 ## Retrospective
 

@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from decimal import Decimal
 import json
 import math
 from pathlib import Path
@@ -47,6 +48,7 @@ def validate_population_response(path: str | Path) -> PopulationResponseSummary:
         payload = json.loads(
             raw_bytes.decode("utf-8"),
             parse_constant=_reject_nonstandard_json_constant,
+            parse_float=Decimal,
         )
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
         raise PopulationResponseError(
@@ -106,12 +108,7 @@ def validate_population_response(path: str | Path) -> PopulationResponseSummary:
                 f"population record {index} has a non-integer Year"
             )
         population = record["Population"]
-        if (
-            isinstance(population, bool)
-            or not isinstance(population, (int, float))
-            or (isinstance(population, float) and not math.isfinite(population))
-            or population < 0
-        ):
+        if not _is_valid_population_number(population):
             raise PopulationResponseError(
                 f"population record {index} has an invalid Population"
             )
@@ -141,6 +138,20 @@ def _reject_nonstandard_json_constant(value: str) -> None:
     """Reject Python's extensions for constants absent from the JSON grammar."""
 
     raise ValueError(f"non-standard JSON numeric constant: {value}")
+
+
+def _is_valid_population_number(value: object) -> bool:
+    """Require a nonnegative number representable by Bronze without range loss."""
+
+    if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)):
+        return False
+    if value < 0:
+        return False
+    try:
+        projected = float(value)
+    except (OverflowError, ValueError):
+        return False
+    return math.isfinite(projected) and (value == 0 or projected != 0.0)
 
 
 def prepare_population_landing(

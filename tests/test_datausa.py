@@ -78,6 +78,16 @@ class PopulationValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(PopulationResponseError, "Population"):
                 validate_population_response(path)
 
+    def test_rejects_population_exponent_underflow(self) -> None:
+        encoded = json.dumps(valid_payload()).replace("316128839.0", "1e-400")
+
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "population.json"
+            path.write_text(encoded, encoding="utf-8")
+
+            with self.assertRaisesRegex(PopulationResponseError, "Population"):
+                validate_population_response(path)
+
     def test_datausa_user_agent_contains_no_contact_email(self) -> None:
         self.assertNotIn("@", DATAUSA_USER_AGENT)
         self.assertIn("Data USA", DATAUSA_USER_AGENT)

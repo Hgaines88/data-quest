@@ -148,8 +148,8 @@ detects both missing and additive schema drift instead of allowing an explicit
 reader schema to silently discard new fields. After exploding `data`, the
 pipeline drops and measures rows with blank `Nation ID` or `Nation`, null `Year`,
 null `Population`, or a non-finite or negative population. Landing validation
-also rejects finite-number overflow such as JSON exponent notation that Python
-would otherwise decode as infinity.
+parses JSON decimals losslessly and rejects exponent values that would overflow
+to infinity or underflow to zero when projected into Bronze's double type.
 
 ## Silver contracts
 
