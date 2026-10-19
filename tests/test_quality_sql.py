@@ -80,6 +80,12 @@ class BronzeToSilverQualityQueryTests(unittest.TestCase):
         period_rule = "period_code NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')"
         self.assertEqual(self.sql.count(period_rule), 2)
 
+    def test_series_period_domains_are_checked_independently(self) -> None:
+        for column in ("begin_period", "end_period"):
+            with self.subTest(column=column):
+                rule = f"{column} NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')"
+                self.assertEqual(self.sql.count(rule), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

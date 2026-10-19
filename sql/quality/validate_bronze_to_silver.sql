@@ -264,6 +264,8 @@ checks AS (
       OR seasonal_code IS NULL OR seasonal_text IS NULL
       OR begin_year IS NULL OR begin_period IS NULL
       OR end_year IS NULL OR end_period IS NULL
+      OR begin_period NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
+      OR end_period NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
       OR source_file IS NULL OR source_path IS NULL OR ingested_at_utc IS NULL
       OR run_id IS NULL OR content_sha256 IS NULL
     ),
@@ -277,10 +279,12 @@ checks AS (
       OR seasonal_code IS NULL OR seasonal_text IS NULL
       OR begin_year IS NULL OR begin_period IS NULL
       OR end_year IS NULL OR end_period IS NULL
+      OR begin_period NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
+      OR end_period NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')
       OR source_file IS NULL OR source_path IS NULL OR ingested_at_utc IS NULL
       OR run_id IS NULL OR content_sha256 IS NULL
     ) = 0,
-    'Every series requires provider-grounded labels and complete provenance.'
+    'Every series requires valid periods, provider-grounded labels, and complete provenance.'
   FROM workspace.rearc_data_quest.silver_bls_series
 
   UNION ALL
