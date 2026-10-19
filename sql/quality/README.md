@@ -35,8 +35,13 @@ SQL alternatives and reviewer-facing queries retain explicit `ORDER BY`
 clauses.
 
 The query is read-only and uses the project's default catalog and schema.
-Replace `workspace.rearc_data_quest` when the deployment overrides those
-defaults.
+For a non-default deployment, replace all governed table references beginning
+with `workspace.rearc_data_quest`. Also replace the metadata source
+`workspace.information_schema.columns` with the target catalog's
+`information_schema.columns`, and change each `table_schema =
+'rearc_data_quest'` predicate to the deployed schema name. These substitutions
+must stay aligned so the schema checks inspect the same Gold tables that the
+value checks reconcile.
 
 Intentional representation differences are limited and explicit:
 

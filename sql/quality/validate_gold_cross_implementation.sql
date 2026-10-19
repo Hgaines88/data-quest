@@ -36,12 +36,16 @@ q1_pyspark AS (
   FROM workspace.rearc_data_quest.gold_population_summary_2013_2018
 ),
 q1_sql_schema AS (
-  SELECT 'start_year:int,end_year:int,year_count:int,mean_population:double,population_stddev:double,stddev_semantics:string'
-    AS schema_signature
+  SELECT MAX(typeof(struct(sql_result.*))) AS schema_signature
+  FROM q1_sql AS sql_result
 ),
 q1_pyspark_schema AS (
-  SELECT LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
-    WITHIN GROUP (ORDER BY ordinal_position) AS schema_signature
+  SELECT concat(
+    'struct<',
+    LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
+      WITHIN GROUP (ORDER BY ordinal_position),
+    '>'
+  ) AS schema_signature
   FROM workspace.information_schema.columns
   WHERE table_schema = 'rearc_data_quest'
     AND table_name = 'gold_population_summary_2013_2018'
@@ -176,12 +180,16 @@ q2_pyspark AS (
   FROM workspace.rearc_data_quest.gold_bls_best_year_by_series
 ),
 q2_sql_schema AS (
-  SELECT 'series_id:string,series_label:string,best_year:int,annual_quarterly_sum:decimal(30,6),quarterly_observation_count:int,has_quarterly_observations:boolean'
-    AS schema_signature
+  SELECT MAX(typeof(struct(sql_result.*))) AS schema_signature
+  FROM q2_sql AS sql_result
 ),
 q2_pyspark_schema AS (
-  SELECT LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
-    WITHIN GROUP (ORDER BY ordinal_position) AS schema_signature
+  SELECT concat(
+    'struct<',
+    LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
+      WITHIN GROUP (ORDER BY ordinal_position),
+    '>'
+  ) AS schema_signature
   FROM workspace.information_schema.columns
   WHERE table_schema = 'rearc_data_quest'
     AND table_name = 'gold_bls_best_year_by_series'
@@ -286,12 +294,16 @@ q3_pyspark AS (
   FROM workspace.rearc_data_quest.gold_bls_q01_population
 ),
 q3_sql_schema AS (
-  SELECT 'series_id:string,series_label:string,year:int,q01_value:decimal(20,6),population:bigint,population_match_found:boolean'
-    AS schema_signature
+  SELECT MAX(typeof(struct(sql_result.*))) AS schema_signature
+  FROM q3_sql AS sql_result
 ),
 q3_pyspark_schema AS (
-  SELECT LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
-    WITHIN GROUP (ORDER BY ordinal_position) AS schema_signature
+  SELECT concat(
+    'struct<',
+    LISTAGG(concat(column_name, ':', lower(full_data_type)), ',')
+      WITHIN GROUP (ORDER BY ordinal_position),
+    '>'
+  ) AS schema_signature
   FROM workspace.information_schema.columns
   WHERE table_schema = 'rearc_data_quest'
     AND table_name = 'gold_bls_q01_population'

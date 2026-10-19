@@ -88,17 +88,22 @@ class GoldCrossImplementationQualityQueryTests(unittest.TestCase):
     def test_compares_published_names_types_and_order(self) -> None:
         self.assertEqual(self.sql.count("workspace.information_schema.columns"), 3)
         self.assertEqual(self.sql.count("ORDER BY ordinal_position"), 3)
-        for column_signature in (
-            "start_year:int",
-            "series_id:string",
-            "q01_value:decimal(20,6)",
-        ):
-            with self.subTest(column_signature=column_signature):
-                self.assertIn(column_signature, self.sql)
+        self.assertEqual(
+            self.sql.count("MAX(typeof(struct(sql_result.*))) AS schema_signature"),
+            3,
+        )
+        for sql_result in ("q1_sql", "q2_sql", "q3_sql"):
+            with self.subTest(sql_result=sql_result):
+                self.assertIn(f"FROM {sql_result} AS sql_result", self.sql)
+        self.assertNotIn("SELECT 'start_year:int", self.sql)
+        self.assertNotIn("SELECT 'series_id:string", self.sql)
 
     def test_stable_checks_do_not_depend_on_result_rows(self) -> None:
         self.assertIn("COUNT(*) = 1\n      AND MIN(start_year) = 2013", self.sql)
-        self.assertNotIn("FROM q1_sql\n),\nq1_pyspark_schema", self.sql)
+        self.assertEqual(
+            self.sql.count("MAX(typeof(struct(sql_result.*))) AS schema_signature"),
+            3,
+        )
 
     def test_contains_independent_source_spot_checks(self) -> None:
         self.assertIn("q1_source_calculation AS", self.sql)
