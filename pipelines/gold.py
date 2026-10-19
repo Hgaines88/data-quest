@@ -64,6 +64,32 @@ def gold_population_summary_2013_2018() -> DataFrame:
     )
 
 
+@dp.temporary_view(name="gold_bls_series_metadata_validation")
+@dp.expect_or_fail(
+    "every_quarterly_observation_has_exactly_one_series_metadata_row",
+    "_unresolved_series_count = 0",
+)
+def gold_bls_series_metadata_validation() -> DataFrame:
+    """Fail when retained observations lack unambiguous series metadata."""
+
+    quarterly_series = (
+        spark.read.table("silver_bls_observation")
+        .filter(F.col("period_code").isin("Q01", "Q02", "Q03", "Q04"))
+        .select("series_id")
+        .distinct()
+    )
+    metadata_cardinality = spark.read.table("silver_bls_series").groupBy(
+        "series_id"
+    ).agg(F.count(F.lit(1)).alias("_metadata_row_count"))
+    return (
+        quarterly_series.join(metadata_cardinality, "series_id", "left")
+        .filter(
+            F.coalesce(F.col("_metadata_row_count"), F.lit(0)) != F.lit(1)
+        )
+        .agg(F.count(F.lit(1)).alias("_unresolved_series_count"))
+    )
+
+
 @dp.temporary_view(name="gold_bls_best_year_by_series_candidate")
 @dp.expect_or_fail("one_row_per_expected_series", "_series_row_count = 1")
 @dp.expect_or_fail(
@@ -76,6 +102,9 @@ def gold_population_summary_2013_2018() -> DataFrame:
 def gold_bls_best_year_by_series_candidate() -> DataFrame:
     """Select each expected series' strongest deterministic quarterly year."""
 
+    metadata_validation = spark.read.table(
+        "gold_bls_series_metadata_validation"
+    )
     expected_series = spark.read.table("silver_bls_series").select(
         "series_id", "series_label"
     )
@@ -98,6 +127,7 @@ def gold_bls_best_year_by_series_candidate() -> DataFrame:
     )
     return (
         expected_series.join(best_years, "series_id", "left")
+        .crossJoin(metadata_validation)
         .withColumnRenamed("year", "best_year")
         .withColumn(
             "has_quarterly_observations", F.col("best_year").isNotNull()

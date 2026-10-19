@@ -88,6 +88,25 @@ class GoldBlsBestYearDefinitionTests(unittest.TestCase):
             '"quarterly_result_is_complete_or_visibly_missing"', self.source
         )
 
+    def test_fails_when_an_observation_lacks_unique_series_metadata(self) -> None:
+        self.assertIn(
+            'name="gold_bls_series_metadata_validation"', self.source
+        )
+        self.assertIn(
+            '"every_quarterly_observation_has_exactly_one_series_metadata_row"',
+            self.source,
+        )
+        self.assertIn(
+            'F.coalesce(F.col("_metadata_row_count"), F.lit(0)) != F.lit(1)',
+            self.source,
+        )
+        self.assertIn('"_unresolved_series_count"', self.source)
+        self.assertIn(
+            'spark.read.table(\n        "gold_bls_series_metadata_validation"',
+            self.source,
+        )
+        self.assertIn(".crossJoin(metadata_validation)", self.source)
+
     def test_publishes_required_best_year_contract(self) -> None:
         self.assertIn('name="gold_bls_best_year_by_series"', self.source)
         for field in (
