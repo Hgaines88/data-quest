@@ -66,6 +66,16 @@ class GoldBlsBestYearSqlTests(unittest.TestCase):
         self.assertIn("AS HAS_QUARTERLY_OBSERVATIONS", self.source)
         self.assertIn("COALESCE(RANKED.QUARTERLY_OBSERVATION_COUNT, 0)", self.source)
 
+    def test_rejects_quarterly_series_without_unique_metadata(self) -> None:
+        self.assertIn("METADATA_CARDINALITY AS", self.source)
+        self.assertIn("UNRESOLVED_QUARTERLY_SERIES AS", self.source)
+        self.assertIn(
+            "COALESCE(METADATA.METADATA_ROW_COUNT, 0) <> 1", self.source
+        )
+        self.assertIn("RAISE_ERROR(", self.source)
+        self.assertIn("INNER JOIN METADATA_VALIDATION AS VALIDATION", self.source)
+        self.assertIn("ON VALIDATION.METADATA_IS_VALID", self.source)
+
 
 if __name__ == "__main__":
     unittest.main()

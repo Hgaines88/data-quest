@@ -12,7 +12,9 @@ schema, count, key, null behavior, and values with the primary PySpark output.
 `gold_bls_best_year_by_series`. It sums only `Q01` through `Q04`, ranks annual
 sums descending with year ascending as the deterministic tie-breaker, and
 starts from the Silver series inventory so a series without quarterly history
-remains visible with `has_quarterly_observations = false`. Live validation will
+remains visible with `has_quarterly_observations = false`. Before returning
+results, it raises an error unless every quarterly observation series resolves
+to exactly one Silver metadata row. Live validation will
 compare its schema, row count, series keys, null behavior, and values with the
 primary PySpark output and independently spot-check a selected annual sum.
 
