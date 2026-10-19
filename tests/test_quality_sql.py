@@ -18,6 +18,9 @@ class BronzeToSilverQualityQueryTests(unittest.TestCase):
             "observation_row_count_reconciles",
             "series_row_count_reconciles",
             "population_us_row_count_reconciles",
+            "observation_conversion_mismatches",
+            "series_conversion_mismatches",
+            "population_conversion_mismatches",
             "observation_duplicate_keys",
             "series_duplicate_keys",
             "population_duplicate_keys",
@@ -61,6 +64,21 @@ class BronzeToSilverQualityQueryTests(unittest.TestCase):
     def test_population_check_enforces_the_documented_us_grain(self) -> None:
         self.assertEqual(self.sql.count("nation_id <> '01000US'"), 2)
         self.assertEqual(self.sql.count("nation <> 'United States'"), 2)
+
+    def test_compares_converted_values_in_both_directions(self) -> None:
+        for comparison in (
+            "observation_conversion_mismatches",
+            "series_conversion_mismatches",
+            "population_conversion_mismatches",
+        ):
+            with self.subTest(comparison=comparison):
+                self.assertEqual(self.sql.count(comparison), 3)
+        self.assertEqual(self.sql.lower().count("left anti join"), 8)
+
+    def test_observation_domains_are_checked_independently(self) -> None:
+        self.assertEqual(self.sql.count("year NOT BETWEEN 1000 AND 9999"), 2)
+        period_rule = "period_code NOT IN ('Q01', 'Q02', 'Q03', 'Q04', 'Q05')"
+        self.assertEqual(self.sql.count(period_rule), 2)
 
 
 if __name__ == "__main__":
