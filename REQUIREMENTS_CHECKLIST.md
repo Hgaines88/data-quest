@@ -195,12 +195,12 @@ Recommended labels: `setup`, `ingestion`, `bronze`, `silver`, `gold`, `sql`, `py
 **Priority:** Required  
 **Depends on:** DQ-11, DQ-04
 
-- [ ] Model the required BLS lookup files.
-- [ ] Join series metadata to measure, sector, duration, seasonal, class, or other applicable descriptions.
-- [ ] Construct a concise, human-readable series label from documented provider fields.
-- [ ] Check for missing lookup matches and avoid silently inventing descriptions.
+- [x] Model the required BLS lookup files.
+- [x] Join series metadata to measure, sector, duration, seasonal, class, or other applicable descriptions.
+- [x] Construct a concise, human-readable series label from documented provider fields.
+- [x] Check for missing lookup matches and avoid silently inventing descriptions.
 
-**Done when:** Every Gold result can display a provider-grounded label or an explicitly handled missing-label condition.
+**Done when:** Every Gold result can display a provider-grounded label or an explicitly handled missing-label condition. See the [completed Silver series update and graph evidence](docs/evidence/dq13_silver_series_live_validation.md).
 
 ### DQ-14: Build typed and deduplicated Silver population data
 

@@ -793,6 +793,40 @@ selector; that selector names `data-quest-silver` as current and
 `data-quest-bronze` as the other associated pipeline. It is navigation context,
 not duplicate source execution or cross-pipeline contamination.
 
+### DQ-13: build labels from provider metadata without inventing meaning
+
+The series dimension extends the existing Silver pipeline without changing the
+validated observation path. It starts from `bronze_bls_series` and left-joins
+the five provider lookups referenced by that file: sector, class, measure,
+duration, and seasonal adjustment. Keeping the joins left-sided makes a missing
+description observable instead of silently removing the series.
+
+One fail-fast gate enforces the two risks that matter at this boundary. Every
+provider description must match, and the joined result must contain exactly one
+row per `series_id`. The latter also detects a duplicated lookup code because a
+many-to-many join would increase the per-series window count. The readable
+label is a simple concatenation of the five provider descriptions; there is no
+guessed fallback such as `Unknown series`. This produces one public
+`silver_bls_series` table while keeping the quality decision visible in the
+temporary candidate view.
+
+Copilot review caught two contract boundaries before deployment. The provider
+uses `-` when a series has no base year, so Silver now converts that sentinel to
+null and uses ANSI-safe `try_cast` to publish an integer. The coverage gate also
+checks both begin and end periods against `Q01` through `Q05`; a non-null but
+unsupported code can no longer pass merely because Bronze preserved it.
+
+The target-runtime update completed successfully on October 18, 2026 at 7:55
+PM EDT with zero errors and zero warnings. `silver_bls_series` published 282
+rows in 7 seconds, exactly matching the previously recorded Bronze series
+inventory. Its dependency graph shows all five lookups feeding the candidate
+gate, and the existing observation table remained green with `No change`.
+Because the published series table depends on the fail-fast completeness and
+one-row-per-series condition, successful publication establishes full lookup
+coverage and stable cardinality for this snapshot. The completed update, table
+result, graph, and performance evidence are preserved in
+[`docs/evidence/dq13_silver_series_live_validation.md`](docs/evidence/dq13_silver_series_live_validation.md).
+
 ## Retrospective
 
 This section will be completed as the implementation develops. The environment phase reinforced the value of verifying platform capabilities and permissions before writing pipeline code.

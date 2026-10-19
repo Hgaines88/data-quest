@@ -58,3 +58,17 @@ The operator-recorded revision, metric limits, evidence digests, and quality
 interpretation are indexed in
 `docs/evidence/dq12_silver_live_validation.md`.
 
+## DQ-13 Silver series evidence
+
+- `dq13_silver_series_run_completed.png`: completed update with zero errors and
+  warnings and both Silver paths visible.
+- `dq13_silver_series_graph.png`: provider series and five lookup dependencies
+  feeding the candidate gate and published dimension.
+- `dq13_silver_series_performance.png`: two successful materialized-view
+  refresh statements.
+- `dq13_silver_series_tables.png`: 282-row series result and unchanged green
+  observation result.
+
+The revision attribution, exact claims, limitations, and image digests are in
+`docs/evidence/dq13_silver_series_live_validation.md`.
+

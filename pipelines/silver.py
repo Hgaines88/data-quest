@@ -1,5 +1,5 @@
 # Databricks notebook source
-"""Publish typed, uniquely keyed BLS observations from validated Bronze tables."""
+"""Publish typed BLS observations and provider-grounded series metadata."""
 
 from pathlib import Path
 import sys
@@ -35,6 +35,31 @@ _SILVER_COLUMNS = (
     "year",
     "period_code",
     "value",
+    "footnote_codes",
+    "source_file",
+    "source_path",
+    "ingested_at_utc",
+    "run_id",
+    "content_sha256",
+)
+_SERIES_COLUMNS = (
+    "series_id",
+    "series_label",
+    "sector_code",
+    "sector_name",
+    "class_code",
+    "class_text",
+    "measure_code",
+    "measure_text",
+    "duration_code",
+    "duration_text",
+    "seasonal_code",
+    "seasonal_text",
+    "base_year",
+    "begin_year",
+    "begin_period",
+    "end_year",
+    "end_period",
     "footnote_codes",
     "source_file",
     "source_path",
@@ -151,4 +176,117 @@ def silver_bls_observation() -> DataFrame:
     consistency = spark.read.table("bls_current_consistency")
     return observations.crossJoin(consistency).select(
         *[F.col(column) for column in _SILVER_COLUMNS]
+    )
+
+
+def _lookup(table: str, code: str, description: str) -> DataFrame:
+    """Select one trimmed provider code and description lookup."""
+
+    return spark.read.table(SETTINGS.table_name(table)).select(
+        F.trim(code).alias(code),
+        F.trim(description).alias(description),
+    )
+
+
+@dp.temporary_view(name="silver_bls_series_candidates")
+@dp.expect_or_fail(
+    "series_metadata_is_complete_and_unique",
+    "_series_match_count = 1 AND _all_lookups_matched",
+)
+def silver_bls_series_candidates() -> DataFrame:
+    """Join each provider series to its applicable descriptive lookups."""
+
+    series = spark.read.table(SETTINGS.table_name("bronze_bls_series")).select(
+        F.trim("series_id").alias("series_id"),
+        F.trim("sector_code").alias("sector_code"),
+        F.trim("class_code").alias("class_code"),
+        F.trim("measure_code").alias("measure_code"),
+        F.trim("duration_code").alias("duration_code"),
+        F.trim("seasonal").alias("seasonal_code"),
+        F.expr("try_cast(nullif(trim(base_year), '-') as int)").alias("base_year"),
+        F.when(F.length(F.trim("footnote_codes")) > 0, F.trim("footnote_codes"))
+        .otherwise(F.lit(None).cast("string"))
+        .alias("footnote_codes"),
+        F.expr("try_cast(trim(begin_year) as int)").alias("begin_year"),
+        F.trim("begin_period").alias("begin_period"),
+        F.expr("try_cast(trim(end_year) as int)").alias("end_year"),
+        F.trim("end_period").alias("end_period"),
+        F.col("_source_file").alias("source_file"),
+        F.col("_source_path").alias("source_path"),
+        F.col("_ingested_at_utc").alias("ingested_at_utc"),
+        F.col("_run_id").alias("run_id"),
+        F.col("_content_sha256").alias("content_sha256"),
+    )
+    joined = (
+        series.join(
+            _lookup("bronze_bls_sector", "sector_code", "sector_name"),
+            "sector_code",
+            "left",
+        )
+        .join(
+            _lookup("bronze_bls_class", "class_code", "class_text"),
+            "class_code",
+            "left",
+        )
+        .join(
+            _lookup("bronze_bls_measure", "measure_code", "measure_text"),
+            "measure_code",
+            "left",
+        )
+        .join(
+            _lookup("bronze_bls_duration", "duration_code", "duration_text"),
+            "duration_code",
+            "left",
+        )
+        .join(
+            _lookup("bronze_bls_seasonal", "seasonal_code", "seasonal_text"),
+            "seasonal_code",
+            "left",
+        )
+    )
+    descriptions = (
+        "sector_name",
+        "class_text",
+        "measure_text",
+        "duration_text",
+        "seasonal_text",
+    )
+    return (
+        joined.withColumn(
+            "series_label",
+            F.concat_ws(
+                " | ",
+                *[F.col(column) for column in descriptions],
+            ),
+        )
+        .withColumn(
+            "_series_match_count",
+            F.count(F.lit(1)).over(Window.partitionBy("series_id")),
+        )
+        .withColumn(
+            "_all_lookups_matched",
+            F.lit(True)
+            & F.col("series_id").isNotNull()
+            & F.col("begin_year").isNotNull()
+            & F.col("end_year").isNotNull()
+            & F.col("begin_period").isin("Q01", "Q02", "Q03", "Q04", "Q05")
+            & F.col("end_period").isin("Q01", "Q02", "Q03", "Q04", "Q05")
+            & F.col("source_path").isNotNull()
+            & F.col("content_sha256").isNotNull()
+            & F.col(descriptions[0]).isNotNull()
+            & F.col(descriptions[1]).isNotNull()
+            & F.col(descriptions[2]).isNotNull()
+            & F.col(descriptions[3]).isNotNull()
+            & F.col(descriptions[4]).isNotNull(),
+        )
+    )
+
+
+@dp.materialized_view(
+    name="silver_bls_series",
+    comment="BLS series metadata with provider-grounded descriptive labels.",
+)
+def silver_bls_series() -> DataFrame:
+    return spark.read.table("silver_bls_series_candidates").select(
+        *[F.col(column) for column in _SERIES_COLUMNS]
     )
