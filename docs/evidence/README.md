@@ -111,3 +111,10 @@ these exports support exact value inspection.
   writes, exact Gold row counts with zero invalid rows, and the explicit
   boundary for dashboard, warehouse, identity, and grant resources outside
   bundle state.
+
+## DQ-28 end-to-end validation
+
+- `dq28_end_to_end_validation.md`: records the local baseline and the exact
+  live bundle, landing, pipeline, stakeholder, authorization, observability,
+  privacy, cost, and explainability gates. Its status remains explicitly
+  pending until the reviewed revision passes those live checks.

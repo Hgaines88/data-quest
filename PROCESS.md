@@ -1353,3 +1353,21 @@ contracts returned 1, 282, and 39 rows with zero invalid rows, and the
 convergence plan reported four unchanged resources with no additions, changes,
 or deletions. The full claim boundaries and failure/recovery trail are recorded in
 [`docs/evidence/dq24_bundle_deployment_validation.md`](docs/evidence/dq24_bundle_deployment_validation.md).
+
+### 2026-10-20: DQ-28 end-to-end validation plan
+
+AI assistance was used to map the DQ-28 acceptance criteria to one bounded
+integration procedure after DQ-24 through DQ-27 closed. I retained the existing
+ownership boundaries instead of adding a wrapper or claiming that the bundle
+manages landing, the dashboard, warehouse, identities, grants, or notification
+destinations. The resulting runbook validates the isolated bundle outputs and
+the externally governed shared stakeholder surface as explicit, separate paths
+over the same source and Gold contracts.
+
+Before documentation changes, the local baseline passed 202 tests and 106
+subtests, Python compilation, and `git diff --check`. The local machine has no
+Databricks CLI, so I did not record an unauthenticated command as platform
+evidence. The DQ-28 evidence record remains visibly pending until the exact
+reviewed revision completes the live bundle, landing, reconciliation,
+stakeholder, authorization, observability, privacy, cost, and explainability
+gates in the authorized Databricks environment.

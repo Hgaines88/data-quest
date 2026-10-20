@@ -76,6 +76,14 @@ thresholds, alerting boundaries, ownership, controlled failure validation, and
 non-destructive recovery. Landing remains the only writer to operational audit
 state; the downstream bundle job does not gain a second source writer.
 
+DQ-28 integrates those boundaries through one explicit
+[end-to-end validation runbook](docs/END_TO_END_VALIDATION.md). The procedure
+validates the supported bundle resources, the separately governed landing
+workflow, and the external dashboard, access, and observability controls
+without claiming that Free Edition or the bundle owns unsupported resources.
+Its [evidence record](docs/evidence/dq28_end_to_end_validation.md) remains
+pending until the exact reviewed revision passes the live gates.
+
 ## Prerequisites
 
 - A Databricks workspace with Spark Declarative Pipelines, Unity Catalog, and a

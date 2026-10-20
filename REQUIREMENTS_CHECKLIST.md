@@ -424,15 +424,21 @@ resources. The completed evidence is recorded in the
 **Priority:** Bonus
 **Depends on:** DQ-24
 
-- [ ] Surface source and Gold-layer freshness.
-- [ ] Surface discovered, downloaded, skipped, changed, removed, and failed-file counts.
-- [ ] Surface pipeline expectation results and rejected or quarantined records.
-- [ ] Make pipeline, ingestion, and deployment failures diagnosable without exposing secrets or personal information.
-- [ ] Define practical warning and failure thresholds for the available metrics.
-- [ ] Document alerting options, rerun behavior, rollback or recovery steps, and ownership expectations.
-- [ ] Demonstrate one controlled failure and successful recovery when safe and feasible.
+- [x] Surface source and Gold-layer freshness.
+- [x] Surface discovered, downloaded, skipped, changed, removed, and failed-file counts.
+- [x] Surface pipeline expectation results and rejected or quarantined records.
+- [x] Make pipeline, ingestion, and deployment failures diagnosable without exposing secrets or personal information.
+- [x] Define practical warning and failure thresholds for the available metrics.
+- [x] Document alerting options, rerun behavior, rollback or recovery steps, and ownership expectations.
+- [x] Demonstrate one controlled failure and successful recovery when safe and feasible.
 
 **Done when:** A reviewer can determine whether the product is fresh and healthy, diagnose a representative failure, and follow documented recovery guidance.
+
+**Validation state:** Complete. The merged implementation adds privacy-safe
+source-run audits, read-only source and Gold health, pipeline expectation
+inspection, documented thresholds and ownership, and a controlled
+pre-publication failure with successful recovery. See
+[`docs/OPERATIONAL_OBSERVABILITY.md`](docs/OPERATIONAL_OBSERVABILITY.md).
 
 ### DQ-28: Validate the extended Databricks product end to end
 

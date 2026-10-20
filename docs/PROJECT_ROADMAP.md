@@ -28,12 +28,12 @@ those checks before the remaining work would make the audit immediately stale.
 | 6 | DQ-29 | Decide whether Snowflake or Power BI adds defensible value. | The Databricks-native product has been fully evaluated. | A documented decision either ends the extension work or defines a narrowly scoped additional consumer. |
 | 7 | DQ-23 | Perform the final submission audit. | DQ-29 is complete and no implementation card remains open. | The final repository is reproducible, reviewable, explainable, privacy-safe, and accessible to Rearc reviewers. |
 
-DQ-24 retains its technical dependency on DQ-26 because the bundle should
+DQ-24 retained its technical dependency on DQ-26 because the bundle should
 encode the final access model. DQ-27 retains its dependency on DQ-24 because
 deployment and recovery evidence should exercise the version-controlled
 resource definition. DQ-28 remains the integration gate for DQ-24 through
-DQ-27. Where Free Edition cannot deploy a modeled resource, DQ-28 must validate
-the bundle configuration and exercise the documented equivalent resource; it
+DQ-27. Where Free Edition cannot deploy a modeled resource, DQ-28 validates
+the bundle configuration and exercises the documented equivalent resource; it
 must record the limitation and must not claim that the unsupported deployment
 occurred. DQ-29 remains a decision gate, not an automatic commitment to
 another platform.
@@ -58,11 +58,11 @@ corresponding card is considered complete.
 
 ## Current status
 
-DQ-01 through DQ-22, DQ-25, and the engineering QA protocol are complete.
-DQ-26 implementation, behavioral validation, and post-review inherited/direct
-grant inventories are complete. DQ-24 is complete: landing is excluded from
-independently deployed jobs, development outputs are isolated per current user,
-the Bronze-through-Gold run and contract checks passed, and the final plan
-reported four unchanged resources. Production was not deployed, and shared
-landing state, dashboard, warehouse, identity, and grant resources remain
-explicitly external. DQ-27 is the next card. DQ-23 remains intentionally deferred.
+DQ-01 through DQ-22, DQ-24 through DQ-27, and the engineering QA protocol are
+complete. DQ-24 keeps
+landing outside independently deployed jobs, isolates development outputs per
+current user, and deploys only the ordered Bronze-through-Gold resources.
+Production was not deployed, and shared landing state, dashboard, warehouse,
+identity, and grant resources remain explicitly external. DQ-27 adds the
+privacy-safe health, expectation, failure, and recovery controls. DQ-28 is the
+current integration gate; DQ-23 remains intentionally deferred.
