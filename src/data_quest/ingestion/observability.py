@@ -5,6 +5,10 @@ from datetime import datetime, timedelta
 import re
 
 from data_quest.ingestion.landing import LandingExecutionResult
+from data_quest.ingestion.datausa import PopulationResponseError
+from data_quest.ingestion.discovery import SourceRequestError
+from data_quest.ingestion.download import DownloadIntegrityError
+from data_quest.ingestion.manifest import IncompleteRunError
 
 
 _SAFE_VALUE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
@@ -132,7 +136,10 @@ def failed_run_audit(
         raise ValueError("failure_stage must be a safe operational value")
     error_category = _error_category(error)
     resolved_failed_file_count = (
-        int(error_category in {"SOURCE_UNAVAILABLE", "FILE_VALIDATION"})
+        int(
+            failure_stage not in {"DISCOVERY", "DISCOVERY_CONFIRMATION"}
+            and error_category in {"SOURCE_UNAVAILABLE", "FILE_VALIDATION"}
+        )
         if failed_file_count is None
         else failed_file_count
     )
@@ -168,15 +175,18 @@ def failed_run_audit(
 def _error_category(error: Exception) -> str:
     """Collapse failures into stable categories without retaining messages."""
 
-    class_name = type(error).__name__
-    if class_name in {"SourceRequestError", "TimeoutError", "ConnectionError"}:
-        return "SOURCE_UNAVAILABLE"
-    if class_name in {"DownloadIntegrityError", "ControlledLandingFailure"}:
+    if isinstance(error, (DownloadIntegrityError, PopulationResponseError)) or (
+        type(error).__name__ == "ControlledLandingFailure"
+    ):
         return "FILE_VALIDATION"
-    if class_name == "IncompleteRunError":
+    if isinstance(error, IncompleteRunError):
         return "INVENTORY_SAFETY"
-    if class_name in {"PermissionError", "SparkSecurityException"}:
+    if isinstance(error, PermissionError) or type(error).__name__ == (
+        "SparkSecurityException"
+    ):
         return "AUTHORIZATION"
-    if class_name in {"ValueError", "AssertionError"}:
+    if isinstance(error, (SourceRequestError, TimeoutError, ConnectionError)):
+        return "SOURCE_UNAVAILABLE"
+    if isinstance(error, (ValueError, AssertionError)):
         return "CONTRACT_VALIDATION"
     return "UNEXPECTED"

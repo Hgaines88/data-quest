@@ -46,9 +46,12 @@ at its terminal stage; it never guesses partial progress.
    Gold status, exact Gold counts, and no unexplained recent failures.
 2. Run
    [`sql/operations/inspect_pipeline_expectations.sql`](../sql/operations/inspect_pipeline_expectations.sql).
-   Confirm every returned `passed` value is true. For drop expectations, failed
-   records are rejected rows. For fail-fast expectations, a failure blocks the
-   update and the prior published table remains the last-good result. This
+   Confirm every layer's `update_state` is `COMPLETED` and every non-null
+   expectation row has `passed = true`. A status-only row with null expectation
+   counts means that update emitted no expectation metrics; it is not evidence
+   of zero rejected records. For drop expectations, failed records are rejected
+   rows. For fail-fast expectations, a failure blocks the update and the prior
+   published table remains the last-good result. This
    project has no quarantine table; it reports that explicitly rather than
    implying that rejected data was retained elsewhere.
 3. Open the refresh job and confirm `refresh_bronze`, `refresh_silver`, and

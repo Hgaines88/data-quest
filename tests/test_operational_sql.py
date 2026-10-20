@@ -26,6 +26,8 @@ class OperationalSqlTests(unittest.TestCase):
             self.assertIn(field, sql)
         self.assertIn("INTERVAL 24 HOURS", sql)
         self.assertIn("INTERVAL 48 HOURS", sql)
+        self.assertIn("VALUES ('bls'), ('datausa')", sql)
+        self.assertIn("WHEN completed_at_utc IS NULL THEN 'FAIL'", sql)
 
     def test_expectation_query_uses_stable_event_log_contract(self) -> None:
         sql = (OPERATIONS / "inspect_pipeline_expectations.sql").read_text()
@@ -35,6 +37,8 @@ class OperationalSqlTests(unittest.TestCase):
         self.assertIn("passed_records", sql)
         self.assertIn("failed_records", sql)
         self.assertIn("rejected_or_blocking_records", sql)
+        self.assertIn("update_state", sql)
+        self.assertIn("LEFT JOIN expectation_summary ON TRUE", sql)
 
     def test_operational_queries_are_read_only_and_contain_no_identity(self) -> None:
         sql = "\n".join(path.read_text() for path in OPERATIONS.glob("*.sql"))

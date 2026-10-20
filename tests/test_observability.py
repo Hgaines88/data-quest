@@ -3,6 +3,8 @@
 from datetime import datetime, timedelta, timezone
 import unittest
 
+from data_quest.ingestion.datausa import PopulationResponseError
+from data_quest.ingestion.discovery import SourcePolicyError, SourceRedirectError
 from data_quest.ingestion.landing import LandingExecutionResult
 from data_quest.ingestion.observability import (
     failed_run_audit,
@@ -12,10 +14,6 @@ from data_quest.ingestion.observability import (
 
 STARTED = datetime(2026, 10, 20, tzinfo=timezone.utc)
 COMPLETED = STARTED + timedelta(seconds=5)
-
-
-class SourceRequestError(RuntimeError):
-    pass
 
 
 class ObservabilityRecordTests(unittest.TestCase):
@@ -54,7 +52,7 @@ class ObservabilityRecordTests(unittest.TestCase):
             started_at_utc=STARTED,
             completed_at_utc=COMPLETED,
             failure_stage="DOWNLOAD_AND_VALIDATE",
-            error=SourceRequestError(secret_message),
+            error=SourcePolicyError(secret_message),
             discovered_count=12,
             failed_file_count=1,
         )
@@ -63,6 +61,33 @@ class ObservabilityRecordTests(unittest.TestCase):
         self.assertNotIn(secret_message, repr(audit))
         self.assertNotIn("@", repr(audit))
         self.assertEqual(audit.published_transition_count, 0)
+
+    def test_discovery_failure_does_not_invent_failed_file(self) -> None:
+        audit = failed_run_audit(
+            source="bls",
+            run_id="20261020T000000Z-test",
+            started_at_utc=STARTED,
+            completed_at_utc=COMPLETED,
+            failure_stage="DISCOVERY",
+            error=SourceRedirectError("unsafe redirect"),
+        )
+
+        self.assertEqual(audit.error_category, "SOURCE_UNAVAILABLE")
+        self.assertEqual(audit.failed_file_count, 0)
+
+    def test_population_contract_failure_is_file_validation(self) -> None:
+        audit = failed_run_audit(
+            source="datausa",
+            run_id="20261020T000000Z-test",
+            started_at_utc=STARTED,
+            completed_at_utc=COMPLETED,
+            failure_stage="DOWNLOAD_AND_VALIDATE",
+            error=PopulationResponseError("invalid response"),
+            discovered_count=1,
+        )
+
+        self.assertEqual(audit.error_category, "FILE_VALIDATION")
+        self.assertEqual(audit.failed_file_count, 1)
 
     def test_rejects_unsafe_operational_values(self) -> None:
         with self.assertRaisesRegex(ValueError, "source"):

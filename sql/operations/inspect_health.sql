@@ -2,7 +2,10 @@
 -- Read only. Thresholds measure operational refresh recency, not the provider's
 -- business-period cadence: WARN after 24 hours and FAIL after 48 hours.
 
-WITH latest_source_run AS (
+WITH expected_sources(source) AS (
+  VALUES ('bls'), ('datausa')
+),
+latest_source_run AS (
   SELECT *
   FROM workspace.rearc_data_quest.ingestion_run_audit
   QUALIFY ROW_NUMBER() OVER (
@@ -10,11 +13,12 @@ WITH latest_source_run AS (
   ) = 1
 )
 SELECT
-  source,
+  expected_sources.source,
   completed_at_utc AS last_completed_at_utc,
   outcome,
   TIMESTAMPDIFF(HOUR, completed_at_utc, CURRENT_TIMESTAMP()) AS age_hours,
   CASE
+    WHEN completed_at_utc IS NULL THEN 'FAIL'
     WHEN outcome = 'FAILED' THEN 'FAIL'
     WHEN completed_at_utc < CURRENT_TIMESTAMP() - INTERVAL 48 HOURS THEN 'FAIL'
     WHEN completed_at_utc < CURRENT_TIMESTAMP() - INTERVAL 24 HOURS THEN 'WARN'
@@ -28,8 +32,9 @@ SELECT
   removed_count,
   failed_file_count,
   published_transition_count
-FROM latest_source_run
-ORDER BY source;
+FROM expected_sources
+LEFT JOIN latest_source_run USING (source)
+ORDER BY expected_sources.source;
 
 -- One Gold materialized view exposes the shared Gold pipeline event log. The
 -- latest terminal update is the authoritative pipeline-refresh signal.
