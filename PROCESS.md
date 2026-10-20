@@ -1199,8 +1199,27 @@ and five boundary, matched, and internal-gap Q01 rows. The expected values are
 accepted 2026-10-19 regression anchors. They make provider revisions visible
 rather than authorizing an unexplained expectation change.
 
-This commit intentionally does not claim that DQ-25 is complete. A reviewer
-must still build the live dashboard, configure or explicitly document the
-available Genie behavior, run all four checks successfully, reconcile
-representative answers, and capture privacy-safe evidence according to
-[`docs/STAKEHOLDER_EXPLORATION.md`](docs/STAKEHOLDER_EXPLORATION.md).
+### 2026-10-19: DQ-25 live dashboard and reconciliation
+
+I built and published the **US Productivity Insight Workspace** in Databricks
+Free Edition from the three governed stakeholder SQL datasets. The published
+page contains the four specified filters, two population KPI cards, coverage
+and best-year tables, nullable Q01 population context, the non-causality
+boundary, and an operator-verification source note. Population cards use the
+actual Gold values rather than row counts.
+
+The four-row acceptance query passed for population bounds, population values,
+the representative BLS best-year result, and Q01 nullable-context behavior.
+Two representative Genie answers reconciled to the Gold-backed datasets. The
+Free Edition surface exposed generated dashboard Genie behavior but no verified
+custom instruction editor, so I do not claim that the proposed custom Genie
+instructions were deployed.
+
+The first published revision failed with `No warehouse selected to run query`.
+I explicitly selected and started the Serverless Starter Warehouse, reran the
+dataset, and republished with shared data permissions. The published widgets
+then rendered successfully. A published-mode `2026` filter test preserved
+`q01_value = 0.00`, null population, and `population_match_found = false`, after
+which the filter was reset to its default. Privacy-safe screenshots and exact
+digests are indexed in
+[`docs/evidence/dq25_stakeholder_exploration_validation.md`](docs/evidence/dq25_stakeholder_exploration_validation.md).

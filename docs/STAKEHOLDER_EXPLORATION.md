@@ -52,7 +52,8 @@ Place this visible source note on the canvas:
 
 > Source: governed Gold tables derived from BLS productivity data and Data USA
 > population data. Values reflect the latest successful Gold update verified by
-> the operator. Automated freshness monitoring is addressed by DQ-27.
+> the operator. Freshness is operator-verified; automated monitoring is not yet
+> enabled.
 
 ## Genie configuration
 
@@ -102,6 +103,9 @@ were deployed; validate the same starter questions against the visible widgets.
 **DQ-25 is not complete until the live dashboard exists, the reconciliation
 query passes, representative answers reconcile, and evidence is recorded.**
 Repository assets alone do not satisfy that gate.
+
+The completed live validation is recorded in
+[`docs/evidence/dq25_stakeholder_exploration_validation.md`](evidence/dq25_stakeholder_exploration_validation.md).
 
 ## Platform notes and references
 
