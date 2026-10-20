@@ -1,8 +1,11 @@
 -- Run as a dedicated non-admin member of data_quest_readonly_analysts.
--- Run ONE statement at a time. Every statement must fail with an authorization
--- error. Do not run this file as a batch: execution stops at the first denial.
+-- Run ONE statement at a time. Do not run this file as a batch: execution
+-- normally stops at the first failure.
 
--- Gold write must be denied even though SELECT is allowed.
+-- The deployed Gold contract is a view, so this write must fail structurally
+-- with EXPECT_TABLE_NOT_VIEW. This proves non-writability, but it is
+-- not an authorization-denial test. The remaining four statements fail because
+-- the analyst lacks the required privilege.
 UPDATE workspace.rearc_data_quest.gold_population_summary_2013_2018
 SET mean_population = mean_population
 WHERE false;

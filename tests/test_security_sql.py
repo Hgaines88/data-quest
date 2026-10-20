@@ -57,6 +57,8 @@ class SecuritySqlTest(unittest.TestCase):
         ]:
             self.assertIn(marker, sql)
         self.assertIn("Run ONE statement at a time", sql)
+        self.assertIn("EXPECT_TABLE_NOT_VIEW", sql)
+        self.assertRegex(sql, r"not an\s+(?:--\s*)?authorization-denial test")
 
     def test_revoke_is_symmetric_with_apply(self):
         apply_sql = self.read("apply_gold_readonly_access.sql")
@@ -78,9 +80,17 @@ class SecuritySqlTest(unittest.TestCase):
             "CAN VIEW",
             "Individual data permission",
             "dedicated non-admin validation user or service principal",
-            "DQ-26 remains incomplete",
+            "dq26_gold_access_control_validation.md",
         ]:
             self.assertIn(phrase, guide)
+
+    def test_live_evidence_records_structural_and_authorization_failures(self):
+        evidence = (
+            ROOT / "docs" / "evidence" / "dq26_gold_access_control_validation.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("EXPECT_TABLE_NOT_VIEW", evidence)
+        self.assertIn("four authorization denials", evidence)
+        self.assertIn("exactly five effective grants", evidence)
 
 
 if __name__ == "__main__":

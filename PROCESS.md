@@ -1224,7 +1224,7 @@ which the filter was reset to its default. Privacy-safe screenshots and exact
 digests are indexed in
 [`docs/evidence/dq25_stakeholder_exploration_validation.md`](docs/evidence/dq25_stakeholder_exploration_validation.md).
 
-### 2026-10-19: DQ-26 least-privilege design boundary
+### 2026-10-19: DQ-26 least-privilege implementation and validation
 
 I defined `data_quest_readonly_analysts` as a non-admin interactive analyst
 group. Its data path is limited to `USE CATALOG` on `workspace`, `USE SCHEMA`
@@ -1243,10 +1243,22 @@ prove that the analyst's Unity Catalog grants are sufficient.
 
 Checked-in apply, inspection, positive, negative, and revocation SQL makes the
 intended data grants reviewable and reversible. Repository tests enforce exact
-Gold-table symmetry and reject elevated or schema-wide grants. This design is
-not yet live proof: DQ-26 remains incomplete until a separate non-admin member
-successfully reads all three Gold contracts and uses the dashboard while Gold
-writes, Bronze and Silver reads, raw Volume access, and schema object creation
-all fail with authorization errors. The operator/admin account cannot provide
-valid denial evidence because inherited ownership or administrative authority
-would confound the test.
+Gold-table symmetry and reject elevated or schema-wide grants.
+
+I then completed the live test with a separate non-admin user in the analyst
+group. Databricks SQL access was enabled while Consumer, Workspace, and Admin
+access remained disabled. The group received **Can use** on the Serverless
+Starter Warehouse and **Can view** on the dashboard, which was republished with
+**Individual data permission**. All three Gold reads and the dashboard worked;
+the Series and Observation year filters also worked and were reset.
+
+The lower-layer tests produced authorization denials for Bronze `SELECT`,
+Silver `SELECT`, raw-Volume `LIST`, and schema `CREATE TABLE`. The Gold
+`UPDATE` also failed, but because the deployed Gold object is a view
+(`EXPECT_TABLE_NOT_VIEW`), not because an authorization check denied DML. I
+record this distinction instead of overstating the result. The admin audit
+returned exactly five effective data grants: catalog use, schema use, and
+`SELECT` on the three named Gold contracts. No lower-layer, Volume, creation,
+ownership, or management grant appeared. The privacy-safe evidence and exact
+digests are indexed in
+[`docs/evidence/dq26_gold_access_control_validation.md`](docs/evidence/dq26_gold_access_control_validation.md).

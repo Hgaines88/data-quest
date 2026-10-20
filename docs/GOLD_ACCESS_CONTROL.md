@@ -70,8 +70,10 @@ credentials.
    data permission.
 3. Run each statement in
    [`analyst_negative_checks.sql`](../sql/security/analyst_negative_checks.sql)
-   separately. Every statement must fail with an authorization error:
-   - a write to an allowed Gold table;
+   separately. The attempted write to the deployed Gold view must fail because
+   a view is not an updateable table; this establishes non-writability but is
+   not evidence of an authorization denial. The remaining statements must fail
+   with authorization errors:
    - a read from a Bronze table;
    - a read from a Silver table;
    - a read from the raw Volume; and
@@ -81,9 +83,9 @@ credentials.
    and confirm the group has only the intended catalog, schema, and three table
    grants. Also inspect group membership to rule out inherited elevated roles.
 
-SQL authorization failures are the expected negative-test result. Do not make
-the negative script executable as one batch because execution normally stops
-at the first denied statement.
+Do not make the negative script executable as one batch because execution
+normally stops at the first failed statement. Record the structural Gold-view
+failure separately from the four authorization denials.
 
 ## Revocation and recovery
 
@@ -101,8 +103,8 @@ to administrator.
 ## Platform and evidence boundary
 
 Unity Catalog privileges, warehouse ACLs, dashboard ACLs, group membership, and
-the published credential mode are distinct controls. Repository tests can
-verify that the intended policy is narrow, but only a separate live principal
-can prove effective allowed and denied behavior. DQ-26 remains incomplete
-until that live identity test and privacy-safe evidence are recorded.
+the published credential mode are distinct controls. Repository tests verify
+that the intended policy is narrow. The 2026-10-19 live validation used a
+separate non-admin principal and is recorded in
+[`docs/evidence/dq26_gold_access_control_validation.md`](evidence/dq26_gold_access_control_validation.md).
 

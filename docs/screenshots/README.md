@@ -41,6 +41,19 @@ The remaining screenshots preserve the chronological implementation and review
 record. They are indexed by card below, with exact claims and limitations in
 `docs/evidence/`.
 
+## DQ-26 Gold access-control evidence
+
+- `dq26_analyst_dashboard_overview.png`: separate analyst dashboard view with
+  all filters reset, rendered KPIs, coverage, and governed best-year data.
+- `dq26_analyst_dashboard_detail.png`: Q01 nullable-context table and paginated
+  best-year detail through individual data permission.
+- `dq26_effective_grants.png`: owner/admin audit returning exactly the intended
+  catalog, schema, and three Gold table grants.
+
+The live identity boundary, positive and negative outcomes, the structural
+Gold-view write limitation, and SHA-256 digests are indexed in
+`docs/evidence/dq26_gold_access_control_validation.md`.
+
 ## DQ-07 BLS landing evidence
 
 - `dq07_first_run_reconciliation.png`: 12 first-run active objects with byte

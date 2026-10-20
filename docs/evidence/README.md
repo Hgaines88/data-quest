@@ -93,3 +93,11 @@ these exports support exact value inspection.
   query, two reconciled Genie answers, published-runtime warehouse recovery,
   null-preservation smoke test, privacy-safe screenshot paths, and screenshot
   SHA-256 digests.
+
+## DQ-26 Gold access-control validation
+
+- `dq26_gold_access_control_validation.md`: records the separate non-admin
+  analyst test, exactly five effective Unity Catalog grants, successful Gold
+  reads and individual-permission dashboard use, four authorization denials,
+  the distinct structural Gold-view write block, privacy-safe screenshot
+  paths, and screenshot SHA-256 digests.
