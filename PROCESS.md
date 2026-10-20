@@ -1257,8 +1257,12 @@ Silver `SELECT`, raw-Volume `LIST`, and schema `CREATE TABLE`. The Gold
 `UPDATE` also failed, but because the deployed Gold object is a view
 (`EXPECT_TABLE_NOT_VIEW`), not because an authorization check denied DML. I
 record this distinction instead of overstating the result. The admin audit
-returned exactly five effective data grants: catalog use, schema use, and
+returned exactly five direct group grants: catalog use, schema use, and
 `SELECT` on the three named Gold contracts. No lower-layer, Volume, creation,
-ownership, or management grant appeared. The privacy-safe evidence and exact
+ownership, or management grant appeared. Copilot review subsequently identified
+that the initial audit did not enumerate grants inherited through other groups;
+the inspection SQL now inventories every project-schema securable and requires
+repetition for `users` and every other effective group before merge. The
+privacy-safe evidence and exact
 digests are indexed in
 [`docs/evidence/dq26_gold_access_control_validation.md`](docs/evidence/dq26_gold_access_control_validation.md).

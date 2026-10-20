@@ -6,7 +6,7 @@ These scripts implement and validate the DQ-26 data-plane portion of the
 | File | Run as | Purpose |
 | --- | --- | --- |
 | `apply_gold_readonly_access.sql` | Catalog/schema owner or access administrator | Grant only parent usage and exact-table reads |
-| `inspect_gold_readonly_access.sql` | Object owner or access administrator | Display effective grants on each governed object |
+| `inspect_gold_readonly_access.sql` | Object owner or access administrator | Inventory direct grants across every project-schema securable; repeat for each inherited group |
 | `analyst_positive_checks.sql` | Dedicated non-admin analyst | Prove all three intended Gold reads succeed |
 | `analyst_negative_checks.sql` | Dedicated non-admin analyst, one statement at a time | Prove writes and unauthorized-layer reads fail |
 | `revoke_gold_readonly_access.sql` | Catalog/schema owner or access administrator | Remove the data grants during teardown |

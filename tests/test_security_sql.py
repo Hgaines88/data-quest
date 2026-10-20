@@ -19,21 +19,38 @@ class SecuritySqlTest(unittest.TestCase):
 
     def test_apply_grants_only_parent_usage_and_exact_gold_select(self):
         sql = self.read("apply_gold_readonly_access.sql")
-        self.assertEqual(sql.count("GRANT USE CATALOG"), 1)
-        self.assertEqual(sql.count("GRANT USE SCHEMA"), 1)
-        self.assertEqual(sql.count("GRANT SELECT ON TABLE"), 3)
-        self.assertEqual(sql.count(GROUP), 5)
-        for table in GOLD_TABLES:
-            self.assertEqual(sql.count(table), 1)
+        uncommented = re.sub(r"--.*$", "", sql, flags=re.MULTILINE)
+        statements = {
+            re.sub(r"\s+", " ", statement).strip()
+            for statement in uncommented.split(";")
+            if statement.strip()
+        }
+        expected = {
+            f"GRANT USE CATALOG ON CATALOG workspace TO {GROUP}",
+            (
+                "GRANT USE SCHEMA ON SCHEMA workspace.rearc_data_quest "
+                f"TO {GROUP}"
+            ),
+            *{
+                "GRANT SELECT ON TABLE "
+                f"workspace.rearc_data_quest.{table} TO {GROUP}"
+                for table in GOLD_TABLES
+            },
+        }
+        self.assertEqual(statements, expected)
 
-        self.assertNotRegex(sql, r"(?i)GRANT\s+SELECT\s+ON\s+(?:SCHEMA|CATALOG)")
-        self.assertNotRegex(
-            sql,
-            r"(?i)GRANT\s+(?:ALL PRIVILEGES|MANAGE|MODIFY|UPDATE|INSERT|"
-            r"DELETE|CREATE|READ VOLUME|WRITE VOLUME|OWN)",
-        )
-        self.assertNotRegex(sql, r"(?i)\b(?:bronze|silver)_")
-        self.assertNotIn("/Volumes/", sql)
+    def test_inspection_inventories_all_project_securable_types(self):
+        sql = self.read("inspect_gold_readonly_access.sql")
+        for relation in [
+            "catalog_privileges",
+            "schema_privileges",
+            "table_privileges",
+            "volume_privileges",
+            "routine_privileges",
+        ]:
+            self.assertIn(f"system.information_schema.{relation}", sql)
+        self.assertIn("Repeat with grantee = 'users'", sql)
+        self.assertIn("no direct grants", sql)
 
     def test_positive_checks_read_only_the_three_gold_contracts(self):
         sql = self.read("analyst_positive_checks.sql")
@@ -90,7 +107,7 @@ class SecuritySqlTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("EXPECT_TABLE_NOT_VIEW", evidence)
         self.assertIn("four authorization denials", evidence)
-        self.assertIn("exactly five effective grants", evidence)
+        self.assertIn("exactly five direct grants", evidence)
 
 
 if __name__ == "__main__":

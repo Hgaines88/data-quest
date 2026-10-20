@@ -17,8 +17,8 @@ that it did not own the governed objects and belonged to the analyst group.
 
 ## Effective data grants
 
-The owner/admin inspection returned exactly five effective grants for the
-analyst group:
+The owner/admin inspection returned exactly five direct grants for the analyst
+group:
 
 | Object type | Object | Privilege |
 | --- | --- | --- |
@@ -29,7 +29,12 @@ analyst group:
 | Table | `gold_population_summary_2013_2018` | `SELECT` |
 
 No schema-wide `SELECT`, lower-layer `SELECT`, Volume access, object-creation
-privilege, ownership, or management privilege appeared in the inspection.
+privilege, ownership, or management privilege appeared in that direct-group
+inspection. The separate analyst's successful and denied operations establish
+the observed effective behavior for the tested objects. The retained audit did
+not enumerate every grant inherited through the workspace `users` group; the
+strengthened inspection SQL now requires that additional inventory before a
+future validation is accepted as exhaustive.
 
 ## Positive validation
 
@@ -55,8 +60,10 @@ Each statement was run separately as the analyst:
 The evidence therefore contains four authorization denials plus a distinct
 structural Gold-view write block. It does not claim that the Gold write probe
 reached an authorization check. Together with the exact-grant inspection, the
-result establishes the required read-only stakeholder boundary for the
-deployed view-backed Gold contracts.
+result establishes the observed read-only stakeholder boundary for the tested
+deployed view-backed Gold contracts. Absence of direct mutation, refresh,
+ownership, and pipeline-management authority is established by the five-row
+direct-grant inventory, not by the unsupported `UPDATE` probe.
 
 ## Privacy-safe screenshots
 

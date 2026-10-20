@@ -388,7 +388,7 @@ repository. Their execution order and QA gates are defined in the
 - [x] Confirm that each visual or Genie response is supported by a governed Gold table at the correct grain.
 - [x] Build a focused Databricks dashboard, a Genie space, or both when the workspace supports them.
 - [x] Add clear titles, units, filters, definitions, and source/freshness context.
-- [x] Configure Genie instructions and sample questions so answers remain within the documented semantic scope.
+- [x] Configure Genie instructions and sample questions so answers remain within the documented semantic scope (accepted Free Edition exception: the proposed instructions are versioned, but no custom instruction editor was available, so deployment is not claimed).
 - [x] Validate representative dashboard values and Genie answers against Gold-layer queries.
 - [x] Capture reviewer-facing evidence and document any Free Edition limitations.
 

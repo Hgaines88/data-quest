@@ -30,8 +30,11 @@ tables, and implementation details. Do not grant ownership, `MANAGE`,
 `MODIFY`, fine-grained DML privileges, object-creation privileges, or Volume
 access.
 
-If the catalog or schema differs from the verified defaults, replace every
-`workspace.rearc_data_quest` reference in the security SQL consistently.
+If the catalog or schema differs from the verified defaults, retarget all three
+reference forms in the security SQL: the standalone `workspace` catalog, every
+dotted `workspace.rearc_data_quest` object reference, and the slash-delimited
+`/Volumes/workspace/rearc_data_quest/` path. A partial replacement can audit or
+grant one environment while probing another.
 
 ## Apply the access model
 
@@ -81,9 +84,16 @@ credentials.
 4. As the owner/admin, run the statements in
    [`inspect_gold_readonly_access.sql`](../sql/security/inspect_gold_readonly_access.sql)
    and confirm the group has only the intended catalog, schema, and three table
-   grants. Also inspect group membership to rule out inherited elevated roles.
+   grants across the complete project schema. Repeat the consolidated inventory
+   for every effective group inherited by the validation identity, including
+   the workspace `users` group, and confirm the new validation identity has no
+   direct grants. Also inspect group membership to rule out other inherited
+   elevated roles.
 
-Do not make the negative script executable as one batch because execution
+The absence of mutation, refresh, ownership, and pipeline-management authority
+must be established by the complete grant and membership inventory, not by the
+unsupported Gold-view `UPDATE`. Do not make the negative script executable as
+one batch because execution
 normally stops at the first failed statement. Record the structural Gold-view
 failure separately from the four authorization denials.
 

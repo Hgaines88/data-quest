@@ -58,6 +58,8 @@ corresponding card is considered complete.
 
 ## Current status
 
-DQ-01 through DQ-22, DQ-25, DQ-26, and the engineering QA protocol are
-complete. DQ-23 remains open and intentionally deferred. The next
-implementation card is DQ-24.
+DQ-01 through DQ-22, DQ-25, and the engineering QA protocol are complete.
+DQ-26 implementation and behavioral validation are complete, but its
+post-review inherited-group grant inventory remains a pre-merge gate. DQ-23
+remains open and intentionally deferred. The next implementation card after
+that gate is DQ-24.
