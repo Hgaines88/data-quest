@@ -68,6 +68,14 @@ teardown procedure. The [DQ-24 validation record](docs/evidence/dq24_bundle_depl
 captures the isolated deployment, review-driven isolation corrections, and
 post-deployment Gold checks without claiming production deployment.
 
+DQ-27 adds an append-only, privacy-safe landing-run audit and read-only
+operational queries for source freshness, Gold refresh health, exact contract
+counts, and pipeline expectation results. The
+[operational observability runbook](docs/OPERATIONAL_OBSERVABILITY.md) defines
+thresholds, alerting boundaries, ownership, controlled failure validation, and
+non-destructive recovery. Landing remains the only writer to operational audit
+state; the downstream bundle job does not gain a second source writer.
+
 ## Prerequisites
 
 - A Databricks workspace with Spark Declarative Pipelines, Unity Catalog, and a
@@ -96,6 +104,7 @@ The verified defaults are:
 | Schema | `rearc_data_quest` | Landing notebook `schema` widget; Bronze/Silver property `data_quest.schema`; every pipeline target schema |
 | Managed Volume | `raw_landing` | Landing notebook `volume` widget; Bronze/Silver property `data_quest.volume` |
 | BLS contact | none | `contact_email` widget in `notebooks/01_land_bls.py` |
+| Controlled failure | `false` | BLS `controlled_failure` widget; enable only for the documented recovery exercise and reset immediately |
 
 Use simple Unity Catalog identifiers consisting of letters, numbers, and
 underscores. If the defaults change, use the same object names in both landing
@@ -148,6 +157,12 @@ landing notebook concurrently.
    these substitutions aligned so schema checks and value checks inspect the
    same tables. The [quality SQL guide](sql/quality/README.md) records the full
    rule.
+8. **Inspect operational health:** run the two read-only queries in
+   [`sql/operations/`](sql/operations/README.md) as the project owner. Confirm
+   current successful source runs, a completed Gold update, exact Gold counts,
+   and zero unexplained expectation failures. Follow the
+   [operational runbook](docs/OPERATIONAL_OBSERVABILITY.md) for alerts and
+   recovery; do not copy raw errors or notification credentials into Git.
 
 The pipeline implementation details and expected table counts are collected in
 [`pipelines/README.md`](pipelines/README.md).
@@ -187,6 +202,7 @@ Databricks runtime claims are supported separately by captured live evidence.
 | Acceptance-criteria traceability | [`REQUIREMENTS_CHECKLIST.md`](REQUIREMENTS_CHECKLIST.md) |
 | Ingestion manifest semantics | [`docs/INGESTION_MANIFEST_CONTRACT.md`](docs/INGESTION_MANIFEST_CONTRACT.md) |
 | Test scope | [`tests/README.md`](tests/README.md) |
+| Operational health and recovery | [`docs/OPERATIONAL_OBSERVABILITY.md`](docs/OPERATIONAL_OBSERVABILITY.md) |
 
 The repository contains no credentials. Screenshot files intended for review
 are cropped to exclude workspace hostnames, account email, operator identity,
