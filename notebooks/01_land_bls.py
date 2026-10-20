@@ -117,6 +117,32 @@ ensure_ingestion_run_audit_table(spark, RUN_AUDIT_TABLE)
 run_time = datetime.now(timezone.utc)
 run_id = f"{run_time:%Y%m%dT%H%M%SZ}-{uuid.uuid4().hex[:8]}"
 
+
+def record_failure(
+    failure_stage,
+    error,
+    *,
+    discovered_count=0,
+    downloaded_count=0,
+    result=None,
+):
+    """Best-effort audit of the current run without masking its failure."""
+
+    audit = failed_run_audit(
+        source="bls",
+        run_id=run_id,
+        started_at_utc=run_time,
+        completed_at_utc=datetime.now(timezone.utc),
+        failure_stage=failure_stage,
+        error=error,
+        discovered_count=discovered_count,
+        downloaded_count=downloaded_count,
+        result=result,
+    )
+    if not append_failed_run_audit_best_effort(spark, RUN_AUDIT_TABLE, audit):
+        print("WARNING: failure audit unavailable; inspect this task run")
+
+
 try:
     source_files = discover_source_files(
         BLS_DIRECTORY_URL,
@@ -126,39 +152,12 @@ try:
         backoff_seconds=1.0,
     )
 except Exception as error:
-    audit_written = append_failed_run_audit_best_effort(
-        spark,
-        RUN_AUDIT_TABLE,
-        failed_run_audit(
-            source="bls",
-            run_id=run_id,
-            started_at_utc=run_time,
-            completed_at_utc=datetime.now(timezone.utc),
-            failure_stage="DISCOVERY",
-            error=error,
-        ),
-    )
-    if not audit_written:
-        print("WARNING: failure audit unavailable; inspect this task run")
+    record_failure("DISCOVERY", error)
     raise
 try:
     current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
 except Exception as error:
-    audit_written = append_failed_run_audit_best_effort(
-        spark,
-        RUN_AUDIT_TABLE,
-        failed_run_audit(
-            source="bls",
-            run_id=run_id,
-            started_at_utc=run_time,
-            completed_at_utc=datetime.now(timezone.utc),
-            failure_stage="MANIFEST_READ",
-            error=error,
-            discovered_count=len(source_files),
-        ),
-    )
-    if not audit_written:
-        print("WARNING: failure audit unavailable; inspect this task run")
+    record_failure("MANIFEST_READ", error, discovered_count=len(source_files))
     raise
 active_paths_before = {
     entry.relative_path
@@ -178,21 +177,11 @@ if removal_candidates:
             backoff_seconds=1.0,
         )
     except Exception as error:
-        audit_written = append_failed_run_audit_best_effort(
-            spark,
-            RUN_AUDIT_TABLE,
-            failed_run_audit(
-                source="bls",
-                run_id=run_id,
-                started_at_utc=run_time,
-                completed_at_utc=datetime.now(timezone.utc),
-                failure_stage="DISCOVERY_CONFIRMATION",
-                error=error,
-                discovered_count=len(source_files),
-            ),
+        record_failure(
+            "DISCOVERY_CONFIRMATION",
+            error,
+            discovered_count=len(source_files),
         )
-        if not audit_written:
-            print("WARNING: failure audit unavailable; inspect this task run")
         raise
 
 print(f"Run: {run_id}")
@@ -218,22 +207,12 @@ try:
         backoff_seconds=1.0,
     )
 except Exception as error:
-    audit_written = append_failed_run_audit_best_effort(
-        spark,
-        RUN_AUDIT_TABLE,
-        failed_run_audit(
-            source="bls",
-            run_id=run_id,
-            started_at_utc=run_time,
-            completed_at_utc=datetime.now(timezone.utc),
-            failure_stage="DOWNLOAD_AND_VALIDATE",
-            error=error,
-            discovered_count=len(source_files),
-            downloaded_count=getattr(error, "verified_download_count", 0),
-        ),
+    record_failure(
+        "DOWNLOAD_AND_VALIDATE",
+        error,
+        discovered_count=len(source_files),
+        downloaded_count=getattr(error, "verified_download_count", 0),
     )
-    if not audit_written:
-        print("WARNING: failure audit unavailable; inspect this task run")
     raise
 
 
@@ -258,22 +237,12 @@ try:
         promoter=promote_for_run,
     )
 except Exception as error:
-    audit_written = append_failed_run_audit_best_effort(
-        spark,
-        RUN_AUDIT_TABLE,
-        failed_run_audit(
-            source="bls",
-            run_id=run_id,
-            started_at_utc=run_time,
-            completed_at_utc=datetime.now(timezone.utc),
-            failure_stage="PUBLICATION",
-            error=error,
-            discovered_count=len(source_files),
-            downloaded_count=len(landing_plan.staged_files),
-        ),
+    record_failure(
+        "PUBLICATION",
+        error,
+        discovered_count=len(source_files),
+        downloaded_count=len(landing_plan.staged_files),
     )
-    if not audit_written:
-        print("WARNING: failure audit unavailable; inspect this task run")
     raise
 
 display(spark.createDataFrame([asdict(landing_result)]))
@@ -306,21 +275,7 @@ try:
             expected_sha256=entry.content_sha256,
         )
 except Exception as error:
-    audit_written = append_failed_run_audit_best_effort(
-        spark,
-        RUN_AUDIT_TABLE,
-        failed_run_audit(
-            source="bls",
-            run_id=run_id,
-            started_at_utc=run_time,
-            completed_at_utc=datetime.now(timezone.utc),
-            failure_stage="RECONCILIATION",
-            error=error,
-            result=landing_result,
-        ),
-    )
-    if not audit_written:
-        print("WARNING: failure audit unavailable; inspect this task run")
+    record_failure("RECONCILIATION", error, result=landing_result)
     raise
 
 append_ingestion_run_audit(

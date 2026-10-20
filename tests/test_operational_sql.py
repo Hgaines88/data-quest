@@ -40,7 +40,7 @@ class OperationalSqlTests(unittest.TestCase):
         for notebook in notebooks:
             source = notebook.read_text()
             self.assertNotIn("failed_file_count=1", source)
-            self.assertIn('failure_stage="MANIFEST_READ"', source)
+            self.assertIn('record_failure("MANIFEST_READ", error', source)
             self.assertIn(
                 'downloaded_count=getattr(error, "verified_download_count", 0)',
                 source,

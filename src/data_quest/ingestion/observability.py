@@ -136,16 +136,7 @@ def failed_run_audit(
         raise ValueError("failure_stage must be a safe operational value")
     error_category = _error_category(error)
     resolved_failed_file_count = (
-        int(
-            (
-                failure_stage not in {"DISCOVERY", "DISCOVERY_CONFIRMATION"}
-                and error_category in {"SOURCE_UNAVAILABLE", "FILE_VALIDATION"}
-            )
-            or (
-                failure_stage == "DOWNLOAD_AND_VALIDATE"
-                and isinstance(error, StagingWriteError)
-            )
-        )
+        _default_failed_file_count(failure_stage, error_category, error)
         if failed_file_count is None
         else failed_file_count
     )
@@ -176,6 +167,24 @@ def failed_run_audit(
             result.published_transition_count if result is not None else 0
         ),
     )
+
+
+def _default_failed_file_count(
+    failure_stage: str,
+    error_category: str,
+    error: Exception,
+) -> int:
+    """Return one only when the failure is attributable to a source file."""
+
+    if failure_stage in {"DISCOVERY", "DISCOVERY_CONFIRMATION"}:
+        return 0
+    if error_category in {"SOURCE_UNAVAILABLE", "FILE_VALIDATION"}:
+        return 1
+    if failure_stage == "DOWNLOAD_AND_VALIDATE" and isinstance(
+        error, StagingWriteError
+    ):
+        return 1
+    return 0
 
 
 def _error_category(error: Exception) -> str:
