@@ -445,15 +445,21 @@ pre-publication failure with successful recovery. See
 **Priority:** Bonus
 **Depends on:** DQ-24, DQ-25, DQ-26, DQ-27
 
-- [ ] Deploy and run the documented solution from its starting state using the Asset Bundle where supported.
-- [ ] For unsupported Free Edition resources, validate the bundle configuration, exercise the documented equivalent resource, and record the limitation without claiming deployment.
-- [ ] Run ingestion and the Spark Declarative Pipeline through Gold.
-- [ ] Reconcile dashboard and representative Genie answers to Gold queries.
-- [ ] Verify read-only analyst access and confirm prohibited access remains denied.
-- [ ] Confirm freshness, expectation, file-processing, and failure signals are visible.
-- [ ] Review runtime, compute selection, cleanup, and likely cost drivers.
-- [ ] Update the README, architecture diagram, `PROCESS.md`, AI-usage log, and evidence gallery to match the final implementation.
-- [ ] Perform a final secrets, privacy, reproducibility, and explainability review.
+- [x] Deploy and run the documented solution from its starting state using the Asset Bundle where supported.
+- [x] For unsupported Free Edition resources, validate the bundle configuration, exercise the documented equivalent resource, and record the limitation without claiming deployment.
+- [x] Run ingestion and the Spark Declarative Pipeline through Gold.
+- [x] Reconcile dashboard and representative Genie answers to Gold queries.
+- [x] Verify read-only analyst access and confirm prohibited access remains denied.
+- [x] Confirm freshness, expectation, file-processing, and failure signals are visible.
+- [x] Review runtime, compute selection, cleanup, and likely cost drivers.
+- [x] Update the README, architecture diagram, `PROCESS.md`, AI-usage log, and evidence gallery to match the final implementation.
+- [x] Perform a secrets, privacy, reproducibility, and explainability review proportionate to the DQ-28 change.
+
+**Validation state:** Complete. The exact reviewed revision passed the isolated
+bundle deployment and convergence checks, serial no-op landing reruns,
+development and shared Bronze-to-Gold refreshes, expectation inspection, and
+layer reconciliation. See
+[`docs/evidence/dq28_end_to_end_validation.md`](docs/evidence/dq28_end_to_end_validation.md).
 
 **Done when:** The extended product can be deployed where supported, equivalently validated where deployment is unsupported, operated, governed, used, and explained end to end with supporting evidence.
 
@@ -462,13 +468,13 @@ pre-publication failure with successful recovery. See
 **Priority:** Decision gate
 **Depends on:** DQ-28
 
-- [ ] Summarize which stakeholder, governance, deployment, observability, and operational needs Databricks already satisfies.
-- [ ] Identify any remaining requirement that Databricks does not satisfy well enough for this use case.
-- [ ] Evaluate whether Snowflake or Power BI would serve a defensible consumer, interoperability, semantic-modeling, or reporting need.
-- [ ] Estimate added build time, Windows requirements, cost, credentials, duplicated storage or compute, and maintenance burden.
-- [ ] Confirm what Rearc permits to be reused or discussed outside the assessment context.
-- [ ] Record a clear decision: stop with Databricks, build a separate public-data adaptation, or add a narrowly scoped external consumer.
-- [ ] Do not begin an external implementation before documenting the decision.
+- [x] Summarize which stakeholder, governance, deployment, observability, and operational needs Databricks already satisfies.
+- [x] Identify any remaining requirement that Databricks does not satisfy well enough for this use case.
+- [x] Evaluate whether Snowflake or Power BI would serve a defensible consumer, interoperability, semantic-modeling, or reporting need.
+- [x] Estimate added build time, Windows requirements, cost, credentials, duplicated storage or compute, and maintenance burden.
+- [x] Establish a conservative reuse boundary: do not reuse assessment-specific material outside the authorized context without confirmed permission.
+- [x] Record the decision to stop with Databricks in [`docs/PLATFORM_EXTENSION_DECISION.md`](docs/PLATFORM_EXTENSION_DECISION.md).
+- [x] Do not begin an external implementation before documenting the decision.
 
 **Done when:** Any later platform extension has a stated user and architectural purpose, or the project is intentionally closed as a complete Databricks product.
 
