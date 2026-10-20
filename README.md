@@ -10,8 +10,6 @@ implementation and an independently runnable Spark SQL alternative.
 For implementation decisions, corrections, trade-offs, AI usage, and the
 retrospective, read [`PROCESS.md`](PROCESS.md). For a quick visual review, open
 the [curated screenshot index](docs/screenshots/README.md#dq-21-curated-submission-set).
-For a concise source-to-Gold explanation and interview narrative, start with
-the [architecture walkthrough](docs/ARCHITECTURE_WALKTHROUGH.md).
 The remaining work and the rule that reserves DQ-23 for the final audit are
 recorded in the [project completion roadmap](docs/PROJECT_ROADMAP.md).
 
@@ -212,7 +210,6 @@ Databricks runtime claims are supported separately by captured live evidence.
 
 | Review need | Location |
 | --- | --- |
-| Concise architecture and interview walkthrough | [`docs/ARCHITECTURE_WALKTHROUGH.md`](docs/ARCHITECTURE_WALKTHROUGH.md) |
 | Curated pipeline, table, and Question 1–3 screenshots | [`docs/screenshots/README.md`](docs/screenshots/README.md#dq-21-curated-submission-set) |
 | Detailed live-validation records and exported rows | [`docs/evidence/README.md`](docs/evidence/README.md) |
 | Architecture, trade-offs, AI usage, corrections, retrospective | [`PROCESS.md`](PROCESS.md) |
