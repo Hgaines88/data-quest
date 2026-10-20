@@ -377,10 +377,14 @@ repository. Their execution order and QA gates are defined in the
 - [x] For unsupported Free Edition resources, capture the dashboard-source constraint and document the DQ-25/DQ-26 equivalent validation path without claiming deployment.
 - [x] Document validate, plan, deploy, run, update, and teardown or rollback commands.
 
-**Validation state:** Authenticated validation passed; every reviewed plan had
-zero deletions; the isolated development bundle deployed; its ordered five-task
-run succeeded; all 185 local tests passed; and the three development Gold
-contracts returned their expected row counts with zero invalid rows. See the
+**Validation state:** Authenticated validation passed. A final review identified
+cross-deployment landing serialization and per-user output-isolation gaps. The
+corrected bundle orchestrates only Bronze through Gold, uses a current-user
+development schema, and keeps landing as a separately governed single-writer
+prerequisite. Its reviewed plan had zero deletions, all three tasks succeeded,
+all 185 local tests passed, all three Gold contracts returned their expected row
+counts with zero invalid rows, and the final plan reported four unchanged
+resources. The completed evidence is recorded in the
 [DQ-24 validation record](docs/evidence/dq24_bundle_deployment_validation.md).
 
 **Done when:** The project can be validated and reproducibly deployed from version-controlled configuration for supported resources, every unsupported resource has an evidenced limitation and equivalent validation path, and no required manual UI reconstruction is left undocumented.

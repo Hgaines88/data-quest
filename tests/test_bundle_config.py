@@ -18,7 +18,10 @@ class BundleConfigTests(unittest.TestCase):
             self.assertRegex(config, rf"(?m)^  {variable}:$")
         self.assertIn("mode: development", config)
         self.assertIn("mode: production", config)
-        self.assertIn("output_schema: rearc_data_quest_dq24_dev", config)
+        self.assertIn(
+            "output_schema: rearc_data_quest_dq24_${workspace.current_user.short_name}",
+            config,
+        )
         self.assertNotRegex(config, r"(?i)(token|password|secret)\s*:")
 
     def test_three_serverless_triggered_pipelines_are_declared(self):
@@ -39,15 +42,13 @@ class BundleConfigTests(unittest.TestCase):
         self.assertNotIn("@gmail.com", config)
         self.assertNotIn("@zipcode.rocks", config)
 
-    def test_refresh_job_preserves_single_writer_order(self):
+    def test_refresh_job_orders_only_non_landing_pipeline_tasks(self):
         config = (ROOT / "resources" / "refresh.job.yml").read_text(
             encoding="utf-8"
         )
         task_positions = [
             config.index(f"task_key: {task}")
             for task in (
-                "land_bls",
-                "land_population",
                 "refresh_bronze",
                 "refresh_silver",
                 "refresh_gold",
@@ -55,9 +56,14 @@ class BundleConfigTests(unittest.TestCase):
         ]
         self.assertEqual(task_positions, sorted(task_positions))
         self.assertEqual(config.count("max_concurrent_runs: 1"), 1)
-        self.assertIn('default: ""', config)
-        self.assertIn('default: "false"', config)
-        self.assertIn("{{job.parameters.contact_email}}", config)
+        self.assertNotIn("land_bls", config)
+        self.assertNotIn("land_population", config)
+        self.assertNotIn("notebook_task:", config)
+        self.assertNotIn("${var.schema}", config)
+        self.assertNotIn("${var.volume}", config)
+        self.assertEqual(config.count("depends_on:"), 2)
+        self.assertIn("- task_key: refresh_bronze", config)
+        self.assertIn("- task_key: refresh_silver", config)
         self.assertNotIn("operator@example", config)
         self.assertNotIn("client:", config)
         self.assertNotIn("environment_key:", config)

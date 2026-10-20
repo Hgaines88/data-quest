@@ -15,8 +15,9 @@ The validated bundle manages four workspace resources:
 
 The existing catalog, source schema, raw Volume, warehouse, dashboard, identity
 groups, grants, and manually verified pipelines remain outside bundle state.
-Development pipeline outputs are isolated in
-`workspace.rearc_data_quest_dq24_dev`.
+Development pipeline outputs are isolated per deployer in a schema resolved
+from `workspace.current_user.short_name`; no personal resolved name is retained
+in this record.
 
 ## Local and authenticated gates
 
@@ -29,6 +30,9 @@ Validation used Databricks CLI 1.21.0 on 2026-10-20.
 - Initial reviewed plan: four creates, zero changes, zero deletions.
 - Isolation correction plan: three pipeline updates, zero deletions.
 - Job compatibility correction plan: one job update, zero deletions.
+- Final review correction plan: four updates, zero additions, zero deletions.
+- Final convergence plan: four unchanged resources, zero pending changes or
+  deletions.
 
 The final deployed summary contained exactly the refresh job and the three
 layer pipelines named above.
@@ -53,11 +57,11 @@ serverless notebook tasks now omit a cluster definition as supported by the
 current Databricks bundle contract. Validation and plan were repeated before
 the single job update.
 
-## Successful ordered run
+## Superseded five-task trial
 
-The corrected refresh ran on 2026-10-20 with mass-removal protection disabled
-and the BLS contact supplied only as a runtime parameter. The final job and all
-five tasks reported `TERMINATED/SUCCESS`:
+An intermediate refresh ran on 2026-10-20 with mass-removal protection disabled
+and the BLS contact supplied only as a runtime parameter. The job and all five
+tasks reported `TERMINATED/SUCCESS`:
 
 1. `land_bls`;
 2. `land_population`;
@@ -65,14 +69,38 @@ five tasks reported `TERMINATED/SUCCESS`:
 4. `refresh_silver`; and
 5. `refresh_gold`.
 
-This proves that the bundle-deployed dependency chain executed successfully in
-the authorized workspace. It does not claim that production was deployed.
+This historical run proved the then-deployed dependency chain could execute,
+but it does not validate the final configuration. A later review correctly
+found that `max_concurrent_runs: 1` serializes only one job and cannot prevent
+another user's or target's deployment from writing the same manifests and raw
+Volume. The final bundle therefore excludes both landing tasks and treats
+landing as a separately governed, single-authorized-writer prerequisite.
+
+The same review found that a fixed development schema isolated development from
+production but not one developer from another. The final development target
+derives its output schema from `workspace.current_user.short_name`.
+
+## Final corrected run
+
+The corrected configuration was authenticated, planned, and deployed on
+2026-10-20. The deployment updated exactly the refresh job and three pipelines,
+created and deleted no bundle resources, and deleted no synchronized files.
+The refresh job contained only the following ordered tasks, each of which
+reported `TERMINATED/SUCCESS`:
+
+1. `refresh_bronze`;
+2. `refresh_silver`; and
+3. `refresh_gold`.
+
+The development output schema resolved from the authenticated current user's
+short name and was distinct from both the shared source schema and the prior
+fixed development schema. No landing notebook was scheduled or executed by the
+bundle. A post-run plan reported zero additions, zero changes, zero deletions,
+and four unchanged resources.
 
 ## Isolated output validation
 
-A read-only information-schema query confirmed the dedicated development
-schema contained the expected published Bronze, Silver, and Gold materialized
-views. A separate read-only integrity query returned:
+A read-only integrity query against the per-user development schema returned:
 
 | Gold contract | Row count | Invalid rows |
 | --- | ---: | ---: |

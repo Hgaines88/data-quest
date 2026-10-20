@@ -60,9 +60,9 @@ corresponding card is considered complete.
 
 DQ-01 through DQ-22, DQ-25, and the engineering QA protocol are complete.
 DQ-26 implementation, behavioral validation, and post-review inherited/direct
-grant inventories are complete. DQ-24 is complete: authenticated validation,
-zero-delete plan review, isolated development deployment, the ordered five-task
-run, local regression suite, and Gold integrity checks passed. Production was
-not deployed, and shared dashboard, warehouse, identity, and grant resources
-remain explicitly external. DQ-27 is the next card. DQ-23 remains intentionally
-deferred.
+grant inventories are complete. DQ-24 is complete: landing is excluded from
+independently deployed jobs, development outputs are isolated per current user,
+the Bronze-through-Gold run and contract checks passed, and the final plan
+reported four unchanged resources. Production was not deployed, and shared
+landing state, dashboard, warehouse, identity, and grant resources remain
+explicitly external. DQ-27 is the next card. DQ-23 remains intentionally deferred.

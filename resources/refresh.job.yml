@@ -3,35 +3,8 @@ resources:
     refresh:
       name: data-quest-${bundle.target}-refresh
       max_concurrent_runs: 1
-      parameters:
-        - name: contact_email
-          default: ""
-        - name: allow_mass_removal
-          default: "false"
       tasks:
-        - task_key: land_bls
-          notebook_task:
-            notebook_path: ../notebooks/01_land_bls.py
-            base_parameters:
-              contact_email: "{{job.parameters.contact_email}}"
-              catalog: ${var.catalog}
-              schema: ${var.schema}
-              volume: ${var.volume}
-              allow_mass_removal: "{{job.parameters.allow_mass_removal}}"
-
-        - task_key: land_population
-          depends_on:
-            - task_key: land_bls
-          notebook_task:
-            notebook_path: ../notebooks/02_land_datausa_population.py
-            base_parameters:
-              catalog: ${var.catalog}
-              schema: ${var.schema}
-              volume: ${var.volume}
-
         - task_key: refresh_bronze
-          depends_on:
-            - task_key: land_population
           pipeline_task:
             pipeline_id: ${resources.pipelines.bronze.id}
             full_refresh: false

@@ -107,7 +107,7 @@ these exports support exact value inspection.
 
 - `dq24_bundle_deployment_validation.md`: records authenticated validation and
   reviewed plans, two contained Free Edition compatibility corrections,
-  dedicated development-schema isolation, successful deployment and ordered
-  five-task run, exact Gold row counts with zero invalid rows, and the explicit
+  per-user development-schema isolation, review-driven removal of shared landing
+  writes, exact Gold row counts with zero invalid rows, and the explicit
   boundary for dashboard, warehouse, identity, and grant resources outside
   bundle state.

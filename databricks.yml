@@ -37,7 +37,7 @@ targets:
     workspace:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
     variables:
-      output_schema: rearc_data_quest_dq24_dev
+      output_schema: rearc_data_quest_dq24_${workspace.current_user.short_name}
 
   prod:
     mode: production

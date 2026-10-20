@@ -1284,12 +1284,12 @@ digests are indexed in
 ### 2026-10-20: DQ-24 bundle resource model and pre-deployment gate
 
 I modeled the deployable Databricks portion of the verified solution as three
-triggered serverless pipelines and one single-writer refresh job. The job
-preserves the operational dependency chain already exercised manually: BLS
-landing, Data USA landing, Bronze, Silver, and Gold. Catalog, schema, and Volume
-names are non-secret variables; the required BLS contact remains an empty
-runtime job parameter rather than tracked configuration. The development target
-uses a current-user bundle root, while production uses an explicit shared root
+triggered serverless pipelines and one ordered downstream refresh job. The job
+orchestrates Bronze, Silver, and Gold only. BLS and Data USA landing remain a
+separately governed single-authorized-writer prerequisite because job-level
+concurrency cannot serialize shared manifest and Volume writes across users or
+deployment targets. The development target uses both a current-user bundle root
+and a current-user output schema, while production uses an explicit shared root
 and cannot be deployed safely until its plan and any existing-resource binding
 decision are reviewed.
 
@@ -1308,7 +1308,7 @@ It then stopped at the expected authentication boundary because this local
 worktree has no configured Databricks credentials. The repository's 185 local
 tests, including four bundle contract checks, pass. I do not treat either result
 as deployment evidence: authenticated validation, a reviewed plan, isolated
-development deployment, the five-task live run, and post-deployment quality
+development deployment, the ordered downstream live run, and post-deployment quality
 checks remain required before DQ-24 can close.
 
 The first isolated development deploy exposed a runtime API constraint that
@@ -1324,12 +1324,13 @@ before running them when a post-deploy review found that resource-name
 isolation alone did not isolate pipeline output tables. I split the existing
 source schema from the pipeline output schema: Bronze continues to read the
 verified manifests and raw Volume in `rearc_data_quest`, while the development
-Bronze, Silver, and Gold outputs target `rearc_data_quest_dq24_dev`. Production
+Bronze, Silver, and Gold outputs target a schema derived from the current user's
+Databricks short name. Production
 retains `rearc_data_quest` as its output only after a separate binding and plan
 review. This prevents a development update from contending with tables owned by
 the manually verified pipelines.
 
-The first five-task run then failed before notebook execution because the job
+The first intermediate five-task run then failed before notebook execution because the job
 environment used deprecated `client: "1"`, which Free Edition rejected as an
 unsupported `Client-1` REPL channel. All downstream tasks were skipped and no
 data update ran. Current Databricks bundle guidance permits serverless notebook
@@ -1338,13 +1339,17 @@ non-notebook serverless tasks require `environment_key`. I removed the
 deprecated environment rather than guessing another client channel and again
 required validation and plan review before deployment.
 
-After the correction, the final development plan changed only the refresh job
-and deleted nothing. The redeployed bundle completed the ordered five-task run:
-both landing notebooks and all three isolated pipeline updates reported
-`TERMINATED/SUCCESS`. The bundle summary contained exactly the refresh job and
-three pipelines. A read-only information-schema query confirmed the isolated
-published layer outputs, and a Gold integrity query returned one population
-summary row, 282 best-year rows, and 39 Q01 population-context rows with zero
-invalid rows for each contract. The full claim boundaries and failure/recovery
-trail are recorded in
+After that correction, an intermediate plan changed only the refresh job and
+deleted nothing, and the five-task trial succeeded. A final Copilot review then
+identified two valid deployment-isolation gaps: the fixed development schema
+was shared by all developers, and `max_concurrent_runs: 1` did not serialize
+landing writes across independently deployed jobs. I corrected the development
+schema to include `workspace.current_user.short_name` and removed both landing
+notebooks and their runtime parameters from the bundle job. Landing remains
+governed by its existing single-writer runbooks; the bundle now begins at Bronze
+and cannot mutate shared landing state. Final authenticated validation, a
+zero-delete plan, deployment, and the three-stage run all succeeded. The Gold
+contracts returned 1, 282, and 39 rows with zero invalid rows, and the
+convergence plan reported four unchanged resources with no additions, changes,
+or deletions. The full claim boundaries and failure/recovery trail are recorded in
 [`docs/evidence/dq24_bundle_deployment_validation.md`](docs/evidence/dq24_bundle_deployment_validation.md).
