@@ -81,8 +81,8 @@ DQ-28 integrates those boundaries through one explicit
 validates the supported bundle resources, the separately governed landing
 workflow, and the external dashboard, access, and observability controls
 without claiming that Free Edition or the bundle owns unsupported resources.
-Its [evidence record](docs/evidence/dq28_end_to_end_validation.md) remains
-pending until the exact reviewed revision passes the live gates.
+Its [evidence record](docs/evidence/dq28_end_to_end_validation.md) captures the
+completed live validation of the exact reviewed revision.
 
 DQ-29 records the decision to [stop with Databricks](docs/PLATFORM_EXTENSION_DECISION.md)
 unless a named consumer and a concrete unmet requirement justify an external

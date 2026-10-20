@@ -62,11 +62,12 @@ corresponding card is considered complete.
 
 ## Current status
 
-DQ-01 through DQ-22, DQ-24 through DQ-27, and the engineering QA protocol are
+DQ-01 through DQ-22, DQ-24 through DQ-29, and the engineering QA protocol are
 complete. DQ-24 keeps
 landing outside independently deployed jobs, isolates development outputs per
 current user, and deploys only the ordered Bronze-through-Gold resources.
 Production was not deployed, and shared landing state, dashboard, warehouse,
 identity, and grant resources remain explicitly external. DQ-27 adds the
-privacy-safe health, expectation, failure, and recovery controls. DQ-28 is the
-current integration gate; DQ-23 remains intentionally deferred.
+privacy-safe health, expectation, failure, and recovery controls. DQ-28 passed
+its integrated live gates, and DQ-29 concluded that no external platform is
+justified. DQ-23 remains intentionally deferred.
