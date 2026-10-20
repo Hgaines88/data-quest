@@ -40,7 +40,10 @@ grant one environment while probing another.
 
 1. As an account or workspace administrator, create the account group
    `data_quest_readonly_analysts` in **Settings > Identity and access > Groups**
-   and assign it to the workspace with ordinary workspace-user entitlement.
+   and assign it to the workspace with **Databricks SQL access** enabled.
+   Leave **Consumer access**, **Workspace access**, and **Admin access**
+   disabled. Verify the effective entitlements after the group propagates; the
+   warehouse **Can use** ACL does not itself provide Databricks SQL access.
 2. Add a dedicated non-admin validation user or service principal. The
    identity must not own project objects and must not inherit broader access
    from another group.

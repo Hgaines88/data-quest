@@ -98,6 +98,10 @@ class SecuritySqlTest(unittest.TestCase):
             "Individual data permission",
             "dedicated non-admin validation user or service principal",
             "dq26_gold_access_control_validation.md",
+            "Databricks SQL access",
+            "Consumer access",
+            "Workspace access",
+            "Admin access",
         ]:
             self.assertIn(phrase, guide)
 
