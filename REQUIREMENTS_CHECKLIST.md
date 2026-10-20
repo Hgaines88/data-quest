@@ -369,13 +369,23 @@ repository. Their execution order and QA gates are defined in the
 **Priority:** Bonus
 **Depends on:** DQ-26
 
-- [ ] Inventory the pipeline, jobs, notebooks or source files, schemas, variables, permissions, and other resources that belong in the bundle.
-- [ ] Define environment-specific configuration without committing credentials, personal workspace identifiers, or secrets.
-- [ ] Add bundle targets appropriate for local validation and the authorized Databricks workspace.
-- [ ] Validate the bundle configuration before deployment.
-- [ ] Deploy or update supported resources through the bundle and confirm that the resulting pipeline still passes its tests.
-- [ ] For unsupported Free Edition resources, capture constraint evidence and document an equivalent validation path without claiming deployment.
-- [ ] Document validate, deploy, run, update, and teardown or rollback commands.
+- [x] Inventory the pipeline, jobs, notebooks or source files, schemas, variables, permissions, and other resources that belong in the bundle.
+- [x] Define environment-specific configuration without committing credentials, personal workspace identifiers, or secrets.
+- [x] Add bundle targets appropriate for local validation and the authorized Databricks workspace.
+- [x] Validate the bundle configuration before deployment.
+- [x] Deploy or update supported resources through the bundle and confirm that the resulting pipeline still passes its tests.
+- [x] For unsupported Free Edition resources, capture the dashboard-source constraint and document the DQ-25/DQ-26 equivalent validation path without claiming deployment.
+- [x] Document validate, plan, deploy, run, update, and teardown or rollback commands.
+
+**Validation state:** Authenticated validation passed. A final review identified
+cross-deployment landing serialization and per-user output-isolation gaps. The
+corrected bundle orchestrates only Bronze through Gold, uses a current-user
+development schema, and keeps landing as a separately governed single-writer
+prerequisite. Its reviewed plan had zero deletions, all three tasks succeeded,
+all 185 local tests passed, all three Gold contracts returned their expected row
+counts with zero invalid rows, and the final plan reported four unchanged
+resources. The completed evidence is recorded in the
+[DQ-24 validation record](docs/evidence/dq24_bundle_deployment_validation.md).
 
 **Done when:** The project can be validated and reproducibly deployed from version-controlled configuration for supported resources, every unsupported resource has an evidenced limitation and equivalent validation path, and no required manual UI reconstruction is left undocumented.
 

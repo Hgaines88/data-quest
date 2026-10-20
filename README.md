@@ -57,6 +57,17 @@ dashboard ACLs, positive reads, prohibited operations, teardown, and the live
 separate-principal evidence gate. Its [security SQL](sql/security/README.md)
 never grants schema-wide data access.
 
+DQ-24 packages the three triggered pipelines and their ordered Bronze-to-Gold
+refresh job as a version-controlled Databricks bundle. Landing remains a
+separately governed single-writer prerequisite because independently deployed
+jobs cannot safely serialize writes to the shared manifests and raw Volume. The
+[bundle deployment runbook](docs/BUNDLE_DEPLOYMENT.md) records its external
+governance prerequisites, isolated development target, authenticated validation
+gate, reviewed plan requirement, landing prerequisite, update path, and guarded
+teardown procedure. The [DQ-24 validation record](docs/evidence/dq24_bundle_deployment_validation.md)
+captures the isolated deployment, review-driven isolation corrections, and
+post-deployment Gold checks without claiming production deployment.
+
 ## Prerequisites
 
 - A Databricks workspace with Spark Declarative Pipelines, Unity Catalog, and a

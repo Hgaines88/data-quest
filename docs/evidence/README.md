@@ -102,3 +102,12 @@ these exports support exact value inspection.
   the distinct structural Gold-view write block, zero-grant audits for the
   inherited `users` group and validation identity, privacy-safe screenshot
   paths, and screenshot SHA-256 digests.
+
+## DQ-24 Databricks bundle deployment validation
+
+- `dq24_bundle_deployment_validation.md`: records authenticated validation and
+  reviewed plans, two contained Free Edition compatibility corrections,
+  per-user development-schema isolation, review-driven removal of shared landing
+  writes, exact Gold row counts with zero invalid rows, and the explicit
+  boundary for dashboard, warehouse, identity, and grant resources outside
+  bundle state.
