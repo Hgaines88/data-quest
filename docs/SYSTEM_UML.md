@@ -1,10 +1,11 @@
 # UML-style system design
 
-This document combines the implemented raw-ingestion boundary with the planned
-Bronze, Silver, Gold, and stakeholder layers. Solid relationships are product
-responsibilities; the landing notebooks and separate source manifests exist
-today, while pipeline and presentation components remain planned. Dashed
-relationships are validation, governance, or optional interactions.
+This document describes the implemented landing, Bronze, Silver, Gold,
+stakeholder, governance, deployment, and observability boundaries. Solid
+relationships are data or user flows. Dashed relationships are validation,
+governance, operational, or deployment interactions. The Asset Bundle manages
+the three pipelines and their ordered refresh job; landing and the existing
+dashboard, warehouse, identities, and grants remain separately governed.
 
 ## Component view
 
@@ -67,7 +68,6 @@ flowchart LR
     obs -. observes .-> datausa_manifest
     obs -. observes .-> sdp
     dab -. deploys .-> sdp
-    dab -. configures .-> uc
 
     dashboard --> stakeholder
     genie --> stakeholder
