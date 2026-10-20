@@ -92,15 +92,18 @@ metadata lookup aligned: use `<catalog>.information_schema.columns` and change
 every `table_schema = 'rearc_data_quest'` predicate to the exact development
 schema name. In the health copy, leave `ingestion_run_audit` pointed at the
 shared source schema because landing is not deployed by the bundle. Run all
-four copies, require every reconciliation pass flag to be true, and record the
-Bronze, Silver, and Gold update IDs produced by this bundle run. Require Gold
-row counts of 1, 282, and 39 with zero invalid rows.
+four copies, require every reconciliation pass flag to be true, and use the
+expectations copy to record the Bronze, Silver, and Gold update IDs produced by
+this bundle run. Require Gold row counts of 1, 282, and 39 with zero invalid
+rows.
 
 Next, update the separately governed shared stakeholder path. From the same
 reviewed Git revision, run the existing shared Bronze, Silver, and Gold
 pipelines in that order. Do not deploy the bundle's `prod` target. Record the
-three successful shared update IDs and verify that each query below reports
-those updates rather than an earlier successful run:
+three successful shared update IDs and verify that
+`sql/operations/inspect_pipeline_expectations.sql` reports those exact IDs for
+the corresponding layers. The other queries below validate the resulting data
+and stakeholder surface; they do not report pipeline update IDs:
 
 1. run `sql/quality/validate_bronze_to_silver.sql`;
 2. run `sql/quality/validate_gold_cross_implementation.sql`;
@@ -131,9 +134,10 @@ authorization screenshots.
 Rerun both operational SQL files against the shared schema and rerun the
 development-schema copies defined in step 5. Confirm fresh successful source
 audit rows in the shared source schema. For both output schemas, match the
-reported Bronze, Silver, and Gold update IDs to this validation, confirm the
-completed Gold update and exact Gold counts, require visible expectation
-results, and resolve every failure signal. Review the runtime, serverless
+Bronze, Silver, and Gold update IDs reported by
+`inspect_pipeline_expectations.sql` to this validation, confirm the completed
+Gold update and exact Gold counts, require visible expectation results, and
+resolve every failure signal. Review the runtime, serverless
 compute choices, single-writer landing boundary, isolated development schema,
 cleanup procedure, and likely cost drivers in `docs/BUNDLE_DEPLOYMENT.md` and
 `docs/OPERATIONAL_OBSERVABILITY.md`.
