@@ -28,6 +28,22 @@ class OperationalSqlTests(unittest.TestCase):
         self.assertIn("INTERVAL 48 HOURS", sql)
         self.assertIn("VALUES ('bls'), ('datausa')", sql)
         self.assertIn("WHEN completed_at_utc IS NULL THEN 'FAIL'", sql)
+        self.assertIn("VALUES ('GOLD_PIPELINE')", sql)
+        self.assertIn("LEFT JOIN latest_gold_update ON TRUE", sql)
+
+    def test_notebooks_delegate_failed_file_count_to_error_classification(self) -> None:
+        notebooks = (
+            ROOT / "notebooks" / "01_land_bls.py",
+            ROOT / "notebooks" / "02_land_datausa_population.py",
+        )
+
+        for notebook in notebooks:
+            source = notebook.read_text()
+            self.assertNotIn("failed_file_count=1", source)
+            self.assertIn(
+                'downloaded_count=getattr(error, "verified_download_count", 0)',
+                source,
+            )
 
     def test_expectation_query_uses_stable_event_log_contract(self) -> None:
         sql = (OPERATIONS / "inspect_pipeline_expectations.sql").read_text()

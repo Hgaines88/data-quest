@@ -152,7 +152,13 @@ def prepare_source_landing(
             inventory_complete=True,
             downloads_complete=True,
         )
-    except Exception:
+    except Exception as error:
+        # Preserve privacy-safe progress without wrapping the original error,
+        # so downstream classification can still use its concrete type.
+        try:
+            error.verified_download_count = len(staged_files)
+        except (AttributeError, TypeError):
+            pass
         cleanup(staging_root)
         raise
 

@@ -125,6 +125,7 @@ except Exception as error:
             failure_stage="DOWNLOAD_AND_VALIDATE",
             error=error,
             discovered_count=1,
+            downloaded_count=getattr(error, "verified_download_count", 0),
         ),
     )
     if not audit_written:
@@ -153,7 +154,6 @@ except Exception as error:
             error=error,
             discovered_count=1,
             downloaded_count=len(landing_plan.staged_files),
-            failed_file_count=1,
         ),
     )
     if not audit_written:
@@ -203,7 +203,6 @@ except Exception as error:
             completed_at_utc=datetime.now(timezone.utc),
             failure_stage="RECONCILIATION",
             error=error,
-            failed_file_count=1,
             result=landing_result,
         ),
     )

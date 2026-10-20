@@ -58,19 +58,24 @@ latest_gold_update AS (
     ).update_progress.state IN ('COMPLETED', 'FAILED', 'CANCELED')
   ORDER BY timestamp DESC
   LIMIT 1
+),
+expected_gold(object_name) AS (
+  VALUES ('GOLD_PIPELINE')
 )
 SELECT
-  'GOLD_PIPELINE' AS object_name,
+  expected_gold.object_name,
   completed_at_utc,
   update_state,
   TIMESTAMPDIFF(HOUR, completed_at_utc, CURRENT_TIMESTAMP()) AS age_hours,
   CASE
+    WHEN completed_at_utc IS NULL THEN 'FAIL'
     WHEN update_state <> 'COMPLETED' THEN 'FAIL'
     WHEN completed_at_utc < CURRENT_TIMESTAMP() - INTERVAL 48 HOURS THEN 'FAIL'
     WHEN completed_at_utc < CURRENT_TIMESTAMP() - INTERVAL 24 HOURS THEN 'WARN'
     ELSE 'HEALTHY'
   END AS health_status
-FROM latest_gold_update;
+FROM expected_gold
+LEFT JOIN latest_gold_update ON TRUE;
 
 -- Exact contract counts make incomplete Gold publication immediately visible.
 SELECT 'gold_population_summary_2013_2018' AS object_name,

@@ -149,7 +149,7 @@ class PrepareBlsLandingTests(unittest.TestCase):
                 content_sha256=hashlib.sha256(successful_body).hexdigest(),
             )
 
-        with self.assertRaisesRegex(SourceRequestError, "controlled"):
+        with self.assertRaisesRegex(SourceRequestError, "controlled") as raised:
             prepare_source_landing(
                 [source("first"), source("second")],
                 [],
@@ -162,6 +162,7 @@ class PrepareBlsLandingTests(unittest.TestCase):
             )
 
         cleanup.assert_called_once_with(f"{VOLUME_ROOT}/_staging/{RUN_ID}")
+        self.assertEqual(raised.exception.verified_download_count, 1)
 
     def test_duplicate_source_names_fail_before_download(self) -> None:
         downloader = Mock()
