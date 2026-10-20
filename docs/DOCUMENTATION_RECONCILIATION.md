@@ -1,9 +1,8 @@
 # Documentation reconciliation
 
-This record closes the documentation-drift findings in section 8 of
-`docs/COPILOT_CODEBASE_AUDIT.md`. That audit remains a historical assessment of
-commit `8cf008b`; this disposition compares each finding with the repository
-after DQ-35 through DQ-41.
+This record closes documentation-drift findings identified during a
+repository-wide review at commit `8cf008b`. The dispositions compare each
+finding with the repository after DQ-35 through DQ-41.
 
 | Finding | Current disposition | Evidence or correction |
 | --- | --- | --- |

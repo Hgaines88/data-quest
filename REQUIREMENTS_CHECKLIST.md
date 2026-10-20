@@ -344,9 +344,8 @@ check passing and no unexplained discrepancy.
 **Priority:** Required  
 **Depends on:** DQ-20, DQ-21, DQ-22, DQ-29
 
-**Execution note:** This is the final project-wide gate. See the
-[project completion roadmap](docs/PROJECT_ROADMAP.md); do not close DQ-23 while
-an implementation card or the platform decision gate remains open.
+**Execution note:** This is the final project-wide gate. Do not close DQ-23
+while an implementation card or the platform decision gate remains open.
 
 - [ ] Run the complete ingestion and pipeline workflow from a documented starting state.
 - [ ] Re-run it to demonstrate idempotency.
@@ -361,8 +360,7 @@ an implementation card or the platform decision gate remains open.
 ## Epic 5: Optional enhancements
 
 These extend the completed required pipeline before DQ-23 certifies the final
-repository. Their execution order and QA gates are defined in the
-[project completion roadmap](docs/PROJECT_ROADMAP.md).
+repository.
 
 ### DQ-24: Deploy with Databricks Asset Bundles
 

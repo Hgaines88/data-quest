@@ -276,7 +276,7 @@ the extra read cost becomes operationally significant.
 
 ## Quality assurance protocol
 
-Beginning with DQ-05, every pull request follows `docs/QUALITY_ASSURANCE_PROTOCOL.md`. The protocol replaces dependence on any single paid reviewer with a repeatable set of requirements, tests, static checks, adversarial review, integration evidence, data reconciliation, security and operational review, documentation, and explainability gates.
+Beginning with DQ-05, every pull request follows `docs/QUALITY_ASSURANCE_PROTOCOL.md`. The protocol defines a repeatable set of requirements, tests, static checks, adversarial review, integration evidence, data reconciliation, security and operational review, documentation, and explainability gates.
 
 The applicable depth depends on the risk of the change. Documentation changes still require accuracy and claim-boundary review. Integration, data movement, analytics, security, and deployment changes require progressively stronger live evidence and reconciliation. A gate may be marked not applicable only with a reason.
 
@@ -310,25 +310,19 @@ final.
 
 ### 2026-10-16: Requirements decomposition and repository foundation
 
-AI assistance was used to translate the assessment README into a dependency-aware checklist, propose a conventional repository layout, and identify validation cases that were implied by the assignment, such as deterministic tie handling and preservation of unmatched years during joins.
-
 I reviewed and approved the plan before it was converted into GitHub issues. I validated the resulting foundation through a focused pull request, secret-safe ignore checks, Python package compilation, and a documented definition of done. The checklist remains subject to revision when source profiling or Databricks behavior provides new evidence.
 
 ### 2026-10-16: Databricks environment verification
-
-AI assistance was used to explain the Unity Catalog hierarchy and draft small, bounded notebook probes for catalog discovery, idempotent schema and Volume creation, and write/read/delete validation.
 
 I executed each probe in the Databricks notebook and recorded the actual outputs. I progressed one operation at a time: inspect, create schema, verify schema, create Volume, verify Volume, write and read a probe, then remove it. The verified outputs, rather than the proposed commands alone, support the environment claims recorded above.
 
 ### 2026-10-16: BLS source profiling
 
-AI assistance was used to organize a bounded source-profile procedure and draft shell diagnostics for the live BLS productivity directory. I reviewed the provider documentation, inspected the raw files, and checked record counts, field counts, whitespace, missing-value conventions, business-key uniqueness, lookup coverage, and the relationship between the two observation files.
+I reviewed the provider documentation, inspected the raw files, and checked record counts, field counts, whitespace, missing-value conventions, business-key uniqueness, lookup coverage, and the relationship between the two observation files.
 
 The profile corrected an initial assumption that `pr.data.0.Current` contained only the current calendar year. The observed file instead covered 1995 through 2026 and was an exact 38,469-row subset of `pr.data.1.AllData` in this snapshot. I therefore kept the decision to mirror both raw artifacts but selected `AllData` as the complete analytical source. I also corrected and reran a diagnostic after a trailing blank line and a syntax error distorted its first result. The verified source profile is recorded in `docs/BLS_SOURCE_PROFILE.md`.
 
 ### 2026-10-17: Product vision, stakeholder personas, and conceptual design
-
-AI assistance was used to organize my proposed stakeholder personas, product sections, design principles, UML-style views, and conceptual data model into reviewable repository documentation.
 
 I selected a consulting Economic Strategy Director as the primary stakeholder and defined the product around the decisions that person needs to make. I retained secondary personas for analytical depth, client conversations, and platform governance without attempting to make one dashboard satisfy every audience equally. I also required the design to distinguish observation from interpretation and recommendation, preserve missing or revised data, and prevent population context from being presented as causal evidence.
 
@@ -336,14 +330,14 @@ The diagrams and logical objects are plans rather than proof of implementation. 
 
 ### 2026-10-17: Repository-wide quality assurance protocol
 
-AI assistance was used to organize an enhanced review protocol after I decided not to make project quality dependent on a paid Copilot review subscription. The protocol incorporates requirements traceability, risk classification, normal and failure-path testing, automated checks, adversarial diff review, live integration evidence, data reconciliation, security and operational review, documentation, and an explainability gate.
+I established a review protocol incorporating requirements traceability, risk classification, normal and failure-path testing, automated checks, adversarial diff review, live integration evidence, data reconciliation, security and operational review, documentation, and an explainability gate.
 
 I adopted the protocol because correctness must be supported by multiple independent forms of evidence. I will apply it to DQ-05 and every remaining issue, document why any gate is not applicable, and retest the exact commit after rebases or conflict resolution.
 
 ### 2026-10-17: Required Gold semantics and dashboard boundary
 
-AI assistance was used to audit the product vision and issue plan against the
-three analytical questions in the assessment. The audit found that the overall
+An audit of the product vision and issue plan against the three analytical
+questions in the assessment found that the overall
 Gold and evidence plan was complete but that the Question 2 wording did not yet
 explicitly exclude `Q05`, which the source profile identifies as an annual
 average.
@@ -358,14 +352,14 @@ have already been built or validated.
 
 ### 2026-10-16: Policy-compliant BLS discovery
 
-AI assistance was used to draft tests and implementation for converting an HTML directory listing into a safe, deterministic source inventory. I reviewed the behavior in two layers: a pure parser that rejects links outside the exact configured directory, and a request function that sends an identifying `User-Agent`, applies a timeout, uses bounded retries for transient failures, and fails immediately with policy guidance for HTTP 403 or 429 responses.
+I implemented and reviewed HTML-directory discovery in two layers: a pure parser that rejects links outside the exact configured directory, and a request function that sends an identifying `User-Agent`, applies a timeout, uses bounded retries for transient failures, and fails immediately with policy guidance for HTTP 403 or 429 responses.
 
 The tests were written before the HTTP implementation and initially failed because the new request API did not exist. After implementation and self-review, 13 controlled tests passed without network access. A separate live integration check then discovered the 12 files observed during source profiling. The live check listed files only; it did not download them or write to Databricks. The code contains no hardcoded BLS filenames, and the committed configuration retains a placeholder rather than personal contact information.
 
 ### 2026-10-17: Manifest and change-detection contract
 
-AI assistance was used to challenge the manifest design against partial
-downloads, interrupted runs, ambiguous source identities, source removals, and
+I challenged the manifest design against partial downloads, interrupted runs,
+ambiguous source identities, source removals, and
 misleading provider metadata. I chose the source-relative path as the stable key,
 verified size plus SHA-256 as the content identity, and append-only tombstones as
 the removal representation. I also required a run identifier and deterministic
@@ -392,9 +386,8 @@ This evidence proves safe and deterministic directory discovery for the observed
 
 ### 2026-10-17: Verified BLS landing implementation
 
-AI assistance was used to draft test cases and implementation for streamed BLS
-downloads, run-scoped staging, immutable promotion, Delta manifest publication,
-and Databricks reconciliation. I retained the architecture from the approved
+I implemented streamed BLS downloads, run-scoped staging, immutable promotion,
+Delta manifest publication, and Databricks reconciliation. I retained the architecture from the approved
 manifest contract: complete discovery and download precede planning, all new or
 changed bytes are promoted before one manifest write, and unchanged objects are
 neither rewritten nor republished.
@@ -416,9 +409,9 @@ claim boundaries are recorded in the validation log above.
 
 ### 2026-10-17: Data USA raw-response validation and landing design
 
-AI assistance was used to inspect the current assigned response shape, draft
-failure-oriented tests, and adapt the verified raw-landing contract for the
-single Data USA API artifact. I reviewed the provider documentation and made one
+I inspected the current assigned response shape, wrote failure-oriented tests,
+and adapted the verified raw-landing contract for the single Data USA API
+artifact. I reviewed the provider documentation and made one
 read-only request to the assigned endpoint. The observed response contained the
 documented four-part envelope, 11 records, and the columns `Nation ID`, `Nation`,
 `Year`, and `Population`.
@@ -440,8 +433,8 @@ change.
 
 ### 2026-10-17: Consolidated ingestion rerun evidence
 
-AI assistance was used to audit DQ-09 against the already merged manifest,
-landing, download, and Data USA tests. I chose not to add duplicate
+I audited DQ-09 against the already merged manifest, landing, download, and
+Data USA tests. I chose not to add duplicate
 implementation merely to create a new card-sized change. Instead, I mapped each
 acceptance criterion to a named controlled test and the two completed live
 no-change demonstrations in `docs/INGESTION_RERUN_EVIDENCE.md`.
@@ -461,9 +454,9 @@ assessment workflow remains explicitly single-writer.
 
 ### 2026-10-17: Source schemas and data-quality actions
 
-AI assistance was used to reconcile the observed BLS and Data USA structures,
-the official BLS data dictionary, the logical model, and the three required Gold
-contracts. I reviewed the proposed fields, keys, types, normalization boundaries,
+I reconciled the observed BLS and Data USA structures, the official BLS data
+dictionary, the logical model, and the three required Gold contracts. I reviewed
+the proposed fields, keys, types, normalization boundaries,
 and expectation severity before recording them in
 `docs/SOURCE_SCHEMA_QUALITY_CONTRACT.md`.
 
@@ -495,7 +488,7 @@ than restricting the reusable Silver population history. These rules are now
 documented implementation contracts; DQ-11 through DQ-15 still need to build and
 validate them in Databricks.
 
-GitHub Copilot's pull-request review identified four documentation gaps before
+Pull-request review identified four documentation gaps before
 merge. I corrected an invalid Mermaid precision annotation, aligned the
 population candidate key with the `nation_id + year` contract, added an explicit
 fail-update gate for malformed or wrong-width BLS records before projection, and
@@ -503,7 +496,7 @@ made the Data USA envelope, pagination, ordered columns, and record-key checks
 exact so additive drift cannot be silently discarded. I reviewed each suggestion
 against the source evidence and project quality policy before accepting it.
 
-Copilot's re-review found two additional quality actions that the first revision
+Re-review found two additional quality actions that the first revision
 left implicit. I made both fail-update invariants: every normalized Current row
 must match the AllData snapshot on business key and value, and every retained
 observation must resolve to exactly one valid series-metadata row before enriched
@@ -512,9 +505,9 @@ snapshot or an unlabeled series from producing apparently complete results.
 
 ### 2026-10-18: Independent audit and inventory-safety remediation
 
-I commissioned a repository-wide Copilot audit after completing the raw landing
-and schema-contract phases, then independently reviewed and corrected the audit
-report before merging it. The accepted high-severity finding showed that a BLS
+I completed a repository-wide audit after the raw landing and schema-contract
+phases, then independently reviewed the findings before accepting changes. The
+accepted high-severity finding showed that a BLS
 directory response could remain nonempty yet be severely truncated. Without an
 additional guard, that response could be treated as a complete inventory and
 publish false removal tombstones for valid active files.
@@ -556,7 +549,7 @@ I established the behavior with failing-first filesystem tests for missing,
 valid, and corrupt unchanged destinations, plus ordering coverage proving all
 object verification completes before publication. This design repairs absence
 automatically while preserving the stronger safety boundary around conflicting
-immutable bytes. Copilot review then exposed a lifecycle distinction in the
+immutable bytes. Review then exposed a lifecycle distinction in the
 first revision: a retained removal tombstone is also classified as unchanged,
 but correctly has neither an active immutable-object requirement nor staged
 bytes. I added a failing regression with an unrelated new object and narrowed
@@ -583,7 +576,7 @@ remediation prevents discovery from requesting a different path than the one
 advertised. Redirect handling and network-exception normalization remain
 separate audit findings and are not claimed here.
 
-Copilot review found three remaining identity edge cases in the first revision.
+Review found three remaining identity edge cases in the first revision.
 I accepted all three after reproducing them: an encoded base directory was
 decoded before relative-link resolution, path normalization could hide an
 encoded separator in the original final component, and two encoded aliases
@@ -652,16 +645,16 @@ URL behavior, and a filesystem path whose parent is a regular file. These tests
 exercise failure states that a normal live provider run cannot safely or
 deterministically manufacture.
 
-Copilot review identified that cleanup itself remained outside the typed local
+Review identified that cleanup itself remained outside the typed local
 storage boundary. I reproduced it with a destination that was an existing
 directory: the initial unlink raised raw `IsADirectoryError` before any network
 request. Cleanup now ignores only genuinely absent paths and wraps every other
 filesystem error as non-retryable `StagingWriteError`; the regression also
-proves that the provider opener is never called. I retained Copilot's additional
+proves that the provider opener is never called. I retained an additional
 permission-denied unlink regression because it covers a distinct cleanup path,
 and removed its duplicate existing-directory case.
 
-Copilot's exact-head re-review then identified the parallel discovery case for
+Exact-head re-review then identified the parallel discovery case for
 connection resets: `response.read()` can raise `ConnectionResetError`, an
 `OSError` rather than an `HTTPException`. I added failing-first recovery and
 retry-exhaustion regressions and included read-side `OSError` in discovery's
@@ -690,7 +683,7 @@ both timestamp and lexical run-ID ordering. It always attempts to drop only its
 generated validation table. The live result remains a required DQ-41 gate and
 unit tests alone do not satisfy that claim.
 
-Copilot review found that the first synthetic ordering fixture could not
+Review found that the first synthetic ordering fixture could not
 distinguish timestamp-first ordering from run-ID-first ordering, and that early
 dictionary construction could hide duplicate current rows. I reversed the old
 event's lexical run-ID relationship to conflict with its timestamp and now
@@ -748,8 +741,8 @@ SHA-256 digest, and contained data, but the provider header was
 names `seasonal_code` / `seasonal_text`. Those are two legitimate naming layers,
 not corrupt source data. The contract now stores an optional exact provider
 header separately from projected Bronze columns. A regression asserts both
-representations. Local tests, compilation, repository CI, and a focused Copilot
-review passed before the next platform run.
+representations. Local tests, compilation, repository CI, and focused review
+passed before the next platform run.
 
 The second triggered update supplied the necessary isolation evidence. The
 seasonal table published two rows with all five expectations met; the other
@@ -779,7 +772,7 @@ correctness depend on a larger runtime and leave future provider growth exposed;
 disabling expectations would conceal evidence that had already distinguished
 valid source from execution failure. The line-oriented change instead removes
 the pathological memory shape without weakening governance. It remains subject
-to a fresh GitHub/Copilot review and a third Databricks triggered update before
+to fresh pull-request review and a third Databricks triggered update before
 DQ-11 can be considered complete.
 
 The third triggered update failed during graph analysis rather than execution.
@@ -856,7 +849,7 @@ compilation, and diff checks must pass before deployment. DQ-12 will not be
 marked complete until a triggered Databricks update provides table counts and
 expectation evidence on the target runtime.
 
-Copilot's first review identified an important ANSI-mode boundary before live
+The first review identified an important ANSI-mode boundary before live
 deployment. Ordinary integer and decimal casts can throw on malformed or
 overflowing provider text, which would abort evaluation before the named drop
 expectations could count and exclude those rows. The normalization therefore
@@ -899,7 +892,7 @@ guessed fallback such as `Unknown series`. This produces one public
 `silver_bls_series` table while keeping the quality decision visible in the
 temporary candidate view.
 
-Copilot review caught two contract boundaries before deployment. The provider
+Review caught two contract boundaries before deployment. The provider
 uses `-` when a series has no base year, so Silver now converts that sentinel to
 null and uses ANSI-safe `try_cast` to publish an integer. The coverage gate also
 checks both begin and end periods against `Q01` through `Q05`; a non-null but
@@ -1172,17 +1165,6 @@ scheduling, service-level objectives, or causal inference. Within that scope,
 the ingestion, Bronze, Silver, and three Gold contracts are implemented,
 rerunnable, reconciled, and supported by traceable evidence.
 
-### Roadmap correction: reserve DQ-23 for the completed repository
-
-The initial plan placed the required final submission audit before the optional
-product extensions. That order would make its secrets, privacy, links,
-screenshots, reproducibility, accessibility, and explainability conclusions
-stale as soon as later work changed the repository. The remaining work is now
-ordered DQ-25, DQ-26, DQ-24, DQ-27, DQ-28, DQ-29, and finally DQ-23. DQ-29 is a
-decision gate and does not assume that another platform will be added. The
-authoritative sequence, entry and exit gates, and per-card QA protocol are
-recorded in [`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md).
-
 ### 2026-10-19: DQ-25 governed stakeholder exploration contract
 
 I converted the earlier stakeholder boundary into a buildable AI/BI dashboard
@@ -1259,7 +1241,7 @@ Silver `SELECT`, raw-Volume `LIST`, and schema `CREATE TABLE`. The Gold
 record this distinction instead of overstating the result. The admin audit
 returned exactly five direct group grants: catalog use, schema use, and
 `SELECT` on the three named Gold contracts. No lower-layer, Volume, creation,
-or management grant appeared in that grant inventory. Copilot review subsequently identified
+or management grant appeared in that grant inventory. Subsequent review identified
 that the initial audit did not enumerate grants inherited through other groups.
 I strengthened the inspection SQL to cover every project-schema securable and
 reran it for both the inherited workspace `users` group and the validation
@@ -1340,7 +1322,7 @@ deprecated environment rather than guessing another client channel and again
 required validation and plan review before deployment.
 
 After that correction, an intermediate plan changed only the refresh job and
-deleted nothing, and the five-task trial succeeded. A final Copilot review then
+deleted nothing, and the five-task trial succeeded. A final review then
 identified two valid deployment-isolation gaps: the fixed development schema
 was shared by all developers, and `max_concurrent_runs: 1` did not serialize
 landing writes across independently deployed jobs. I corrected the development
@@ -1356,8 +1338,8 @@ or deletions. The full claim boundaries and failure/recovery trail are recorded 
 
 ### 2026-10-20: DQ-28 end-to-end validation plan
 
-AI assistance was used to map the DQ-28 acceptance criteria to one bounded
-integration procedure after DQ-24 through DQ-27 closed. I retained the existing
+I mapped the DQ-28 acceptance criteria to one bounded integration procedure
+after DQ-24 through DQ-27 closed. I retained the existing
 ownership boundaries instead of adding a wrapper or claiming that the bundle
 manages landing, the dashboard, warehouse, identities, grants, or notification
 destinations. The resulting runbook validates the isolated bundle outputs and

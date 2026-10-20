@@ -5,7 +5,7 @@
 - Git revision pulled immediately before the run:
   `0b2c7f3cfb12ccc8c0ccbe0a1b352ba666ed7993`
 - Databricks pipeline: `data-quest-bronze`
-- Pipeline ID: `4de1f2d5-b749-4995-bec7-24ffa7cb8db0`
+- Pipeline identifier omitted from the submission
 - Triggered update start: 2026-10-18 5:46 PM EDT
 - Final update status: `Completed`
 - Reported update issues: 0 errors, 0 warnings

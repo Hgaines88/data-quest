@@ -5,7 +5,7 @@
 - Git revision: `5009e0c2c2fea025b79df856c2026dffe1e232b7`
 - Branch: `codex/dq-17-bls-best-year`
 - Pipeline: `data-quest-gold`
-- Pipeline ID: `c0fba073-4bb3-4c3a-b91a-dcfb1356ec0b`
+- Pipeline identifier omitted from the submission
 - Validated on: October 19, 2026
 
 The operator pulled the reviewed feature revision into the Databricks Git

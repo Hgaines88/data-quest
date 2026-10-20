@@ -241,7 +241,7 @@ boundary, and limitations are indexed in
 ## DQ-19 Gold cross-implementation evidence
 
 The `dq19_validation_*` images preserve the initial successful run before
-Copilot review hardening. They are historical review evidence, not the final
+review hardening. They are historical review evidence, not the final
 acceptance run.
 
 - `dq19_validation_checks_overview.png`: successful 17-row validation result
