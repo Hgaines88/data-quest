@@ -462,13 +462,13 @@ pre-publication failure with successful recovery. See
 **Priority:** Decision gate
 **Depends on:** DQ-28
 
-- [ ] Summarize which stakeholder, governance, deployment, observability, and operational needs Databricks already satisfies.
-- [ ] Identify any remaining requirement that Databricks does not satisfy well enough for this use case.
-- [ ] Evaluate whether Snowflake or Power BI would serve a defensible consumer, interoperability, semantic-modeling, or reporting need.
-- [ ] Estimate added build time, Windows requirements, cost, credentials, duplicated storage or compute, and maintenance burden.
-- [ ] Confirm what Rearc permits to be reused or discussed outside the assessment context.
-- [ ] Record a clear decision: stop with Databricks, build a separate public-data adaptation, or add a narrowly scoped external consumer.
-- [ ] Do not begin an external implementation before documenting the decision.
+- [x] Summarize which stakeholder, governance, deployment, observability, and operational needs Databricks already satisfies.
+- [x] Identify any remaining requirement that Databricks does not satisfy well enough for this use case.
+- [x] Evaluate whether Snowflake or Power BI would serve a defensible consumer, interoperability, semantic-modeling, or reporting need.
+- [x] Estimate added build time, Windows requirements, cost, credentials, duplicated storage or compute, and maintenance burden.
+- [x] Establish a conservative reuse boundary: do not reuse assessment-specific material outside the authorized context without confirmed permission.
+- [x] Record the decision to stop with Databricks in [`docs/PLATFORM_EXTENSION_DECISION.md`](docs/PLATFORM_EXTENSION_DECISION.md).
+- [x] Do not begin an external implementation before documenting the decision.
 
 **Done when:** Any later platform extension has a stated user and architectural purpose, or the project is intentionally closed as a complete Databricks product.
 

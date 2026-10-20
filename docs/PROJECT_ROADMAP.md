@@ -11,6 +11,10 @@ DQ-29 are complete and no implementation card remains open. DQ-29 may conclude
 that no external-platform extension should be built; that decision does not
 waive or replace any preceding card.**
 
+DQ-29 concluded that the validated Databricks product is the appropriate final
+platform for this assessment. The rationale and reconsideration trigger are
+recorded in the [platform extension decision](PLATFORM_EXTENSION_DECISION.md).
+
 This ordering keeps the repository-accessibility check, secrets and privacy
 scan, link and screenshot validation, reproducibility run, and explainability
 review focused on the repository that will actually be submitted. Performing

@@ -84,6 +84,12 @@ without claiming that Free Edition or the bundle owns unsupported resources.
 Its [evidence record](docs/evidence/dq28_end_to_end_validation.md) remains
 pending until the exact reviewed revision passes the live gates.
 
+DQ-29 records the decision to [stop with Databricks](docs/PLATFORM_EXTENSION_DECISION.md)
+unless a named consumer and a concrete unmet requirement justify an external
+analytics platform. Snowflake and Power BI would currently duplicate validated
+capabilities while adding credentials, reconciliation, cost, and operational
+ownership.
+
 ## Prerequisites
 
 - A Databricks workspace with Spark Declarative Pipelines, Unity Catalog, and a
