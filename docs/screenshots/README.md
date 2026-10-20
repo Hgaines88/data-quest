@@ -49,6 +49,11 @@ record. They are indexed by card below, with exact claims and limitations in
   best-year detail through individual data permission.
 - `dq26_effective_grants.png`: owner/admin audit returning exactly the intended
   catalog, schema, and three Gold table grants.
+- `dq26_users_group_zero_grants.png`: expanded inventory returning no direct
+  project-scope grants for the inherited workspace `users` group.
+- `dq26_validation_user_zero_direct_grants.png`: expanded inventory returning
+  no direct project-scope grants for the validation identity; the crop excludes
+  the identity's email.
 
 The live identity boundary, positive and negative outcomes, the structural
 Gold-view write limitation, and SHA-256 digests are indexed in

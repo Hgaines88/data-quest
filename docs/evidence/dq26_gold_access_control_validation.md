@@ -31,10 +31,12 @@ group:
 No schema-wide `SELECT`, lower-layer `SELECT`, Volume access, object-creation
 privilege, ownership, or management privilege appeared in that direct-group
 inspection. The separate analyst's successful and denied operations establish
-the observed effective behavior for the tested objects. The retained audit did
-not enumerate every grant inherited through the workspace `users` group; the
-strengthened inspection SQL now requires that additional inventory before a
-future validation is accepted as exhaustive.
+the observed effective behavior for the tested objects. Post-review audits of
+the workspace `users` group and the validation identity itself each returned
+zero rows across catalog, project-schema, table/view, Volume, and routine
+privileges. The identity therefore receives the five required data privileges
+through the analyst group without additional direct or default-group grants in
+the audited scope.
 
 ## Positive validation
 
@@ -72,6 +74,8 @@ direct-grant inventory, not by the unsupported `UPDATE` probe.
 | `docs/screenshots/dq26_analyst_dashboard_overview.png` | Individual-permission dashboard with all filters reset, KPI cards, coverage, and best-year data | `b1cd430590e8a68868dc53c234540df6c45e2983a7cbcb705c043793ea87c6c5` |
 | `docs/screenshots/dq26_analyst_dashboard_detail.png` | Paginated best-year data and Q01 nullable population context | `f8d0c9934699b3a1f614ca5a1428f77179984f1788cf27e96d02b11b36c9a3bc` |
 | `docs/screenshots/dq26_effective_grants.png` | Admin audit showing exactly the catalog, schema, and three Gold `SELECT` grants | `3336d823178effb2eab126349353cfdf51899299360ebb814c438890f9f8b254` |
+| `docs/screenshots/dq26_users_group_zero_grants.png` | Complete project-scope inventory for inherited `users` group returning zero rows | `d502552b065f4d9189113c51628f4f7e2140f61d052770eb0e40698fc1ae04ba` |
+| `docs/screenshots/dq26_validation_user_zero_direct_grants.png` | Complete project-scope inventory for the validation identity returning zero direct grants, with the email excluded from the crop | `bcff5c4679eb3f4ddcb61871f07905a690282404080112efb522511c87fd83f4` |
 
 The dashboard captures exclude browser chrome, workspace URLs, account
 identifiers, and credentials. The grant capture is cropped to the Databricks

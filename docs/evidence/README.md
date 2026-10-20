@@ -99,5 +99,6 @@ these exports support exact value inspection.
 - `dq26_gold_access_control_validation.md`: records the separate non-admin
   analyst test, exactly five direct analyst-group Unity Catalog grants, successful Gold
   reads and individual-permission dashboard use, four authorization denials,
-  the distinct structural Gold-view write block, privacy-safe screenshot
+  the distinct structural Gold-view write block, zero-grant audits for the
+  inherited `users` group and validation identity, privacy-safe screenshot
   paths, and screenshot SHA-256 digests.

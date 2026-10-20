@@ -109,9 +109,12 @@ class SecuritySqlTest(unittest.TestCase):
         evidence = (
             ROOT / "docs" / "evidence" / "dq26_gold_access_control_validation.md"
         ).read_text(encoding="utf-8")
+        normalized_evidence = re.sub(r"\s+", " ", evidence)
         self.assertIn("EXPECT_TABLE_NOT_VIEW", evidence)
         self.assertIn("four authorization denials", evidence)
         self.assertIn("exactly five direct grants", evidence)
+        self.assertIn("workspace `users` group", evidence)
+        self.assertIn("each returned zero rows", normalized_evidence)
 
 
 if __name__ == "__main__":
