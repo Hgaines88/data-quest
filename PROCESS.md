@@ -1266,6 +1266,9 @@ reran it for both the inherited workspace `users` group and the validation
 identity directly; each returned zero rows. The operator then inspected the
 validation identity's complete workspace membership field, which listed exactly
 the analyst group and `users`, with no additional direct or inherited groups.
+This inspection followed the behavioral tests in one continuous validation
+session spanning midnight; no membership change occurred between the tests and
+the inspection.
 A later review correctly separated
 those grant results from ownership metadata and job/pipeline workspace ACLs;
 those controls require their own inventories and are not claimed by the SQL

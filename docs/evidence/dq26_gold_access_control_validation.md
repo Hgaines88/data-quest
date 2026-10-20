@@ -16,7 +16,11 @@ The validation identity's email is deliberately omitted. On 2026-10-20, the
 operator inspected the identity's complete workspace **Groups** field. It
 listed exactly `data_quest_readonly_analysts` and the system `users` group;
 there were no other direct or inherited workspace group memberships. The
-operator also confirmed that the identity did not own the governed objects.
+behavioral tests and this inspection were one continuous operator validation
+session spanning midnight, and no group-membership change was made between
+them. The inspected membership therefore also describes the groups effective
+during the 2026-10-19 analyst tests. The operator also confirmed that the
+identity did not own the governed objects.
 
 ## Effective data grants
 
