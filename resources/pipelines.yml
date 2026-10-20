@@ -1,0 +1,42 @@
+resources:
+  pipelines:
+    bronze:
+      name: data-quest-${bundle.target}-bronze
+      catalog: ${var.catalog}
+      schema: ${var.output_schema}
+      serverless: true
+      channel: CURRENT
+      continuous: false
+      libraries:
+        - notebook:
+            path: ../pipelines/bronze.py
+      configuration:
+        data_quest.catalog: ${var.catalog}
+        data_quest.schema: ${var.schema}
+        data_quest.volume: ${var.volume}
+
+    silver:
+      name: data-quest-${bundle.target}-silver
+      catalog: ${var.catalog}
+      schema: ${var.output_schema}
+      serverless: true
+      channel: CURRENT
+      continuous: false
+      libraries:
+        - notebook:
+            path: ../pipelines/silver.py
+      configuration:
+        data_quest.catalog: ${var.catalog}
+        data_quest.schema: ${var.output_schema}
+        data_quest.volume: ${var.volume}
+
+    gold:
+      name: data-quest-${bundle.target}-gold
+      catalog: ${var.catalog}
+      schema: ${var.output_schema}
+      serverless: true
+      channel: CURRENT
+      continuous: false
+      libraries:
+        - notebook:
+            path: ../pipelines/gold.py

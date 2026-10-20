@@ -1,0 +1,45 @@
+bundle:
+  name: data_quest
+  databricks_cli_version: ">= 1.21.0"
+
+include:
+  - resources/*.yml
+
+sync:
+  include:
+    - notebooks/**
+    - pipelines/**
+    - src/**
+    - sql/**
+  exclude:
+    - docs/screenshots/**
+    - docs/evidence/**
+    - tests/**
+
+variables:
+  catalog:
+    description: Unity Catalog catalog containing the project schema.
+    default: workspace
+  schema:
+    description: Existing source schema containing manifests and landed-object metadata.
+    default: rearc_data_quest
+  output_schema:
+    description: Schema where bundle-managed pipeline outputs are published.
+    default: rearc_data_quest
+  volume:
+    description: Existing managed Volume used for immutable landed objects.
+    default: raw_landing
+
+targets:
+  dev:
+    default: true
+    mode: development
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      output_schema: rearc_data_quest_dq24_dev
+
+  prod:
+    mode: production
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}

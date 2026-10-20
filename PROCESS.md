@@ -1280,3 +1280,71 @@ Silver, and Gold pipelines and no separate jobs; only the operator and inherited
 evidence and exact
 digests are indexed in
 [`docs/evidence/dq26_gold_access_control_validation.md`](docs/evidence/dq26_gold_access_control_validation.md).
+
+### 2026-10-20: DQ-24 bundle resource model and pre-deployment gate
+
+I modeled the deployable Databricks portion of the verified solution as three
+triggered serverless pipelines and one single-writer refresh job. The job
+preserves the operational dependency chain already exercised manually: BLS
+landing, Data USA landing, Bronze, Silver, and Gold. Catalog, schema, and Volume
+names are non-secret variables; the required BLS contact remains an empty
+runtime job parameter rather than tracked configuration. The development target
+uses a current-user bundle root, while production uses an explicit shared root
+and cannot be deployed safely until its plan and any existing-resource binding
+decision are reviewed.
+
+The ownership boundary is intentionally narrower than the complete product.
+The pre-existing catalog, schema, managed Volume, warehouse, dashboard,
+identity groups, and Unity Catalog grants remain externally governed. Importing
+those shared objects merely to maximize bundle coverage would let bundle state
+or teardown affect validated data and access policy. The existing dashboard
+also lacks a privacy-reviewed serialized source export, so I document it as a
+manual Free Edition resource instead of inventing a deployable definition.
+DQ-26 remains the authority for its data and workspace access controls.
+
+Databricks CLI 1.21.0 parsed and resolved the development target, bundle name,
+and isolated workspace path without reporting a configuration-schema finding.
+It then stopped at the expected authentication boundary because this local
+worktree has no configured Databricks credentials. The repository's 185 local
+tests, including four bundle contract checks, pass. I do not treat either result
+as deployment evidence: authenticated validation, a reviewed plan, isolated
+development deployment, the five-task live run, and post-deployment quality
+checks remain required before DQ-24 can close.
+
+The first isolated development deploy exposed a runtime API constraint that
+static validation did not report: serverless pipelines cannot explicitly set
+`photon: false`. All three pipeline creates were rejected with
+`INVALID_PARAMETER_VALUE`, their dependent job was not created, and the only
+completed action was synchronizing files beneath the isolated user bundle
+path. I removed the invalid Photon override and required a fresh validation and
+plan before retrying instead of changing compute mode or bypassing the failure.
+
+The corrected deploy created all four development resources, but I stopped
+before running them when a post-deploy review found that resource-name
+isolation alone did not isolate pipeline output tables. I split the existing
+source schema from the pipeline output schema: Bronze continues to read the
+verified manifests and raw Volume in `rearc_data_quest`, while the development
+Bronze, Silver, and Gold outputs target `rearc_data_quest_dq24_dev`. Production
+retains `rearc_data_quest` as its output only after a separate binding and plan
+review. This prevents a development update from contending with tables owned by
+the manually verified pipelines.
+
+The first five-task run then failed before notebook execution because the job
+environment used deprecated `client: "1"`, which Free Edition rejected as an
+unsupported `Client-1` REPL channel. All downstream tasks were skipped and no
+data update ran. Current Databricks bundle guidance permits serverless notebook
+tasks to omit both a cluster definition and an explicit environment; only
+non-notebook serverless tasks require `environment_key`. I removed the
+deprecated environment rather than guessing another client channel and again
+required validation and plan review before deployment.
+
+After the correction, the final development plan changed only the refresh job
+and deleted nothing. The redeployed bundle completed the ordered five-task run:
+both landing notebooks and all three isolated pipeline updates reported
+`TERMINATED/SUCCESS`. The bundle summary contained exactly the refresh job and
+three pipelines. A read-only information-schema query confirmed the isolated
+published layer outputs, and a Gold integrity query returned one population
+summary row, 282 best-year rows, and 39 Q01 population-context rows with zero
+invalid rows for each contract. The full claim boundaries and failure/recovery
+trail are recorded in
+[`docs/evidence/dq24_bundle_deployment_validation.md`](docs/evidence/dq24_bundle_deployment_validation.md).
