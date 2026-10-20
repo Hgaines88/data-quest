@@ -51,6 +51,17 @@ class SecuritySqlTest(unittest.TestCase):
             self.assertIn(f"system.information_schema.{relation}", sql)
         self.assertIn("Repeat with grantee = 'users'", sql)
         self.assertIn("no direct grants", sql)
+        for relation in ["catalogs", "schemata", "tables", "volumes", "routines"]:
+            self.assertIn(f"system.information_schema.{relation}", sql)
+        for owner in [
+            "catalog_owner",
+            "schema_owner",
+            "table_owner",
+            "volume_owner",
+            "routine_owner",
+        ]:
+            self.assertIn(owner, sql)
+        self.assertIn("verified metastore administrator", sql)
 
     def test_positive_checks_read_only_the_three_gold_contracts(self):
         sql = self.read("analyst_positive_checks.sql")
@@ -102,6 +113,9 @@ class SecuritySqlTest(unittest.TestCase):
             "Consumer access",
             "Workspace access",
             "Admin access",
+            "metastore administrator",
+            "Jobs & Pipelines > object > Share",
+            "CAN MANAGE RUN",
         ]:
             self.assertIn(phrase, guide)
 

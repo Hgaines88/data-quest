@@ -33,8 +33,11 @@ access.
 If the catalog or schema differs from the verified defaults, retarget all three
 reference forms in the security SQL: the standalone `workspace` catalog, every
 dotted `workspace.rearc_data_quest` object reference, and the slash-delimited
-`/Volumes/workspace/rearc_data_quest/` path. A partial replacement can audit or
-grant one environment while probing another.
+`/Volumes/workspace/rearc_data_quest/` path. Also replace the standalone filter
+literals used by the inspection queries: `catalog_name = 'workspace'`, each
+`*_catalog = 'workspace'`, `schema_name = 'rearc_data_quest'`, and each
+`*_schema = 'rearc_data_quest'`. A partial replacement can audit or grant one
+environment while probing another.
 
 ## Apply the access model
 
@@ -84,17 +87,30 @@ credentials.
    - a read from a Silver table;
    - a read from the raw Volume; and
    - creation of a table in the project schema.
-4. As the owner/admin, run the statements in
+4. As a verified **metastore administrator**, run the statements in
    [`inspect_gold_readonly_access.sql`](../sql/security/inspect_gold_readonly_access.sql)
    and confirm the group has only the intended catalog, schema, and three table
    grants across the complete project schema. Repeat the consolidated inventory
    for every effective group inherited by the validation identity, including
    the workspace `users` group, and confirm the new validation identity has no
-   direct grants. Also inspect group membership to rule out other inherited
-   elevated roles.
+   direct grants. A principal with only `MANAGE` is insufficient for this
+   consolidated audit because Databricks INFORMATION_SCHEMA privilege views can
+   hide other principals' grants. If metastore-admin visibility is unavailable,
+   enumerate every project object and execute `SHOW GRANTS` on each one.
+5. Run the ownership inventory in the same script. Confirm that neither the
+   validation identity nor any effective group owns the catalog, project
+   schema, any project table/view, Volume, or routine. Also inspect group
+   membership to rule out other inherited elevated roles.
+6. Independently inspect workspace ACLs for every project Lakeflow pipeline and
+   job under **Jobs & Pipelines > object > Share** (or the equivalent permissions
+   API). Confirm that the validation identity and every effective group have no
+   pipeline `CAN RUN`, `CAN MANAGE`, or ownership permission and no job
+   `CAN MANAGE RUN`, `CAN MANAGE`, or ownership permission. Record each object
+   checked; Unity Catalog SQL does not inspect these ACLs.
 
-The absence of mutation, refresh, ownership, and pipeline-management authority
-must be established by the complete grant and membership inventory, not by the
+The absence of mutation and refresh authority must be established by a complete
+grant inventory; ownership by the separate owner inventory; and pipeline/job
+authority by the separate workspace-ACL inventory. None is established by the
 unsupported Gold-view `UPDATE`. Do not make the negative script executable as
 one batch because execution
 normally stops at the first failed statement. Record the structural Gold-view

@@ -1259,10 +1259,13 @@ Silver `SELECT`, raw-Volume `LIST`, and schema `CREATE TABLE`. The Gold
 record this distinction instead of overstating the result. The admin audit
 returned exactly five direct group grants: catalog use, schema use, and
 `SELECT` on the three named Gold contracts. No lower-layer, Volume, creation,
-ownership, or management grant appeared. Copilot review subsequently identified
+or management grant appeared in that grant inventory. Copilot review subsequently identified
 that the initial audit did not enumerate grants inherited through other groups.
 I strengthened the inspection SQL to cover every project-schema securable and
 reran it for both the inherited workspace `users` group and the validation
-identity directly; each returned zero rows. The privacy-safe evidence and exact
+identity directly; each returned zero rows. A later review correctly separated
+those grant results from ownership metadata and job/pipeline workspace ACLs;
+those controls require their own inventories and are not claimed by the SQL
+grant result. The privacy-safe evidence and exact
 digests are indexed in
 [`docs/evidence/dq26_gold_access_control_validation.md`](docs/evidence/dq26_gold_access_control_validation.md).

@@ -28,9 +28,10 @@ group:
 | Table | `gold_bls_q01_population` | `SELECT` |
 | Table | `gold_population_summary_2013_2018` | `SELECT` |
 
-No schema-wide `SELECT`, lower-layer `SELECT`, Volume access, object-creation
-privilege, ownership, or management privilege appeared in that direct-group
-inspection. The separate analyst's successful and denied operations establish
+No schema-wide `SELECT`, lower-layer `SELECT`, Volume access, object-creation,
+or management privilege appeared in that direct-group grant inspection.
+Ownership is recorded separately in object metadata and was not established by
+this result. The separate analyst's successful and denied operations establish
 the observed effective behavior for the tested objects. Post-review audits of
 the workspace `users` group and the validation identity itself each returned
 zero rows across catalog, project-schema, table/view, Volume, and routine
@@ -62,10 +63,11 @@ Each statement was run separately as the analyst:
 The evidence therefore contains four authorization denials plus a distinct
 structural Gold-view write block. It does not claim that the Gold write probe
 reached an authorization check. Together with the exact-grant inspection, the
-result establishes the observed read-only stakeholder boundary for the tested
-deployed view-backed Gold contracts. Absence of direct mutation, refresh,
-ownership, and pipeline-management authority is established by the five-row
-direct-grant inventory, not by the unsupported `UPDATE` probe.
+result establishes the observed data-access boundary for the tested deployed
+view-backed Gold contracts. The five-row inventory establishes only the audited
+Unity Catalog grants; it does not establish ownership or Lakeflow job/pipeline
+ACLs. A post-review ownership inventory and independent workspace-ACL inventory
+remain required before claiming those separate controls are fully validated.
 
 ## Privacy-safe screenshots
 
