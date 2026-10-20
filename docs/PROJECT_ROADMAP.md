@@ -58,7 +58,8 @@ corresponding card is considered complete.
 
 ## Current status
 
-DQ-01 through DQ-27 and the engineering QA protocol are complete. DQ-24 keeps
+DQ-01 through DQ-22, DQ-24 through DQ-27, and the engineering QA protocol are
+complete. DQ-24 keeps
 landing outside independently deployed jobs, isolates development outputs per
 current user, and deploys only the ordered Bronze-through-Gold resources.
 Production was not deployed, and shared landing state, dashboard, warehouse,

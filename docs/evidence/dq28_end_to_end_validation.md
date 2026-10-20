@@ -32,7 +32,8 @@ resources.
 | Whitespace | `git diff --check` | Pass | Completed before documentation edits; rerun required on the final diff. |
 | Bundle validation and deployment | Authenticated `validate`, reviewed `plan`, `deploy`, ordered run, convergence `plan` | Pending | The local machine has no Databricks CLI; use the authorized environment and record only observed output. |
 | Landing | Serial BLS and Data USA notebook rerun | Pending | Keep mass removal and controlled failure disabled. Reconcile provider changes if the rerun is not a no-op. |
-| Pipeline and data | Bronze-to-Gold run plus layer and Gold reconciliation | Pending | Require exact contract counts and all pass flags. |
+| Development pipeline and data | Bundle Bronze-to-Gold run plus retargeted layer, Gold, health, and expectation queries | Pending | Record all three update IDs; require exact contract counts and all pass flags. |
+| Shared pipeline and data | Separately governed shared Bronze-to-Gold run plus checked-in reconciliation and operational queries | Pending | Run from the reviewed revision, record all three update IDs, and prove the queries report those runs rather than earlier updates. |
 | Stakeholder | Dashboard refresh, acceptance query, and representative Genie questions | Pending | Reconcile against the shared governed Gold contracts; do not claim custom Genie instruction deployment. |
 | Access control | Separate-principal positive and prohibited-operation checks | Pending | Preserve the distinction between authorization denials and the structural Gold-view write block. |
 | Observability | Starting and final health and expectation queries | Pending | Null expectation metrics mean unavailable evidence, not zero rejected records. |
@@ -42,9 +43,10 @@ resources.
 ## Live results
 
 Record the observed starting health, landing outcomes, bundle plan and run,
-contract counts, dashboard and Genie reconciliation, access-control results,
-final health, runtime, cleanup decision, and screenshot digests here after the
-exact revision completes review.
+development and shared Bronze/Silver/Gold update IDs, contract counts,
+dashboard and Genie reconciliation, access-control results, final health,
+runtime, cleanup decision, and screenshot digests here after the exact revision
+completes review.
 
 ## Known limitations to retain
 

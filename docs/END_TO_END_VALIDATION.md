@@ -75,21 +75,42 @@ resource, or targets a shared output schema. After the run, require all three
 ordered tasks to succeed and the final plan to converge with no pending change.
 Do not deploy the `prod` target for this assessment validation.
 
-## 5. Reconcile data and stakeholder behavior
+## 5. Reconcile both output paths
 
-For the isolated development output schema, rerun the Gold contract checks
-described in `docs/evidence/dq24_bundle_deployment_validation.md`. Require row
-counts of 1, 282, and 39 with zero invalid rows.
+For the isolated development output schema, make copies of these read-only
+queries without committing the generated files:
 
-For the shared, manually governed stakeholder surface:
+1. `sql/quality/validate_bronze_to_silver.sql`;
+2. `sql/quality/validate_gold_cross_implementation.sql`;
+3. `sql/operations/inspect_health.sql`; and
+4. `sql/operations/inspect_pipeline_expectations.sql`.
+
+In each copy, replace pipeline-output references to
+`workspace.rearc_data_quest` with the exact per-user `output_schema` shown by
+the reviewed bundle plan. In the Gold reconciliation copy, also keep the
+metadata lookup aligned: use `<catalog>.information_schema.columns` and change
+every `table_schema = 'rearc_data_quest'` predicate to the exact development
+schema name. In the health copy, leave `ingestion_run_audit` pointed at the
+shared source schema because landing is not deployed by the bundle. Run all
+four copies, require every reconciliation pass flag to be true, and record the
+Bronze, Silver, and Gold update IDs produced by this bundle run. Require Gold
+row counts of 1, 282, and 39 with zero invalid rows.
+
+Next, update the separately governed shared stakeholder path. From the same
+reviewed Git revision, run the existing shared Bronze, Silver, and Gold
+pipelines in that order. Do not deploy the bundle's `prod` target. Record the
+three successful shared update IDs and verify that each query below reports
+those updates rather than an earlier successful run:
 
 1. run `sql/quality/validate_bronze_to_silver.sql`;
 2. run `sql/quality/validate_gold_cross_implementation.sql`;
 3. run `sql/stakeholder/validate_stakeholder_values.sql`;
-4. refresh the published dashboard and verify its three Gold-backed datasets;
-5. ask the two representative Genie questions recorded in
+4. run `sql/operations/inspect_health.sql`;
+5. run `sql/operations/inspect_pipeline_expectations.sql`;
+6. refresh the published dashboard and verify its three Gold-backed datasets;
+7. ask the two representative Genie questions recorded in
    `docs/evidence/dq25_stakeholder_exploration_validation.md`; and
-6. reconcile the displayed answers to the query results.
+8. reconcile the displayed answers to the query results.
 
 Every machine-readable pass flag must be true. Preserve null population context
 and unavailable BLS history rather than replacing either with zero.
@@ -107,11 +128,14 @@ authorization screenshots.
 
 ## 7. Confirm final health and operational limits
 
-Rerun both operational SQL files. Confirm fresh successful source audit rows,
-a completed Gold update, exact Gold counts, visible expectation results, and no
-unexplained failure signal. Review the runtime, serverless compute choices,
-single-writer landing boundary, isolated development schema, cleanup procedure,
-and likely cost drivers in `docs/BUNDLE_DEPLOYMENT.md` and
+Rerun both operational SQL files against the shared schema and rerun the
+development-schema copies defined in step 5. Confirm fresh successful source
+audit rows in the shared source schema. For both output schemas, match the
+reported Bronze, Silver, and Gold update IDs to this validation, confirm the
+completed Gold update and exact Gold counts, require visible expectation
+results, and resolve every failure signal. Review the runtime, serverless
+compute choices, single-writer landing boundary, isolated development schema,
+cleanup procedure, and likely cost drivers in `docs/BUNDLE_DEPLOYMENT.md` and
 `docs/OPERATIONAL_OBSERVABILITY.md`.
 
 Free Edition does not establish a production SLA, production schedule,
