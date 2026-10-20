@@ -8,7 +8,7 @@ WITH events AS (
   )
 ),
 latest_update AS (
-  SELECT origin:update_id::STRING AS update_id
+  SELECT origin.update_id AS update_id
   FROM events
   WHERE event_type = 'create_update'
   ORDER BY timestamp DESC
@@ -21,7 +21,7 @@ expectations AS (
   )) AS expectation
   FROM events CROSS JOIN latest_update
   WHERE event_type = 'flow_progress'
-    AND origin:update_id::STRING = latest_update.update_id
+    AND origin.update_id = latest_update.update_id
 )
 SELECT
   'BRONZE' AS layer,
@@ -40,7 +40,7 @@ WITH events AS (
   )
 ),
 latest_update AS (
-  SELECT origin:update_id::STRING AS update_id
+  SELECT origin.update_id AS update_id
   FROM events
   WHERE event_type = 'create_update'
   ORDER BY timestamp DESC
@@ -53,7 +53,7 @@ expectations AS (
   )) AS expectation
   FROM events CROSS JOIN latest_update
   WHERE event_type = 'flow_progress'
-    AND origin:update_id::STRING = latest_update.update_id
+    AND origin.update_id = latest_update.update_id
 )
 SELECT
   'SILVER' AS layer,
@@ -72,7 +72,7 @@ WITH events AS (
   )
 ),
 latest_update AS (
-  SELECT origin:update_id::STRING AS update_id
+  SELECT origin.update_id AS update_id
   FROM events
   WHERE event_type = 'create_update'
   ORDER BY timestamp DESC
@@ -85,7 +85,7 @@ expectations AS (
   )) AS expectation
   FROM events CROSS JOIN latest_update
   WHERE event_type = 'flow_progress'
-    AND origin:update_id::STRING = latest_update.update_id
+    AND origin.update_id = latest_update.update_id
 )
 SELECT
   'GOLD' AS layer,
