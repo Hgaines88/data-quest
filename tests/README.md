@@ -15,3 +15,10 @@ three triggered serverless pipelines, ordered downstream task chain, exclusion
 of shared landing writes, per-user development outputs, and exclusion of shared
 governance resources from bundle ownership. These checks complement, but do not replace,
 authenticated `databricks bundle validate` and `databricks bundle plan`.
+
+`test_observability.py` and `test_spark_observability.py` protect the DQ-27
+terminal audit contract, UTC and nonnegative-count invariants, privacy-safe
+failure categories, append-only Spark adapter, and best-effort failure logging
+that cannot mask the primary exception. `test_operational_sql.py` requires the
+freshness, file-processing, expectation, and threshold fields while rejecting
+mutating SQL, committed identities, and workspace IDs.

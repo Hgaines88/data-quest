@@ -127,6 +127,7 @@ erDiagram
 | --- | --- | --- | --- |
 | `bls_ingestion_manifest` | One append-only BLS state transition | `relative_path + ingested_at_utc + run_id` | Current inventory and auditable history |
 | `datausa_ingestion_manifest` | One append-only Data USA state transition | `relative_path + ingested_at_utc + run_id` | Current response state and auditable history |
+| `ingestion_run_audit` | One append-only terminal source-run outcome | `source + run_id` | Privacy-safe freshness, file counts, failure stage, and recovery evidence |
 | Raw artifact version | One immutable content-addressed version | source-relative path plus digest | Provenance, change detection, and reproducibility |
 | `silver_bls_series` | One BLS statistical series | `series_id` | Meaning, coverage, and readable labels |
 | `silver_bls_observation` | One series, year, and published period | `series_id + year + period_code` | Historical productivity observations |

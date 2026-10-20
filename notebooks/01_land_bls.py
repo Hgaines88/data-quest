@@ -32,16 +32,28 @@ REPOSITORY_ROOT = find_repository_root()
 sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 
 from data_quest.ingestion.discovery import discover_source_files  # noqa: E402
-from data_quest.ingestion.download import verify_file_evidence  # noqa: E402
+from data_quest.ingestion.download import (  # noqa: E402
+    promote_verified_file,
+    verify_file_evidence,
+)
 from data_quest.ingestion.landing import (  # noqa: E402
     execute_landing_plan,
     prepare_bls_landing,
 )
 from data_quest.ingestion.manifest import ManifestStatus  # noqa: E402
+from data_quest.ingestion.observability import (  # noqa: E402
+    failed_run_audit,
+    successful_run_audit,
+)
 from data_quest.ingestion.spark_manifest import (  # noqa: E402
     append_manifest_entries,
     ensure_manifest_table,
     load_current_manifest,
+)
+from data_quest.ingestion.spark_observability import (  # noqa: E402
+    append_failed_run_audit_best_effort,
+    append_ingestion_run_audit,
+    ensure_ingestion_run_audit_table,
 )
 
 # COMMAND ----------
@@ -56,6 +68,12 @@ dbutils.widgets.dropdown(
     ["false", "true"],
     "Allow reviewed BLS mass removal",
 )
+dbutils.widgets.dropdown(
+    "controlled_failure",
+    "false",
+    ["false", "true"],
+    "Controlled pre-publication failure",
+)
 
 # COMMAND ----------
 
@@ -65,6 +83,9 @@ schema = dbutils.widgets.get("schema").strip()
 volume = dbutils.widgets.get("volume").strip()
 allow_mass_removal = (
     dbutils.widgets.get("allow_mass_removal").strip().casefold() == "true"
+)
+controlled_failure = (
+    dbutils.widgets.get("controlled_failure").strip().casefold() == "true"
 )
 
 if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", contact_email):
@@ -80,6 +101,7 @@ VOLUME_SOURCE_ROOT = (
     f"/Volumes/{catalog}/{schema}/{volume}/bls/productivity"
 )
 MANIFEST_TABLE = f"{catalog}.{schema}.bls_ingestion_manifest"
+RUN_AUDIT_TABLE = f"{catalog}.{schema}.ingestion_run_audit"
 
 # COMMAND ----------
 
@@ -88,20 +110,55 @@ MANIFEST_TABLE = f"{catalog}.{schema}.bls_ingestion_manifest"
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema}")
 spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog}.{schema}.{volume}")
 ensure_manifest_table(spark, MANIFEST_TABLE)
+ensure_ingestion_run_audit_table(spark, RUN_AUDIT_TABLE)
 
 # COMMAND ----------
 
 run_time = datetime.now(timezone.utc)
 run_id = f"{run_time:%Y%m%dT%H%M%SZ}-{uuid.uuid4().hex[:8]}"
 
-source_files = discover_source_files(
-    BLS_DIRECTORY_URL,
-    USER_AGENT,
-    timeout_seconds=30.0,
-    max_attempts=3,
-    backoff_seconds=1.0,
-)
-current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+
+def record_failure(
+    failure_stage,
+    error,
+    *,
+    discovered_count=0,
+    downloaded_count=0,
+    result=None,
+):
+    """Best-effort audit of the current run without masking its failure."""
+
+    audit = failed_run_audit(
+        source="bls",
+        run_id=run_id,
+        started_at_utc=run_time,
+        completed_at_utc=datetime.now(timezone.utc),
+        failure_stage=failure_stage,
+        error=error,
+        discovered_count=discovered_count,
+        downloaded_count=downloaded_count,
+        result=result,
+    )
+    if not append_failed_run_audit_best_effort(spark, RUN_AUDIT_TABLE, audit):
+        print("WARNING: failure audit unavailable; inspect this task run")
+
+
+try:
+    source_files = discover_source_files(
+        BLS_DIRECTORY_URL,
+        USER_AGENT,
+        timeout_seconds=30.0,
+        max_attempts=3,
+        backoff_seconds=1.0,
+    )
+except Exception as error:
+    record_failure("DISCOVERY", error)
+    raise
+try:
+    current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+except Exception as error:
+    record_failure("MANIFEST_READ", error, discovered_count=len(source_files))
+    raise
 active_paths_before = {
     entry.relative_path
     for entry in current_manifest
@@ -111,13 +168,21 @@ discovered_paths = {source.name for source in source_files}
 removal_candidates = active_paths_before - discovered_paths
 confirmed_source_files = None
 if removal_candidates:
-    confirmed_source_files = discover_source_files(
-        BLS_DIRECTORY_URL,
-        USER_AGENT,
-        timeout_seconds=30.0,
-        max_attempts=3,
-        backoff_seconds=1.0,
-    )
+    try:
+        confirmed_source_files = discover_source_files(
+            BLS_DIRECTORY_URL,
+            USER_AGENT,
+            timeout_seconds=30.0,
+            max_attempts=3,
+            backoff_seconds=1.0,
+        )
+    except Exception as error:
+        record_failure(
+            "DISCOVERY_CONFIRMATION",
+            error,
+            discovered_count=len(source_files),
+        )
+        raise
 
 print(f"Run: {run_id}")
 print(f"Discovered files: {len(source_files)}")
@@ -127,28 +192,58 @@ print(f"Mass-removal override: {allow_mass_removal}")
 
 # COMMAND ----------
 
-landing_plan = prepare_bls_landing(
-    source_files,
-    current_manifest,
-    confirmed_source_files=confirmed_source_files,
-    allow_mass_removal=allow_mass_removal,
-    user_agent=USER_AGENT,
-    volume_source_root=VOLUME_SOURCE_ROOT,
-    run_id=run_id,
-    ingested_at_utc=run_time,
-    timeout_seconds=30.0,
-    max_attempts=3,
-    backoff_seconds=1.0,
-)
+try:
+    landing_plan = prepare_bls_landing(
+        source_files,
+        current_manifest,
+        confirmed_source_files=confirmed_source_files,
+        allow_mass_removal=allow_mass_removal,
+        user_agent=USER_AGENT,
+        volume_source_root=VOLUME_SOURCE_ROOT,
+        run_id=run_id,
+        ingested_at_utc=run_time,
+        timeout_seconds=30.0,
+        max_attempts=3,
+        backoff_seconds=1.0,
+    )
+except Exception as error:
+    record_failure(
+        "DOWNLOAD_AND_VALIDATE",
+        error,
+        discovered_count=len(source_files),
+        downloaded_count=getattr(error, "verified_download_count", 0),
+    )
+    raise
 
-landing_result = execute_landing_plan(
-    landing_plan,
-    publisher=lambda entries: append_manifest_entries(
-        spark,
-        MANIFEST_TABLE,
-        entries,
-    ),
-)
+
+class ControlledLandingFailure(RuntimeError):
+    """Operator-requested failure used only for recovery validation."""
+
+
+def promote_for_run(*args, **kwargs):
+    if controlled_failure:
+        raise ControlledLandingFailure("controlled pre-publication failure")
+    return promote_verified_file(*args, **kwargs)
+
+
+try:
+    landing_result = execute_landing_plan(
+        landing_plan,
+        publisher=lambda entries: append_manifest_entries(
+            spark,
+            MANIFEST_TABLE,
+            entries,
+        ),
+        promoter=promote_for_run,
+    )
+except Exception as error:
+    record_failure(
+        "PUBLICATION",
+        error,
+        discovered_count=len(source_files),
+        downloaded_count=len(landing_plan.staged_files),
+    )
+    raise
 
 display(spark.createDataFrame([asdict(landing_result)]))
 
@@ -157,25 +252,43 @@ display(spark.createDataFrame([asdict(landing_result)]))
 # Independent post-commit reconciliation: the current active manifest must
 # match discovery exactly, and every referenced immutable object must match its
 # committed byte count and SHA-256 digest.
-committed_manifest = load_current_manifest(spark, MANIFEST_TABLE)
-active_entries = [
-    entry for entry in committed_manifest if entry.status is ManifestStatus.ACTIVE
-]
-discovered_paths = {source.name for source in source_files}
-active_paths = {entry.relative_path for entry in active_entries}
+try:
+    committed_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+    active_entries = [
+        entry
+        for entry in committed_manifest
+        if entry.status is ManifestStatus.ACTIVE
+    ]
+    discovered_paths = {source.name for source in source_files}
+    active_paths = {entry.relative_path for entry in active_entries}
 
-assert active_paths == discovered_paths, (
-    f"active manifest differs from discovery: "
-    f"missing={sorted(discovered_paths - active_paths)}, "
-    f"unexpected={sorted(active_paths - discovered_paths)}"
-)
-
-for entry in active_entries:
-    verify_file_evidence(
-        entry.landed_path,
-        expected_size=entry.content_size_bytes,
-        expected_sha256=entry.content_sha256,
+    assert active_paths == discovered_paths, (
+        f"active manifest differs from discovery: "
+        f"missing={sorted(discovered_paths - active_paths)}, "
+        f"unexpected={sorted(active_paths - discovered_paths)}"
     )
+
+    for entry in active_entries:
+        verify_file_evidence(
+            entry.landed_path,
+            expected_size=entry.content_size_bytes,
+            expected_sha256=entry.content_sha256,
+        )
+except Exception as error:
+    record_failure("RECONCILIATION", error, result=landing_result)
+    raise
+
+append_ingestion_run_audit(
+    spark,
+    RUN_AUDIT_TABLE,
+    successful_run_audit(
+        source="bls",
+        run_id=run_id,
+        started_at_utc=run_time,
+        completed_at_utc=datetime.now(timezone.utc),
+        result=landing_result,
+    ),
+)
 
 reconciliation_rows = [
     {
