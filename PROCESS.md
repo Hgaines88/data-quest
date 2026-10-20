@@ -1263,7 +1263,10 @@ or management grant appeared in that grant inventory. Copilot review subsequentl
 that the initial audit did not enumerate grants inherited through other groups.
 I strengthened the inspection SQL to cover every project-schema securable and
 reran it for both the inherited workspace `users` group and the validation
-identity directly; each returned zero rows. A later review correctly separated
+identity directly; each returned zero rows. The operator then inspected the
+validation identity's complete workspace membership field, which listed exactly
+the analyst group and `users`, with no additional direct or inherited groups.
+A later review correctly separated
 those grant results from ownership metadata and job/pipeline workspace ACLs;
 those controls require their own inventories and are not claimed by the SQL
 grant result. On 2026-10-20, the ownership inventory covered 44 objects and

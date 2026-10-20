@@ -129,6 +129,14 @@ class SecuritySqlTest(unittest.TestCase):
         self.assertIn("exactly five direct grants", evidence)
         self.assertIn("workspace `users` group", evidence)
         self.assertIn("each returned zero rows", normalized_evidence)
+        self.assertIn(
+            "listed exactly `data_quest_readonly_analysts` and the system `users` group",
+            normalized_evidence,
+        )
+        self.assertIn(
+            "no other direct or inherited workspace group memberships",
+            normalized_evidence,
+        )
         self.assertIn("44 project-scope objects", normalized_evidence)
         self.assertIn("no separate jobs", normalized_evidence)
         for pipeline in [
