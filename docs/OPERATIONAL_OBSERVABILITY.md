@@ -75,8 +75,8 @@ expectations did not run.
 | Failure stage/category | Interpretation | Safe recovery |
 | --- | --- | --- |
 | `DISCOVERY` / `SOURCE_UNAVAILABLE` | Provider listing could not be read | Leave manifests unchanged; verify provider availability, then rerun the same notebook |
-| `DISCOVERY_CONFIRMATION` / `INVENTORY_SAFETY` | Independent BLS inventories disagree | Compare both inventories before retrying; do not bypass confirmation |
-| `DOWNLOAD_AND_VALIDATE` / `INVENTORY_SAFETY` | A required BLS file is absent, or confirmed removals exceed the guardrail | Restore the required inventory or obtain operator review before any explicit mass-removal override |
+| `DISCOVERY_CONFIRMATION` / `SOURCE_UNAVAILABLE` | The independent confirmation listing could not be read | Leave manifests unchanged; verify provider availability, then rerun the BLS notebook |
+| `DOWNLOAD_AND_VALIDATE` / `INVENTORY_SAFETY` | Independent inventories disagree, a required BLS file is absent, or confirmed removals exceed the guardrail | Compare both inventories, restore required files, or obtain operator review before any explicit mass-removal override |
 | `DOWNLOAD_AND_VALIDATE` / `FILE_VALIDATION` | A staged object or response failed its contract | Staging is cleaned and no manifest transition publishes; fix the source/contract cause and rerun |
 | `PUBLICATION` | Promotion, verification, or atomic manifest append failed | Prior manifest truth remains valid; rerun. Immutable objects already promoted are verified and reused |
 | `RECONCILIATION` | Post-commit inventory or digest check failed | Stop downstream refresh, inspect the named manifest run, and rerun landing after correcting the mismatch |

@@ -7,7 +7,7 @@ import re
 from data_quest.ingestion.landing import LandingExecutionResult
 from data_quest.ingestion.datausa import PopulationResponseError
 from data_quest.ingestion.discovery import SourceRequestError
-from data_quest.ingestion.download import DownloadIntegrityError
+from data_quest.ingestion.download import DownloadIntegrityError, StagingWriteError
 from data_quest.ingestion.manifest import IncompleteRunError
 
 
@@ -137,8 +137,14 @@ def failed_run_audit(
     error_category = _error_category(error)
     resolved_failed_file_count = (
         int(
-            failure_stage not in {"DISCOVERY", "DISCOVERY_CONFIRMATION"}
-            and error_category in {"SOURCE_UNAVAILABLE", "FILE_VALIDATION"}
+            (
+                failure_stage not in {"DISCOVERY", "DISCOVERY_CONFIRMATION"}
+                and error_category in {"SOURCE_UNAVAILABLE", "FILE_VALIDATION"}
+            )
+            or (
+                failure_stage == "DOWNLOAD_AND_VALIDATE"
+                and isinstance(error, StagingWriteError)
+            )
         )
         if failed_file_count is None
         else failed_file_count

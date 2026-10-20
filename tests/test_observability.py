@@ -5,6 +5,7 @@ import unittest
 
 from data_quest.ingestion.datausa import PopulationResponseError
 from data_quest.ingestion.discovery import SourcePolicyError, SourceRedirectError
+from data_quest.ingestion.download import StagingWriteError
 from data_quest.ingestion.landing import LandingExecutionResult
 from data_quest.ingestion.observability import (
     failed_run_audit,
@@ -87,6 +88,21 @@ class ObservabilityRecordTests(unittest.TestCase):
         )
 
         self.assertEqual(audit.error_category, "FILE_VALIDATION")
+        self.assertEqual(audit.failed_file_count, 1)
+
+    def test_staging_write_failure_counts_one_failed_file(self) -> None:
+        audit = failed_run_audit(
+            source="datausa",
+            run_id="20261020T000000Z-test",
+            started_at_utc=STARTED,
+            completed_at_utc=COMPLETED,
+            failure_stage="DOWNLOAD_AND_VALIDATE",
+            error=StagingWriteError("staging unavailable"),
+            discovered_count=1,
+        )
+
+        self.assertEqual(audit.error_category, "UNEXPECTED")
+        self.assertEqual(audit.downloaded_count, 0)
         self.assertEqual(audit.failed_file_count, 1)
 
     def test_rejects_unsafe_operational_values(self) -> None:
