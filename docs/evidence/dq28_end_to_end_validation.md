@@ -35,8 +35,8 @@ resources.
 | Whitespace | `git diff --check` | Pass | Passed on the reviewed final diff. |
 | Bundle validation and deployment | Authenticated `validate`, reviewed `plan`, `deploy`, ordered run, convergence `plan` | Pass | Initial plan: 0 add, 3 change, 0 delete, 1 unchanged. The ordered refresh completed Bronze through Gold; the final plan converged to 0 add, 0 change, 0 delete, 4 unchanged. |
 | Landing | Serial BLS and Data USA notebook rerun | Pass | BLS run `20261020T164038Z-43cb75a2` found 12 unchanged files; Data USA run `20261020T165548Z-c9665d89` found one unchanged object. Both had zero changes, removals, failures, and publication transitions. |
-| Development pipeline and data | Bundle Bronze-to-Gold run plus retargeted layer, Gold, health, and expectation queries | Pass | Bronze `0cb22ed8-ca93-44c4-b50a-2851f71ea7ff`, Silver `095be566-6db2-43a4-8f6f-cdc2b33df4a7`, and Gold `fd2b6f5e-b2db-49f9-8349-9729d68b3c94` completed. All 79 Bronze, 13 Silver, and 8 Gold expectation rows passed. Gold counts were 282, 39, and 1. |
-| Shared pipeline and data | Separately governed shared Bronze-to-Gold run plus checked-in reconciliation and operational queries | Pass | Bronze `11978044-9bc2-4488-92a0-73f9cc5702e8`, Silver `49c57521-d4de-400f-9d34-d04f722c5571`, and Gold `fcb1feaa-2d0b-4f02-b474-73d18209e0f8` completed. All expectation rows passed with zero rejected or blocking records. All 14 Bronze-to-Silver reconciliation checks passed. |
+| Development pipeline and data | Bundle Bronze-to-Gold run plus retargeted layer, Gold, health, and expectation queries | Pass | Bronze, Silver, and Gold completed in order. Pipeline update identifiers are omitted from the submission. All 79 Bronze, 13 Silver, and 8 Gold expectation rows passed. Gold counts were 282, 39, and 1. |
+| Shared pipeline and data | Separately governed shared Bronze-to-Gold run plus checked-in reconciliation and operational queries | Pass | Bronze, Silver, and Gold completed in order. Pipeline update identifiers are omitted from the submission. All expectation rows passed with zero rejected or blocking records. All 14 Bronze-to-Silver reconciliation checks passed. |
 | Stakeholder | Published dashboard, acceptance query, and representative Genie evidence | Pass | DQ-25 evidence reconciles the external stakeholder surface to the unchanged shared Gold contracts. DQ-28 introduced no dashboard or Genie configuration change. |
 | Access control | Separate-principal positive and prohibited-operation checks | Pass | DQ-26 evidence validates the unchanged external grants and preserves the distinction between authorization denials and structural view write protection. |
 | Observability | Starting and final health and expectation queries | Pass | BLS, Data USA, and Gold reported healthy current states; the intentional DQ-27 controlled failure remained visible and was followed by success. Current expectation results contained explicit zero rejected or blocking counts rather than unavailable null metrics. |
@@ -47,9 +47,8 @@ resources.
 
 - Starting health showed successful BLS and Data USA source runs and a healthy
   Gold refresh.
-- The isolated development deployment used schema
-  `workspace.rearc_data_quest_dq24_hakeemjgaines`; shared resources remained in
-  `workspace.rearc_data_quest`.
+- The isolated development deployment used a per-user development schema;
+  shared resources remained in `workspace.rearc_data_quest`.
 - Both landing reruns were no-ops, demonstrating idempotency without publishing
   new manifest transitions.
 - Development and shared Bronze, Silver, and Gold updates completed in order.

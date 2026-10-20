@@ -10,9 +10,6 @@ implementation and an independently runnable Spark SQL alternative.
 For implementation decisions, corrections, trade-offs, AI usage, and the
 retrospective, read [`PROCESS.md`](PROCESS.md). For a quick visual review, open
 the [curated screenshot index](docs/screenshots/README.md#dq-21-curated-submission-set).
-The remaining work and the rule that reserves DQ-23 for the final audit are
-recorded in the [project completion roadmap](docs/PROJECT_ROADMAP.md).
-
 ## Architecture
 
 ```text

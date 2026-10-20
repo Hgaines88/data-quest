@@ -5,7 +5,7 @@
 - Git revision: `57073141c8faa35de2b90a1346162f10ee479c69`
 - Branch: `codex/dq-18-q01-population`
 - Pipeline: `data-quest-gold`
-- Pipeline ID: `c0fba073-4bb3-4c3a-b91a-dcfb1356ec0b`
+- Pipeline identifier omitted from the submission
 - Validated on: October 19, 2026
 
 The operator switched the Databricks Git folder directly to the reviewed DQ-18

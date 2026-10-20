@@ -14,7 +14,7 @@ not independently prove the remote commit identity.
 
 ## Live validation outcome
 
-After the final Copilot review fixes, the read-only query completed
+After the final review fixes, the read-only query completed
 successfully at 5:15 PM EDT in 35.092 seconds, returned exactly 17 checks, and
 displayed `passed = true` for every check. The editor displayed a green
 execution status, no query error, and 111 of 111 completed execution tasks.
