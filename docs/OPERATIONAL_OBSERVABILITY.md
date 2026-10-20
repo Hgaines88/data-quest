@@ -75,6 +75,7 @@ expectations did not run.
 | Failure stage/category | Interpretation | Safe recovery |
 | --- | --- | --- |
 | `DISCOVERY` / `SOURCE_UNAVAILABLE` | Provider listing could not be read | Leave manifests unchanged; verify provider availability, then rerun the same notebook |
+| `MANIFEST_READ` | Current manifest state could not be loaded or validated | Leave landing objects and manifests unchanged; restore manifest access or valid rows, then rerun the same notebook |
 | `DISCOVERY_CONFIRMATION` / `SOURCE_UNAVAILABLE` | The independent confirmation listing could not be read | Leave manifests unchanged; verify provider availability, then rerun the BLS notebook |
 | `DOWNLOAD_AND_VALIDATE` / `INVENTORY_SAFETY` | Independent inventories disagree, a required BLS file is absent, or confirmed removals exceed the guardrail | Compare both inventories, restore required files, or obtain operator review before any explicit mass-removal override |
 | `DOWNLOAD_AND_VALIDATE` / `FILE_VALIDATION` | A staged object or response failed its contract | Staging is cleaned and no manifest transition publishes; fix the source/contract cause and rerun |

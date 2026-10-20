@@ -141,7 +141,25 @@ except Exception as error:
     if not audit_written:
         print("WARNING: failure audit unavailable; inspect this task run")
     raise
-current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+try:
+    current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+except Exception as error:
+    audit_written = append_failed_run_audit_best_effort(
+        spark,
+        RUN_AUDIT_TABLE,
+        failed_run_audit(
+            source="bls",
+            run_id=run_id,
+            started_at_utc=run_time,
+            completed_at_utc=datetime.now(timezone.utc),
+            failure_stage="MANIFEST_READ",
+            error=error,
+            discovered_count=len(source_files),
+        ),
+    )
+    if not audit_written:
+        print("WARNING: failure audit unavailable; inspect this task run")
+    raise
 active_paths_before = {
     entry.relative_path
     for entry in current_manifest

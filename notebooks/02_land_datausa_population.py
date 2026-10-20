@@ -94,7 +94,24 @@ ensure_ingestion_run_audit_table(spark, RUN_AUDIT_TABLE)
 
 run_time = datetime.now(timezone.utc)
 run_id = f"{run_time:%Y%m%dT%H%M%SZ}-{uuid.uuid4().hex[:8]}"
-current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+try:
+    current_manifest = load_current_manifest(spark, MANIFEST_TABLE)
+except Exception as error:
+    audit_written = append_failed_run_audit_best_effort(
+        spark,
+        RUN_AUDIT_TABLE,
+        failed_run_audit(
+            source="datausa",
+            run_id=run_id,
+            started_at_utc=run_time,
+            completed_at_utc=datetime.now(timezone.utc),
+            failure_stage="MANIFEST_READ",
+            error=error,
+        ),
+    )
+    if not audit_written:
+        print("WARNING: failure audit unavailable; inspect this task run")
+    raise
 
 print(f"Run: {run_id}")
 print(f"Current manifest objects: {len(current_manifest)}")
