@@ -1223,3 +1223,30 @@ then rendered successfully. A published-mode `2026` filter test preserved
 which the filter was reset to its default. Privacy-safe screenshots and exact
 digests are indexed in
 [`docs/evidence/dq25_stakeholder_exploration_validation.md`](docs/evidence/dq25_stakeholder_exploration_validation.md).
+
+### 2026-10-19: DQ-26 least-privilege design boundary
+
+I defined `data_quest_readonly_analysts` as a non-admin interactive analyst
+group. Its data path is limited to `USE CATALOG` on `workspace`, `USE SCHEMA`
+on `workspace.rearc_data_quest`, and `SELECT` on the three governed Gold
+contracts used by the dashboard. Because Bronze, Silver, Gold, quality, and
+helper objects share one schema, schema-wide `SELECT` would violate the stated
+Gold-only boundary; the policy therefore names each Gold table explicitly.
+It grants no ownership, management, modification, creation, or Volume access.
+
+The workspace-object path is also explicit: the group requires **Can use** on
+the Serverless Starter Warehouse and **Can view** on the published dashboard.
+The dashboard must be republished with **Individual data permission** for the
+access-control validation. Shared data permission executes with the
+publisher's authority and can demonstrate dashboard availability, but cannot
+prove that the analyst's Unity Catalog grants are sufficient.
+
+Checked-in apply, inspection, positive, negative, and revocation SQL makes the
+intended data grants reviewable and reversible. Repository tests enforce exact
+Gold-table symmetry and reject elevated or schema-wide grants. This design is
+not yet live proof: DQ-26 remains incomplete until a separate non-admin member
+successfully reads all three Gold contracts and uses the dashboard while Gold
+writes, Bronze and Silver reads, raw Volume access, and schema object creation
+all fail with authorization errors. The operator/admin account cannot provide
+valid denial evidence because inherited ownership or administrative authority
+would confound the test.

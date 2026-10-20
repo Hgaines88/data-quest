@@ -51,6 +51,12 @@ The optional DQ-25 stakeholder layer is specified in the
 tables, and its acceptance query keeps the live Databricks build and evidence
 as an explicit manual completion gate.
 
+The DQ-26 [Gold access-control runbook](docs/GOLD_ACCESS_CONTROL.md) defines the
+read-only analyst persona, exact Unity Catalog table grants, warehouse and
+dashboard ACLs, positive reads, prohibited operations, teardown, and the live
+separate-principal evidence gate. Its [security SQL](sql/security/README.md)
+never grants schema-wide data access.
+
 ## Prerequisites
 
 - A Databricks workspace with Spark Declarative Pipelines, Unity Catalog, and a

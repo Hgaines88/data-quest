@@ -384,13 +384,13 @@ repository. Their execution order and QA gates are defined in the
 **Priority:** Bonus
 **Depends on:** DQ-22
 
-- [ ] Define the intended stakeholder, the decisions they need to make, and a small set of plain-language business questions.
-- [ ] Confirm that each visual or Genie response is supported by a governed Gold table at the correct grain.
-- [ ] Build a focused Databricks dashboard, a Genie space, or both when the workspace supports them.
-- [ ] Add clear titles, units, filters, definitions, and source/freshness context.
-- [ ] Configure Genie instructions and sample questions so answers remain within the documented semantic scope.
-- [ ] Validate representative dashboard values and Genie answers against Gold-layer queries.
-- [ ] Capture reviewer-facing evidence and document any Free Edition limitations.
+- [x] Define the intended stakeholder, the decisions they need to make, and a small set of plain-language business questions.
+- [x] Confirm that each visual or Genie response is supported by a governed Gold table at the correct grain.
+- [x] Build a focused Databricks dashboard, a Genie space, or both when the workspace supports them.
+- [x] Add clear titles, units, filters, definitions, and source/freshness context.
+- [x] Configure Genie instructions and sample questions so answers remain within the documented semantic scope.
+- [x] Validate representative dashboard values and Genie answers against Gold-layer queries.
+- [x] Capture reviewer-facing evidence and document any Free Edition limitations.
 
 **Done when:** A non-technical stakeholder can answer the chosen questions without writing code, and representative answers have been reconciled to the Gold layer.
 
