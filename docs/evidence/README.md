@@ -85,3 +85,11 @@ these exports support exact value inspection.
   invariant and source checks, successful 85-task execution, intentional
   representation differences, screenshot paths, and screenshot SHA-256
   digests.
+
+## DQ-25 Stakeholder exploration validation
+
+- `dq25_stakeholder_exploration_validation.md`: records the published AI/BI
+  dashboard, dashboard filters and semantic boundaries, four-row acceptance
+  query, two reconciled Genie answers, published-runtime warehouse recovery,
+  null-preservation smoke test, privacy-safe screenshot paths, and screenshot
+  SHA-256 digests.
