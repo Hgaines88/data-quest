@@ -1223,3 +1223,60 @@ then rendered successfully. A published-mode `2026` filter test preserved
 which the filter was reset to its default. Privacy-safe screenshots and exact
 digests are indexed in
 [`docs/evidence/dq25_stakeholder_exploration_validation.md`](docs/evidence/dq25_stakeholder_exploration_validation.md).
+
+### 2026-10-19: DQ-26 least-privilege implementation and validation
+
+I defined `data_quest_readonly_analysts` as a non-admin interactive analyst
+group. Its data path is limited to `USE CATALOG` on `workspace`, `USE SCHEMA`
+on `workspace.rearc_data_quest`, and `SELECT` on the three governed Gold
+contracts used by the dashboard. Because Bronze, Silver, Gold, quality, and
+helper objects share one schema, schema-wide `SELECT` would violate the stated
+Gold-only boundary; the policy therefore names each Gold table explicitly.
+It grants no ownership, management, modification, creation, or Volume access.
+
+The workspace-object path is also explicit: the group requires **Can use** on
+the Serverless Starter Warehouse and **Can view** on the published dashboard.
+The dashboard must be republished with **Individual data permission** for the
+access-control validation. Shared data permission executes with the
+publisher's authority and can demonstrate dashboard availability, but cannot
+prove that the analyst's Unity Catalog grants are sufficient.
+
+Checked-in apply, inspection, positive, negative, and revocation SQL makes the
+intended data grants reviewable and reversible. Repository tests enforce exact
+Gold-table symmetry and reject elevated or schema-wide grants.
+
+I then completed the live test with a separate non-admin user in the analyst
+group. Databricks SQL access was enabled while Consumer, Workspace, and Admin
+access remained disabled. The group received **Can use** on the Serverless
+Starter Warehouse and **Can view** on the dashboard, which was republished with
+**Individual data permission**. All three Gold reads and the dashboard worked;
+the Series and Observation year filters also worked and were reset.
+
+The lower-layer tests produced authorization denials for Bronze `SELECT`,
+Silver `SELECT`, raw-Volume `LIST`, and schema `CREATE TABLE`. The Gold
+`UPDATE` also failed, but because the deployed Gold object is a view
+(`EXPECT_TABLE_NOT_VIEW`), not because an authorization check denied DML. I
+record this distinction instead of overstating the result. The admin audit
+returned exactly five direct group grants: catalog use, schema use, and
+`SELECT` on the three named Gold contracts. No lower-layer, Volume, creation,
+or management grant appeared in that grant inventory. Copilot review subsequently identified
+that the initial audit did not enumerate grants inherited through other groups.
+I strengthened the inspection SQL to cover every project-schema securable and
+reran it for both the inherited workspace `users` group and the validation
+identity directly; each returned zero rows. The operator then inspected the
+validation identity's complete workspace membership field, which listed exactly
+the analyst group and `users`, with no additional direct or inherited groups.
+This inspection followed the behavioral tests in one continuous validation
+session spanning midnight; no membership change occurred between the tests and
+the inspection.
+A later review correctly separated
+those grant results from ownership metadata and job/pipeline workspace ACLs;
+those controls require their own inventories and are not claimed by the SQL
+grant result. On 2026-10-20, the ownership inventory covered 44 objects and
+returned zero matches when filtered independently for the analyst group,
+`users`, and the validation identity. The workspace inventory found the Bronze,
+Silver, and Gold pipelines and no separate jobs; only the operator and inherited
+`Admins` management authority appeared on each pipeline ACL. The privacy-safe
+evidence and exact
+digests are indexed in
+[`docs/evidence/dq26_gold_access_control_validation.md`](docs/evidence/dq26_gold_access_control_validation.md).

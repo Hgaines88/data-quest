@@ -384,13 +384,13 @@ repository. Their execution order and QA gates are defined in the
 **Priority:** Bonus
 **Depends on:** DQ-22
 
-- [ ] Define the intended stakeholder, the decisions they need to make, and a small set of plain-language business questions.
-- [ ] Confirm that each visual or Genie response is supported by a governed Gold table at the correct grain.
-- [ ] Build a focused Databricks dashboard, a Genie space, or both when the workspace supports them.
-- [ ] Add clear titles, units, filters, definitions, and source/freshness context.
-- [ ] Configure Genie instructions and sample questions so answers remain within the documented semantic scope.
-- [ ] Validate representative dashboard values and Genie answers against Gold-layer queries.
-- [ ] Capture reviewer-facing evidence and document any Free Edition limitations.
+- [x] Define the intended stakeholder, the decisions they need to make, and a small set of plain-language business questions.
+- [x] Confirm that each visual or Genie response is supported by a governed Gold table at the correct grain.
+- [x] Build a focused Databricks dashboard, a Genie space, or both when the workspace supports them.
+- [x] Add clear titles, units, filters, definitions, and source/freshness context.
+- [x] Configure Genie instructions and sample questions so answers remain within the documented semantic scope (accepted Free Edition exception: the proposed instructions are versioned, but no custom instruction editor was available, so deployment is not claimed).
+- [x] Validate representative dashboard values and Genie answers against Gold-layer queries.
+- [x] Capture reviewer-facing evidence and document any Free Edition limitations.
 
 **Done when:** A non-technical stakeholder can answer the chosen questions without writing code, and representative answers have been reconciled to the Gold layer.
 
@@ -399,13 +399,13 @@ repository. Their execution order and QA gates are defined in the
 **Priority:** Bonus
 **Depends on:** DQ-25
 
-- [ ] Define the read-only analyst persona and the exact objects required for the dashboard or Genie space.
-- [ ] Create or document an appropriate group or role-based access pattern without granting ownership or write privileges.
-- [ ] Grant only the required catalog, schema, table, view, warehouse, and dashboard or Genie permissions.
-- [ ] Prefer governed Gold views or tables rather than exposing Bronze, Silver, raw files, or implementation details.
-- [ ] Test that the analyst can query the intended Gold objects and use the stakeholder experience.
-- [ ] Test that writes and access to unauthorized layers are denied.
-- [ ] Record the grants, validation evidence, limitations, and least-privilege rationale in `PROCESS.md`.
+- [x] Define the read-only analyst persona and the exact objects required for the dashboard or Genie space.
+- [x] Create or document an appropriate group or role-based access pattern without granting ownership or write privileges.
+- [x] Grant only the required catalog, schema, table, view, warehouse, and dashboard or Genie permissions.
+- [x] Prefer governed Gold views or tables rather than exposing Bronze, Silver, raw files, or implementation details.
+- [x] Test that the analyst can query the intended Gold objects and use the stakeholder experience.
+- [x] Test that writes and access to unauthorized layers are denied.
+- [x] Record the grants, validation evidence, limitations, and least-privilege rationale in `PROCESS.md`.
 
 **Done when:** The stakeholder experience works for a read-only analyst while unauthorized reads and all writes remain blocked.
 
