@@ -129,6 +129,14 @@ class SecuritySqlTest(unittest.TestCase):
         self.assertIn("exactly five direct grants", evidence)
         self.assertIn("workspace `users` group", evidence)
         self.assertIn("each returned zero rows", normalized_evidence)
+        self.assertIn("44 project-scope objects", normalized_evidence)
+        self.assertIn("no separate jobs", normalized_evidence)
+        for pipeline in [
+            "data-quest-bronze",
+            "data-quest-gold",
+            "data-quest-silver",
+        ]:
+            self.assertIn(pipeline, evidence)
 
 
 if __name__ == "__main__":

@@ -1266,6 +1266,11 @@ reran it for both the inherited workspace `users` group and the validation
 identity directly; each returned zero rows. A later review correctly separated
 those grant results from ownership metadata and job/pipeline workspace ACLs;
 those controls require their own inventories and are not claimed by the SQL
-grant result. The privacy-safe evidence and exact
+grant result. On 2026-10-20, the ownership inventory covered 44 objects and
+returned zero matches when filtered independently for the analyst group,
+`users`, and the validation identity. The workspace inventory found the Bronze,
+Silver, and Gold pipelines and no separate jobs; only the operator and inherited
+`Admins` management authority appeared on each pipeline ACL. The privacy-safe
+evidence and exact
 digests are indexed in
 [`docs/evidence/dq26_gold_access_control_validation.md`](docs/evidence/dq26_gold_access_control_validation.md).

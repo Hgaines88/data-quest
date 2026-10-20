@@ -39,6 +39,20 @@ privileges. The identity therefore receives the five required data privileges
 through the analyst group without additional direct or default-group grants in
 the audited scope.
 
+On 2026-10-20, the metastore-administrator ownership inventory returned 44
+project-scope objects. Filtering the `owner` column separately for
+`data_quest_readonly_analysts`, `users`, and the validation identity returned
+zero rows for each principal. The validation identity and its effective groups
+therefore own none of the audited catalog, schema, table/view, Volume, or
+routine objects.
+
+The workspace ACL inventory found three project workloads and no separate
+jobs: `data-quest-bronze`, `data-quest-gold`, and `data-quest-silver`. Each
+pipeline listed only the operator as owner and the inherited `Admins` group as
+**Can manage**. The analyst group, `users`, and validation identity were absent
+from all three ACLs, so they have no pipeline run, management, or ownership
+authority in the inventoried workspace.
+
 ## Positive validation
 
 As the separate analyst, all three exact Gold count queries completed
@@ -65,9 +79,9 @@ structural Gold-view write block. It does not claim that the Gold write probe
 reached an authorization check. Together with the exact-grant inspection, the
 result establishes the observed data-access boundary for the tested deployed
 view-backed Gold contracts. The five-row inventory establishes only the audited
-Unity Catalog grants; it does not establish ownership or Lakeflow job/pipeline
-ACLs. A post-review ownership inventory and independent workspace-ACL inventory
-remain required before claiming those separate controls are fully validated.
+Unity Catalog grants. The separate 44-object ownership inventory and three-
+pipeline workspace-ACL inventory establish the remaining ownership and
+Lakeflow authority boundaries described above.
 
 ## Privacy-safe screenshots
 
@@ -84,3 +98,6 @@ identifiers, and credentials. The grant capture is cropped to the Databricks
 query/result surface and contains no email or token. Negative-result details
 are operator-recorded outcomes from the separate analyst session; their source
 captures were reviewed during validation but are not retained in the repository.
+The ownership-filter and pipeline-permission captures were likewise reviewed
+but not retained because they expose personal email addresses and workspace
+pipeline identifiers.
