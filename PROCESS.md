@@ -1347,9 +1347,33 @@ the externally governed shared stakeholder surface as explicit, separate paths
 over the same source and Gold contracts.
 
 Before documentation changes, the local baseline passed 202 tests and 106
-subtests, Python compilation, and `git diff --check`. The local machine has no
-Databricks CLI, so I did not record an unauthenticated command as platform
-evidence. The DQ-28 evidence record remains visibly pending until the exact
-reviewed revision completes the live bundle, landing, reconciliation,
+subtests, Python compilation, and `git diff --check`. The exact reviewed
+revision subsequently completed the live bundle, landing, reconciliation,
 stakeholder, authorization, observability, privacy, cost, and explainability
-gates in the authorized Databricks environment.
+gates in the authorized Databricks environment. The observed results and claim
+boundaries are recorded in
+[`docs/evidence/dq28_end_to_end_validation.md`](docs/evidence/dq28_end_to_end_validation.md).
+
+### 2026-10-20: DQ-23 final submission audit
+
+I performed the final audit against the merged submission tree after every
+implementation and platform-decision card had closed. The existing DQ-28 record
+supplies the complete workflow, ordered Bronze-to-Gold execution, and immediate
+no-change landing reruns; I did not repeat those live operations merely to
+produce duplicate evidence.
+
+The final local suite passed 202 tests and 106 subtests, Python compilation,
+and the whitespace check. All three required PySpark Gold outputs and their
+Spark SQL alternatives are present. Ninety-three PNG evidence files are valid
+images, and all local targets referenced by the 38 submitted Markdown files
+resolve. A tracked-tree and Git-history scan found no credential, personal-email,
+private-key, Databricks-host, or access-token pattern outside deliberate test
+fixtures. The repository is public, its default branch is `main`, and an
+unauthenticated request returned HTTP 200.
+
+The submission contains the required code, architecture and trade-off record,
+honest AI-usage and correction summary, retrospective, pipeline and table
+screenshots, and outputs for all three analytical questions. Internal planning
+and interview-preparation artifacts are not part of the submitted tree. Within
+the assessment's documented Free Edition and single-writer boundaries, the
+repository is reproducible, reviewable, explainable, and ready for Rearc review.
