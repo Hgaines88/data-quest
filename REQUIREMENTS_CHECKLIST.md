@@ -347,15 +347,15 @@ check passing and no unexplained discrepancy.
 **Execution note:** This is the final project-wide gate. Do not close DQ-23
 while an implementation card or the platform decision gate remains open.
 
-- [ ] Run the complete ingestion and pipeline workflow from a documented starting state.
-- [ ] Re-run it to demonstrate idempotency.
-- [ ] Confirm required outputs, SQL alternatives, and PySpark alternatives are present.
-- [ ] Search tracked files and Git history for secrets or sensitive data.
-- [ ] Confirm screenshots render and repository links work.
-- [ ] Review every submitted line sufficiently to explain it in an interview.
-- [ ] Confirm the repository is accessible to Rearc reviewers.
+- [x] Run the complete ingestion and pipeline workflow from a documented starting state.
+- [x] Re-run it to demonstrate idempotency.
+- [x] Confirm required outputs, SQL alternatives, and PySpark alternatives are present.
+- [x] Search tracked files and Git history for secrets or sensitive data.
+- [x] Confirm screenshots render and repository links work.
+- [x] Review every submitted line sufficiently to explain it in an interview.
+- [x] Confirm the repository is accessible to Rearc reviewers.
 
-**Done when:** The solution is reproducible, reviewable, explainable, and contains every required deliverable.
+**Done when:** The solution is reproducible, reviewable, explainable, and contains every required deliverable. DQ-23 completed this final gate against the merged submission tree; its evidence is summarized in `PROCESS.md` and the DQ-28 end-to-end validation record.
 
 ## Epic 5: Optional enhancements
 
