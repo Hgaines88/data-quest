@@ -1,5 +1,9 @@
 # Rearc Data Quest: Databricks Medallion Pipeline
 
+![Data Quest architecture: public BLS and Data USA sources flow through safe ingestion, an immutable Unity Catalog Volume, Bronze, Silver, and Gold pipelines, independent validation, observability, and governed stakeholder tools.](docs/architecture/data-quest-architecture.png)
+
+*A governed Databricks data product that turns public labor and population data into validated, observable, and access-controlled analytical results.*
+
 This repository implements the Rearc Data Quest as an idempotent Databricks
 landing workflow and a Spark Declarative Pipeline. It ingests the complete BLS
 productivity time-series directory plus the assigned Data USA population
