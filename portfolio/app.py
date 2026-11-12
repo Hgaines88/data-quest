@@ -55,6 +55,15 @@ def inject_styles() -> None:
           .dq-subtitle { color: #52677d; font-size: 1.18rem; max-width: 780px; }
           .dq-boundary { border-left: 4px solid #2f80c1; background: #eef6fc;
                          padding: 1rem 1.1rem; border-radius: 0 .65rem .65rem 0; }
+          .dq-stack { display: flex; flex-wrap: wrap; gap: .55rem; margin: .8rem 0 1rem; }
+          .dq-stack span { background: #102a43; border: 1px solid #102a43;
+                           border-radius: 999px; color: #ffffff; font-size: .9rem;
+                           font-weight: 720; padding: .38rem .72rem; }
+          .dq-links { display: flex; flex-wrap: wrap; gap: .7rem; margin: .35rem 0 1.3rem; }
+          .dq-links a { background: #ffffff; border: 2px solid #2f80c1;
+                        border-radius: .58rem; color: #155f91 !important;
+                        font-weight: 750; padding: .58rem .82rem; text-decoration: none; }
+          .dq-links a:hover { background: #e9f4fc; border-color: #155f91; }
           .dq-pass { color: #176b49; font-weight: 750; }
           [data-testid="stMetric"] { background: white; border: 1px solid #dbe5ef;
                                      padding: .8rem; border-radius: .8rem; }
@@ -132,7 +141,7 @@ def hero() -> None:
     st.markdown('<div class="dq-kicker">Governed public-data engineering</div>', unsafe_allow_html=True)
     st.markdown('<div class="dq-hero">Data Quest</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="dq-subtitle">A Databricks data product that turns public labor and population data into validated, observable, and access-controlled analytical results.</div>',
+        '<div class="dq-subtitle">A production-style Databricks data engineering project built with Python, PySpark, and Spark SQL—turning public labor and population data into validated, observable, and access-controlled analytical results.</div>',
         unsafe_allow_html=True,
     )
 
@@ -149,11 +158,36 @@ def boundary_note() -> None:
     )
 
 
+def implementation_paths() -> None:
+    st.markdown("### Databricks implementation")
+    st.markdown(
+        """
+        <div class="dq-stack">
+          <span>Databricks</span><span>Python</span><span>PySpark</span>
+          <span>Spark SQL</span><span>Unity Catalog</span>
+          <span>Bronze · Silver · Gold</span>
+        </div>
+        <div class="dq-links">
+          <a href="https://github.com/Hgaines88/data-quest/tree/codex/public-portfolio/notebooks" target="_blank">Landing notebooks</a>
+          <a href="https://github.com/Hgaines88/data-quest/tree/codex/public-portfolio/pipelines" target="_blank">PySpark pipelines</a>
+          <a href="https://github.com/Hgaines88/data-quest/tree/codex/public-portfolio/sql" target="_blank">Spark SQL and validation</a>
+          <a href="https://github.com/Hgaines88/data-quest/tree/codex/public-portfolio/docs/evidence" target="_blank">Databricks execution evidence</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "The Databricks workspace is authenticated. These version-controlled notebooks, "
+        "pipelines, SQL contracts, and captured execution records provide the public review path."
+    )
+
+
 def overview(data: dict) -> None:
     hero()
     st.write("")
     boundary_note()
     st.write("")
+    implementation_paths()
     inventory = data["source_inventory"]
     cols = st.columns(4)
     cols[0].metric("BLS source files", f"{inventory['bls_files']:,}")
