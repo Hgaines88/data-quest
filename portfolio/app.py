@@ -72,24 +72,36 @@ def inject_styles() -> None:
 
           /* Keep tabs readable in light and dark browser themes. */
           [data-baseweb="tab-list"], [role="tablist"] { gap: .45rem; }
-          [data-baseweb="tab"], button[role="tab"] {
+          [data-baseweb="tab"], [role="tab"],
+          [data-testid="stTabs"] button, button[id*="-tab-"] {
             background: #e8eef5 !important; border: 1px solid #b8c9da !important;
             border-radius: .55rem .55rem 0 0 !important;
             min-height: 2.85rem; padding: .55rem .9rem !important;
           }
           [data-baseweb="tab"] p, [data-baseweb="tab"] span,
-          button[role="tab"], button[role="tab"] p, button[role="tab"] span {
+          [role="tab"], [role="tab"] p, [role="tab"] span,
+          [data-testid="stTabs"] button, [data-testid="stTabs"] button p,
+          [data-testid="stTabs"] button span, button[id*="-tab-"],
+          button[id*="-tab-"] p, button[id*="-tab-"] span {
             color: #17324d !important; font-weight: 720 !important;
           }
           [data-baseweb="tab"][aria-selected="true"],
-          button[role="tab"][aria-selected="true"] {
+          [role="tab"][aria-selected="true"],
+          [data-testid="stTabs"] button[aria-selected="true"],
+          button[id*="-tab-"][aria-selected="true"] {
             background: #102a43 !important; border-color: #102a43 !important;
           }
           [data-baseweb="tab"][aria-selected="true"] p,
           [data-baseweb="tab"][aria-selected="true"] span,
-          button[role="tab"][aria-selected="true"],
-          button[role="tab"][aria-selected="true"] p,
-          button[role="tab"][aria-selected="true"] span { color: #ffffff !important; }
+          [role="tab"][aria-selected="true"],
+          [role="tab"][aria-selected="true"] p,
+          [role="tab"][aria-selected="true"] span,
+          [data-testid="stTabs"] button[aria-selected="true"],
+          [data-testid="stTabs"] button[aria-selected="true"] p,
+          [data-testid="stTabs"] button[aria-selected="true"] span,
+          button[id*="-tab-"][aria-selected="true"],
+          button[id*="-tab-"][aria-selected="true"] p,
+          button[id*="-tab-"][aria-selected="true"] span { color: #ffffff !important; }
 
           /* Make text inputs look unmistakably interactive. */
           [data-testid="stTextInput"] label p { color: #17324d !important;
