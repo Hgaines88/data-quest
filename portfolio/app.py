@@ -71,18 +71,25 @@ def inject_styles() -> None:
           .dq-callout-success { background: #e8f7ef; border-color: #23845d; }
 
           /* Keep tabs readable in light and dark browser themes. */
-          [data-baseweb="tab-list"] { gap: .45rem; }
-          [data-baseweb="tab"] { background: #e8eef5; border: 1px solid #b8c9da;
-                                  border-radius: .55rem .55rem 0 0;
-                                  min-height: 2.85rem; padding: .55rem .9rem; }
-          [data-baseweb="tab"] p, [data-baseweb="tab"] span {
+          [data-baseweb="tab-list"], [role="tablist"] { gap: .45rem; }
+          [data-baseweb="tab"], button[role="tab"] {
+            background: #e8eef5 !important; border: 1px solid #b8c9da !important;
+            border-radius: .55rem .55rem 0 0 !important;
+            min-height: 2.85rem; padding: .55rem .9rem !important;
+          }
+          [data-baseweb="tab"] p, [data-baseweb="tab"] span,
+          button[role="tab"], button[role="tab"] p, button[role="tab"] span {
             color: #17324d !important; font-weight: 720 !important;
           }
-          [data-baseweb="tab"][aria-selected="true"] {
-            background: #102a43; border-color: #102a43;
+          [data-baseweb="tab"][aria-selected="true"],
+          button[role="tab"][aria-selected="true"] {
+            background: #102a43 !important; border-color: #102a43 !important;
           }
           [data-baseweb="tab"][aria-selected="true"] p,
-          [data-baseweb="tab"][aria-selected="true"] span { color: #ffffff !important; }
+          [data-baseweb="tab"][aria-selected="true"] span,
+          button[role="tab"][aria-selected="true"],
+          button[role="tab"][aria-selected="true"] p,
+          button[role="tab"][aria-selected="true"] span { color: #ffffff !important; }
 
           /* Make text inputs look unmistakably interactive. */
           [data-testid="stTextInput"] label p { color: #17324d !important;
