@@ -1,0 +1,71 @@
+{
+  "snapshot_label": "Validated Databricks evidence - October 19-20, 2026",
+  "presentation_status": "complete_verified_gold_snapshot",
+  "source_inventory": {
+    "bls_files": 12,
+    "bls_observations": 77126,
+    "bls_series": 282,
+    "population_rows": 11
+  },
+  "gold_contracts": {
+    "population_summary": {
+      "table": "gold_population_summary_2013_2018",
+      "row_count": 1,
+      "start_year": 2013,
+      "end_year": 2018,
+      "year_count": 6,
+      "mean_population": 322069808,
+      "population_stddev": 3796119.9369343743,
+      "stddev_semantics": "population",
+      "full_export_available": true
+    },
+    "best_year_by_series": {
+      "table": "gold_bls_best_year_by_series",
+      "row_count": 282,
+      "field_level_mismatches": 0,
+      "full_export_available": true,
+      "representative_result": {
+        "series_id": "PRS30006032",
+        "best_year": 1994,
+        "annual_quarterly_sum": 14.6,
+        "quarterly_observation_count": 4
+      }
+    },
+    "q01_population": {
+      "table": "gold_bls_q01_population",
+      "row_count": 39,
+      "matched_population_rows": 11,
+      "unmatched_population_rows": 28,
+      "start_year": 1988,
+      "end_year": 2026,
+      "field_level_mismatches": 0,
+      "full_export_available": true,
+      "series_id": "PRS30006032",
+      "series_label": "Manufacturing | All workers | Hours worked | % Change from previous quarter | Seasonal Adjusted",
+      "representative_rows": [
+        {"year": 2012, "q01_value": 2.5, "population": null, "population_match_found": false},
+        {"year": 2013, "q01_value": 0.5, "population": 316128839, "population_match_found": true},
+        {"year": 2020, "q01_value": -7.0, "population": null, "population_match_found": false},
+        {"year": 2024, "q01_value": -0.7, "population": 340110990, "population_match_found": true},
+        {"year": 2026, "q01_value": 0.0, "population": null, "population_match_found": false}
+      ]
+    }
+  },
+  "quality": {
+    "gold_cross_implementation_checks": 17,
+    "gold_cross_implementation_passed": 17,
+    "bronze_expectation_rows": 79,
+    "silver_expectation_rows": 13,
+    "gold_expectation_rows": 8,
+    "bronze_to_silver_checks": 14,
+    "bronze_to_silver_checks_passed": 14
+  },
+  "evidence_sources": [
+    "docs/evidence/dq16_gold_population_summary_validation.md",
+    "docs/evidence/dq17_gold_bls_best_year_validation.md",
+    "docs/evidence/dq18_gold_bls_q01_population_validation.md",
+    "docs/evidence/dq19_gold_cross_implementation_validation.md",
+    "docs/evidence/dq28_end_to_end_validation.md"
+  ]
+}
+

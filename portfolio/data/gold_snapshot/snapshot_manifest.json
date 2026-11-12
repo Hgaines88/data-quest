@@ -1,0 +1,59 @@
+{
+  "authoritative_system": "Databricks governed Gold contracts",
+  "contracts": {
+    "gold_bls_best_year_by_series": {
+      "columns": [
+        "series_id",
+        "series_label",
+        "best_year",
+        "annual_quarterly_sum",
+        "quarterly_observation_count",
+        "has_quarterly_observations"
+      ],
+      "file": "gold_bls_best_year_by_series.csv",
+      "order_by": [
+        "series_id"
+      ],
+      "row_count": 282,
+      "sha256": "1c872619a674930f1ef92ba615fe9cf25f3da9b47d80b627f73dac1d320caad9"
+    },
+    "gold_bls_q01_population": {
+      "columns": [
+        "series_id",
+        "series_label",
+        "year",
+        "q01_value",
+        "population",
+        "population_match_found"
+      ],
+      "file": "gold_bls_q01_population.csv",
+      "order_by": [
+        "series_id",
+        "year"
+      ],
+      "row_count": 39,
+      "sha256": "b3ae9208b48b9dfc6f602153fe6efb9d60ef3e5063ff92b0bbb2e81460de4bad"
+    },
+    "gold_population_summary_2013_2018": {
+      "columns": [
+        "start_year",
+        "end_year",
+        "year_count",
+        "mean_population",
+        "population_stddev",
+        "stddev_semantics"
+      ],
+      "file": "gold_population_summary_2013_2018.csv",
+      "order_by": [
+        "start_year"
+      ],
+      "row_count": 1,
+      "sha256": "f2c87fa9ad5e4fc4f98ca0dbe3470189b76e7d0fcef6c6888f62731732c123be"
+    }
+  },
+  "exported_at_utc": "2026-11-12T00:52:46.979551+00:00",
+  "purpose": "read-only public portfolio presentation",
+  "snapshot_id": "20261112T005238Z",
+  "source_catalog": "workspace",
+  "source_schema": "rearc_data_quest"
+}
