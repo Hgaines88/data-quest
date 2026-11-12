@@ -44,7 +44,8 @@ def inject_styles() -> None:
     st.markdown(
         """
         <style>
-          :root { --dq-navy: #102a43; --dq-blue: #2f80c1; --dq-mint: #dff6ec; }
+          :root { --dq-navy: #102a43; --dq-blue: #2f80c1; --dq-mint: #dff6ec;
+                  --dq-border: #b8c9da; --dq-muted: #52677d; }
           .stApp { background: #f7f9fc; color: #102a43; }
           .block-container { max-width: 1180px; padding-top: 3.75rem; }
           .dq-kicker { color: #2f80c1; font-size: .82rem; font-weight: 750;
@@ -60,7 +61,48 @@ def inject_styles() -> None:
           [data-testid="stMetricLabel"], [data-testid="stMetricValue"] {
             color: #102a43;
           }
-          [data-testid="stAlert"] p { color: #102a43; }
+          .dq-callout { border: 1px solid var(--dq-border); border-left-width: 6px;
+                        border-radius: .72rem; color: var(--dq-navy);
+                        margin: .75rem 0 1rem; padding: .9rem 1rem; }
+          .dq-callout strong { color: var(--dq-navy); display: block;
+                               font-size: 1.02rem; margin-bottom: .22rem; }
+          .dq-callout p { color: #263f58; margin: 0; }
+          .dq-callout-info { background: #e9f4fc; border-color: #2f80c1; }
+          .dq-callout-success { background: #e8f7ef; border-color: #23845d; }
+
+          /* Keep tabs readable in light and dark browser themes. */
+          [data-baseweb="tab-list"] { gap: .45rem; }
+          [data-baseweb="tab"] { background: #e8eef5; border: 1px solid #b8c9da;
+                                  border-radius: .55rem .55rem 0 0;
+                                  min-height: 2.85rem; padding: .55rem .9rem; }
+          [data-baseweb="tab"] p, [data-baseweb="tab"] span {
+            color: #17324d !important; font-weight: 720 !important;
+          }
+          [data-baseweb="tab"][aria-selected="true"] {
+            background: #102a43; border-color: #102a43;
+          }
+          [data-baseweb="tab"][aria-selected="true"] p,
+          [data-baseweb="tab"][aria-selected="true"] span { color: #ffffff !important; }
+
+          /* Make text inputs look unmistakably interactive. */
+          [data-testid="stTextInput"] label p { color: #17324d !important;
+                                                font-size: 1rem !important;
+                                                font-weight: 760 !important; }
+          [data-testid="stTextInput"] [data-baseweb="input"] {
+            background: #ffffff !important; border: 2px solid #537a9e !important;
+            border-radius: .62rem !important; box-shadow: 0 1px 2px rgba(16,42,67,.08);
+          }
+          [data-testid="stTextInput"] input { color: #102a43 !important;
+                                               background: #ffffff !important; }
+          [data-testid="stTextInput"] input::placeholder { color: #65798d !important;
+                                                            opacity: 1; }
+          [data-testid="stTextInput"] [data-baseweb="input"]:focus-within {
+            border-color: #176da8 !important; box-shadow: 0 0 0 3px rgba(47,128,193,.18);
+          }
+          [data-testid="stSelectbox"] label p { color: #17324d !important;
+                                                font-size: 1rem !important;
+                                                font-weight: 760 !important; }
+          [data-testid="stCaptionContainer"] p { color: #40566c !important; }
         </style>
         """,
         unsafe_allow_html=True,
@@ -132,10 +174,16 @@ def results(data: dict) -> None:
     cols[1].metric("Selected year", int(sample["best_year"]))
     cols[2].metric("Q01–Q04 sum", sample["annual_quarterly_sum"])
     st.caption(f"Representative validated series: `{sample['series_id']}`")
-    st.info("Q05 is excluded because BLS defines it as an annual average, not a fifth quarter. Equal maxima resolve to the earliest year.")
+    st.markdown(
+        '<div class="dq-callout dq-callout-info"><strong>Annual-sum rule</strong>'
+        '<p>Q05 is excluded because BLS defines it as an annual average, not a fifth quarter. '
+        'Equal maxima resolve to the earliest year.</p></div>',
+        unsafe_allow_html=True,
+    )
     query = st.text_input(
-        "Search all 282 governed series",
-        placeholder="Series ID or readable label",
+        "Filter the 282 governed series",
+        placeholder="Type a series ID or description…",
+        help="Enter any portion of a BLS series ID or its readable label.",
     ).strip()
     visible_q2 = q2
     if query:
@@ -253,19 +301,24 @@ def failure_lab() -> None:
         "Landing failure before publication": ("Keep last-good state", "Staging is cleaned, the sanitized failure is audited, and no partial manifest transition becomes current."),
         "Changed digest": ("Create a new immutable version", "Advance the candidate through validation while retaining prior source versions and provenance."),
     }
-    selected = st.selectbox("Scenario", list(scenarios))
+    selected = st.selectbox("Choose a failure condition", list(scenarios))
     outcome, explanation = scenarios[selected]
-    st.success(outcome)
-    st.write(explanation)
+    st.markdown(
+        f'<div class="dq-callout dq-callout-success"><strong>{outcome}</strong>'
+        f'<p>{explanation}</p></div>',
+        unsafe_allow_html=True,
+    )
 
 
 def evidence(data: dict) -> None:
     st.title("Evidence room")
     st.write(data["snapshot_label"])
     snapshot, _ = load_gold_snapshot()
-    st.success(
-        "Complete governed Gold snapshot verified: "
-        f"`{snapshot['snapshot_id']}` · 1 / 282 / 39 rows"
+    st.markdown(
+        '<div class="dq-callout dq-callout-success">'
+        '<strong>Complete governed Gold snapshot verified</strong>'
+        f'<p>Snapshot {snapshot["snapshot_id"]} · 1 / 282 / 39 rows</p></div>',
+        unsafe_allow_html=True,
     )
     with st.expander("Gold snapshot provenance and SHA-256 digests"):
         st.json(snapshot)
