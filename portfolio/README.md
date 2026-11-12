@@ -23,8 +23,9 @@ streamlit run portfolio/app.py
 ## Snapshot workflow
 
 `portfolio/data/evidence_manifest.json` records the reviewed validation facts
-currently available in Git. Full Gold exports will be added separately from the
-authoritative Databricks tables:
+available in Git. The following complete Gold exports were produced separately
+from the authoritative Databricks tables and committed as a versioned public
+presentation snapshot:
 
 - `gold_population_summary_2013_2018.csv` - 1 row
 - `gold_bls_best_year_by_series.csv` - 282 rows
@@ -50,4 +51,17 @@ public presentation snapshot exported on November 12, 2026. The Streamlit app
 checks each CSV against its recorded SHA-256 digest and row count before showing
 the complete Question 1, Question 2, and Question 3 results. Databricks remains
 the authoritative system; the committed files are a versioned read-only export.
+
+## Deployment entry point
+
+For Streamlit Community Cloud or another compatible host, use:
+
+- Repository: `Hgaines88/data-quest`
+- Branch: `codex/public-portfolio` until the work is merged
+- Application file: `portfolio/app.py`
+- Python dependencies: `portfolio/requirements.txt`
+
+The application requires no secrets, database connection, or write-capable
+credential. Its only runtime inputs are the committed evidence and verified
+Gold snapshot files.
 
