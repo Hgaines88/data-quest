@@ -1,6 +1,6 @@
 {
   "snapshot_label": "Validated Databricks evidence - October 19-20, 2026",
-  "presentation_status": "evidence_only_until_full_gold_exports",
+  "presentation_status": "complete_verified_gold_snapshot",
   "source_inventory": {
     "bls_files": 12,
     "bls_observations": 77126,
@@ -23,7 +23,7 @@
       "table": "gold_bls_best_year_by_series",
       "row_count": 282,
       "field_level_mismatches": 0,
-      "full_export_available": false,
+      "full_export_available": true,
       "representative_result": {
         "series_id": "PRS30006032",
         "best_year": 1994,
@@ -39,7 +39,7 @@
       "start_year": 1988,
       "end_year": 2026,
       "field_level_mismatches": 0,
-      "full_export_available": false,
+      "full_export_available": true,
       "series_id": "PRS30006032",
       "series_label": "Manufacturing | All workers | Hours worked | % Change from previous quarter | Seasonal Adjusted",
       "representative_rows": [

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -10,6 +12,7 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 PORTFOLIO = Path(__file__).resolve().parent
 MANIFEST = PORTFOLIO / "data" / "evidence_manifest.json"
+GOLD_SNAPSHOT = PORTFOLIO / "data" / "gold_snapshot"
 ARCHITECTURE = ROOT / "docs" / "architecture" / "data-quest-architecture.png"
 SCREENSHOTS = ROOT / "docs" / "screenshots"
 
@@ -17,6 +20,24 @@ SCREENSHOTS = ROOT / "docs" / "screenshots"
 @st.cache_data
 def load_manifest() -> dict:
     return json.loads(MANIFEST.read_text(encoding="utf-8"))
+
+
+@st.cache_data
+def load_gold_snapshot() -> tuple[dict, dict[str, pd.DataFrame]]:
+    snapshot = json.loads(
+        (GOLD_SNAPSHOT / "snapshot_manifest.json").read_text(encoding="utf-8")
+    )
+    frames = {}
+    for contract, details in snapshot["contracts"].items():
+        path = GOLD_SNAPSHOT / details["file"]
+        observed_digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if observed_digest != details["sha256"]:
+            raise ValueError(f"Snapshot digest mismatch for {contract}")
+        frame = pd.read_csv(path)
+        if len(frame) != details["row_count"]:
+            raise ValueError(f"Snapshot row-count mismatch for {contract}")
+        frames[contract] = frame
+    return snapshot, frames
 
 
 def inject_styles() -> None:
@@ -92,36 +113,81 @@ def overview(data: dict) -> None:
 def results(data: dict) -> None:
     st.title("Explore the validated results")
     contracts = data["gold_contracts"]
+    snapshot, frames = load_gold_snapshot()
 
     st.subheader("Question 1 · Population, 2013–2018")
-    q1 = contracts["population_summary"]
+    q1 = frames["gold_population_summary_2013_2018"].iloc[0]
     cols = st.columns(3)
     cols[0].metric("Mean population", f"{q1['mean_population'] / 1_000_000:.1f}M")
     cols[1].metric("Population std. deviation", f"{q1['population_stddev'] / 1_000_000:.1f}M")
-    cols[2].metric("Complete annual values", q1["year_count"])
+    cols[2].metric("Complete annual values", int(q1["year_count"]))
     st.caption("Population standard deviation is used because the six requested annual values form the complete finite range, not a sample.")
 
     st.subheader("Question 2 · Best year for every BLS series")
-    q2 = contracts["best_year_by_series"]
-    sample = q2["representative_result"]
+    q2_contract = contracts["best_year_by_series"]
+    q2 = frames["gold_bls_best_year_by_series"]
+    sample = q2.loc[q2["series_id"] == q2_contract["representative_result"]["series_id"]].iloc[0]
     cols = st.columns(3)
-    cols[0].metric("Published series", q2["row_count"])
-    cols[1].metric("Selected year", sample["best_year"])
+    cols[0].metric("Published series", f"{len(q2):,}")
+    cols[1].metric("Selected year", int(sample["best_year"]))
     cols[2].metric("Q01–Q04 sum", sample["annual_quarterly_sum"])
     st.caption(f"Representative validated series: `{sample['series_id']}`")
     st.info("Q05 is excluded because BLS defines it as an annual average, not a fifth quarter. Equal maxima resolve to the earliest year.")
-    if not q2["full_export_available"]:
-        st.warning("The complete 282-row Gold export has not yet been added to the public snapshot. This view shows only validated aggregate and representative evidence.")
+    query = st.text_input(
+        "Search all 282 governed series",
+        placeholder="Series ID or readable label",
+    ).strip()
+    visible_q2 = q2
+    if query:
+        mask = q2["series_id"].str.contains(query, case=False, na=False) | q2[
+            "series_label"
+        ].str.contains(query, case=False, na=False)
+        visible_q2 = q2.loc[mask]
+    st.dataframe(
+        visible_q2[
+            [
+                "series_id",
+                "series_label",
+                "best_year",
+                "annual_quarterly_sum",
+                "quarterly_observation_count",
+            ]
+        ],
+        hide_index=True,
+        width="stretch",
+        height=330,
+    )
+    st.caption(f"Showing {len(visible_q2):,} of {len(q2):,} authoritative Gold rows.")
 
     st.subheader("Question 3 · Q01 history with population context")
-    q3 = contracts["q01_population"]
+    q3_contract = contracts["q01_population"]
+    q3 = frames["gold_bls_q01_population"]
+    matched = int(q3["population_match_found"].sum())
     cols = st.columns(3)
-    cols[0].metric("BLS observations retained", q3["row_count"])
-    cols[1].metric("Population matches", q3["matched_population_rows"])
-    cols[2].metric("Visible null matches", q3["unmatched_population_rows"])
-    sample_rows = pd.DataFrame(q3["representative_rows"])
-    st.dataframe(sample_rows, hide_index=True, width="stretch")
-    st.caption("Representative source-level checks only. Missing population remains NULL and never removes a valid BLS observation.")
+    cols[0].metric("BLS observations retained", len(q3))
+    cols[1].metric("Population matches", matched)
+    cols[2].metric("Visible null matches", len(q3) - matched)
+    st.caption(f"`{q3_contract['series_id']}` · {q3_contract['series_label']}")
+
+    q01_chart = (
+        alt.Chart(q3)
+        .mark_line(point=True, color="#2f80c1")
+        .encode(
+            x=alt.X("year:O", title="Year"),
+            y=alt.Y("q01_value:Q", title="Q01 value"),
+            tooltip=["year:O", "q01_value:Q"],
+        )
+        .properties(height=300)
+    )
+    st.altair_chart(q01_chart, use_container_width=True)
+    st.dataframe(
+        q3[["year", "q01_value", "population", "population_match_found"]],
+        hide_index=True,
+        width="stretch",
+        height=330,
+    )
+    st.caption("All 39 Gold rows are shown. Missing population remains NULL and never removes a valid BLS observation.")
+    st.caption(f"Verified export snapshot: `{snapshot['snapshot_id']}`")
 
 
 def engineering(data: dict) -> None:
@@ -196,6 +262,13 @@ def failure_lab() -> None:
 def evidence(data: dict) -> None:
     st.title("Evidence room")
     st.write(data["snapshot_label"])
+    snapshot, _ = load_gold_snapshot()
+    st.success(
+        "Complete governed Gold snapshot verified: "
+        f"`{snapshot['snapshot_id']}` · 1 / 282 / 39 rows"
+    )
+    with st.expander("Gold snapshot provenance and SHA-256 digests"):
+        st.json(snapshot)
     st.markdown("Every public claim maps back to committed validation records and curated screenshots.")
     for source in data["evidence_sources"]:
         st.code(source, language=None)

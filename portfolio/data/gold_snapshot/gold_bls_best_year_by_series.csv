@@ -1,0 +1,283 @@
+series_id,series_label,best_year,annual_quarterly_sum,quarterly_observation_count,has_quarterly_observations
+PRS30006011,Manufacturing | All workers | Employment | % Change same quarter 1 year ago | Seasonal Adjusted,2022,16.400000,4,true
+PRS30006012,Manufacturing | All workers | Employment | % Change from previous quarter | Seasonal Adjusted,2022,13.000000,4,true
+PRS30006013,Manufacturing | All workers | Employment | Index (2017=100) | Seasonal Adjusted,1989,578.369000,4,true
+PRS30006021,Manufacturing | All workers | Average weekly hours | % Change same quarter 1 year ago | Seasonal Adjusted,2010,14.200000,4,true
+PRS30006022,Manufacturing | All workers | Average weekly hours | % Change from previous quarter | Seasonal Adjusted,2010,8.900000,4,true
+PRS30006023,Manufacturing | All workers | Average weekly hours | Index (2017=100) | Seasonal Adjusted,2014,402.512000,4,true
+PRS30006031,Manufacturing | All workers | Hours worked | % Change same quarter 1 year ago | Seasonal Adjusted,2022,16.500000,4,true
+PRS30006032,Manufacturing | All workers | Hours worked | % Change from previous quarter | Seasonal Adjusted,1994,14.600000,4,true
+PRS30006033,Manufacturing | All workers | Hours worked | Index (2017=100) | Seasonal Adjusted,1989,568.736000,4,true
+PRS30006061,Manufacturing | All workers | Labor compensation | % Change same quarter 1 year ago | Seasonal Adjusted,1988,28.700000,4,true
+PRS30006062,Manufacturing | All workers | Labor compensation | % Change from previous quarter | Seasonal Adjusted,1988,30.300000,4,true
+PRS30006063,Manufacturing | All workers | Labor compensation | Index (2017=100) | Seasonal Adjusted,2025,532.271000,4,true
+PRS30006081,Manufacturing | All workers | Nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,,,0,false
+PRS30006082,Manufacturing | All workers | Nonlabor payments | % Change from previous quarter | Seasonal Adjusted,,,0,false
+PRS30006083,Manufacturing | All workers | Nonlabor payments | Index (2017=100) | Seasonal Adjusted,,,0,false
+PRS30006091,Manufacturing | All workers | Labor productivity (output per hour) | % Change same quarter 1 year ago | Seasonal Adjusted,2002,34.700000,4,true
+PRS30006092,Manufacturing | All workers | Labor productivity (output per hour) | % Change from previous quarter | Seasonal Adjusted,2002,35.600000,4,true
+PRS30006093,Manufacturing | All workers | Labor productivity (output per hour) | Index (2017=100) | Seasonal Adjusted,2013,411.369000,4,true
+PRS30006101,Manufacturing | All workers | Hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,2020,26.400000,4,true
+PRS30006102,Manufacturing | All workers | Hourly compensation | % Change from previous quarter | Seasonal Adjusted,2020,29.000000,4,true
+PRS30006103,Manufacturing | All workers | Hourly compensation | Index (2017=100) | Seasonal Adjusted,2025,536.798000,4,true
+PRS30006111,Manufacturing | All workers | Unit labor costs | % Change same quarter 1 year ago | Seasonal Adjusted,2020,27.200000,4,true
+PRS30006112,Manufacturing | All workers | Unit labor costs | % Change from previous quarter | Seasonal Adjusted,2008,38.600000,4,true
+PRS30006113,Manufacturing | All workers | Unit labor costs | Index (2017=100) | Seasonal Adjusted,2025,540.478000,4,true
+PRS30006131,Manufacturing | All workers | Unit nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,,,0,false
+PRS30006132,Manufacturing | All workers | Unit nonlabor payments | % Change from previous quarter | Seasonal Adjusted,,,0,false
+PRS30006133,Manufacturing | All workers | Unit nonlabor payments | Index (2017=100) | Seasonal Adjusted,,,0,false
+PRS30006151,Manufacturing | All workers | Real hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,2020,20.900000,4,true
+PRS30006152,Manufacturing | All workers | Real hourly compensation | % Change from previous quarter | Seasonal Adjusted,2020,25.200000,4,true
+PRS30006153,Manufacturing | All workers | Real hourly compensation | Index (2017=100) | Seasonal Adjusted,2020,423.420000,4,true
+PRS30006161,Manufacturing | All workers | Output per worker | % Change same quarter 1 year ago | Seasonal Adjusted,2010,40.400000,4,true
+PRS30006162,Manufacturing | All workers | Output per worker | % Change from previous quarter | Seasonal Adjusted,2002,39.200000,4,true
+PRS30006163,Manufacturing | All workers | Output per worker | Index (2017=100) | Seasonal Adjusted,2014,412.744000,4,true
+PRS30006171,Manufacturing | All workers | Labor share | % Change same quarter 1 year ago | Seasonal Adjusted,,,0,false
+PRS30006172,Manufacturing | All workers | Labor share | % Change from previous quarter | Seasonal Adjusted,,,0,false
+PRS30006173,Manufacturing | All workers | Labor share | Index (2017=100) | Seasonal Adjusted,,,0,false
+PRS30006211,Manufacturing | All workers | Real sectoral output | % Change same quarter 1 year ago | Seasonal Adjusted,2010,28.000000,4,true
+PRS30006212,Manufacturing | All workers | Real sectoral output | % Change from previous quarter | Seasonal Adjusted,1997,31.500000,4,true
+PRS30006213,Manufacturing | All workers | Real sectoral output | Index (2017=100) | Seasonal Adjusted,2007,419.060000,4,true
+PRS30006221,Manufacturing | All workers | Sectoral output price deflator | % Change same quarter 1 year ago | Seasonal Adjusted,,,0,false
+PRS30006222,Manufacturing | All workers | Sectoral output price deflator | % Change from previous quarter | Seasonal Adjusted,,,0,false
+PRS30006223,Manufacturing | All workers | Sectoral output price deflator | Index (2017=100) | Seasonal Adjusted,,,0,false
+PRS30006231,Manufacturing | All workers | Sectoral output | % Change same quarter 1 year ago | Seasonal Adjusted,,,0,false
+PRS30006232,Manufacturing | All workers | Sectoral output | % Change from previous quarter | Seasonal Adjusted,,,0,false
+PRS30006233,Manufacturing | All workers | Sectoral output | Index (2017=100) | Seasonal Adjusted,,,0,false
+PRS31006011,"Manufacturing, Durable Goods | All workers | Employment | % Change same quarter 1 year ago | Seasonal Adjusted",2022,16.200000,4,true
+PRS31006012,"Manufacturing, Durable Goods | All workers | Employment | % Change from previous quarter | Seasonal Adjusted",2022,16.000000,4,true
+PRS31006013,"Manufacturing, Durable Goods | All workers | Employment | Index (2017=100) | Seasonal Adjusted",1989,571.577000,4,true
+PRS31006021,"Manufacturing, Durable Goods | All workers | Average weekly hours | % Change same quarter 1 year ago | Seasonal Adjusted",2010,15.500000,4,true
+PRS31006022,"Manufacturing, Durable Goods | All workers | Average weekly hours | % Change from previous quarter | Seasonal Adjusted",2010,10.400000,4,true
+PRS31006023,"Manufacturing, Durable Goods | All workers | Average weekly hours | Index (2017=100) | Seasonal Adjusted",2014,402.783000,4,true
+PRS31006031,"Manufacturing, Durable Goods | All workers | Hours worked | % Change same quarter 1 year ago | Seasonal Adjusted",2022,19.200000,4,true
+PRS31006032,"Manufacturing, Durable Goods | All workers | Hours worked | % Change from previous quarter | Seasonal Adjusted",1994,19.900000,4,true
+PRS31006033,"Manufacturing, Durable Goods | All workers | Hours worked | Index (2017=100) | Seasonal Adjusted",1989,564.807000,4,true
+PRS31006061,"Manufacturing, Durable Goods | All workers | Labor compensation | % Change same quarter 1 year ago | Seasonal Adjusted",1988,30.100000,4,true
+PRS31006062,"Manufacturing, Durable Goods | All workers | Labor compensation | % Change from previous quarter | Seasonal Adjusted",1988,32.600000,4,true
+PRS31006063,"Manufacturing, Durable Goods | All workers | Labor compensation | Index (2017=100) | Seasonal Adjusted",2025,532.476000,4,true
+PRS31006081,"Manufacturing, Durable Goods | All workers | Nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS31006082,"Manufacturing, Durable Goods | All workers | Nonlabor payments | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS31006083,"Manufacturing, Durable Goods | All workers | Nonlabor payments | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS31006091,"Manufacturing, Durable Goods | All workers | Labor productivity (output per hour) | % Change same quarter 1 year ago | Seasonal Adjusted",2010,34.300000,4,true
+PRS31006092,"Manufacturing, Durable Goods | All workers | Labor productivity (output per hour) | % Change from previous quarter | Seasonal Adjusted",2002,41.300000,4,true
+PRS31006093,"Manufacturing, Durable Goods | All workers | Labor productivity (output per hour) | Index (2017=100) | Seasonal Adjusted",2014,405.868000,4,true
+PRS31006101,"Manufacturing, Durable Goods | All workers | Hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted",2000,27.700000,4,true
+PRS31006102,"Manufacturing, Durable Goods | All workers | Hourly compensation | % Change from previous quarter | Seasonal Adjusted",2020,33.000000,4,true
+PRS31006103,"Manufacturing, Durable Goods | All workers | Hourly compensation | Index (2017=100) | Seasonal Adjusted",2025,539.866000,4,true
+PRS31006111,"Manufacturing, Durable Goods | All workers | Unit labor costs | % Change same quarter 1 year ago | Seasonal Adjusted",2009,30.100000,4,true
+PRS31006112,"Manufacturing, Durable Goods | All workers | Unit labor costs | % Change from previous quarter | Seasonal Adjusted",2008,54.200000,4,true
+PRS31006113,"Manufacturing, Durable Goods | All workers | Unit labor costs | Index (2017=100) | Seasonal Adjusted",2025,549.928000,4,true
+PRS31006131,"Manufacturing, Durable Goods | All workers | Unit nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS31006132,"Manufacturing, Durable Goods | All workers | Unit nonlabor payments | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS31006133,"Manufacturing, Durable Goods | All workers | Unit nonlabor payments | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS31006151,"Manufacturing, Durable Goods | All workers | Real hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted",2020,21.300000,4,true
+PRS31006152,"Manufacturing, Durable Goods | All workers | Real hourly compensation | % Change from previous quarter | Seasonal Adjusted",2020,29.500000,4,true
+PRS31006153,"Manufacturing, Durable Goods | All workers | Real hourly compensation | Index (2017=100) | Seasonal Adjusted",2020,423.110000,4,true
+PRS31006161,"Manufacturing, Durable Goods | All workers | Output per worker | % Change same quarter 1 year ago | Seasonal Adjusted",2010,51.200000,4,true
+PRS31006162,"Manufacturing, Durable Goods | All workers | Output per worker | % Change from previous quarter | Seasonal Adjusted",2002,46.000000,4,true
+PRS31006163,"Manufacturing, Durable Goods | All workers | Output per worker | Index (2017=100) | Seasonal Adjusted",2014,408.690000,4,true
+PRS31006171,"Manufacturing, Durable Goods | All workers | Labor share | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS31006172,"Manufacturing, Durable Goods | All workers | Labor share | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS31006173,"Manufacturing, Durable Goods | All workers | Labor share | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS31006211,"Manufacturing, Durable Goods | All workers | Real sectoral output | % Change same quarter 1 year ago | Seasonal Adjusted",1997,38.100000,4,true
+PRS31006212,"Manufacturing, Durable Goods | All workers | Real sectoral output | % Change from previous quarter | Seasonal Adjusted",1997,45.600000,4,true
+PRS31006213,"Manufacturing, Durable Goods | All workers | Real sectoral output | Index (2017=100) | Seasonal Adjusted",2007,418.692000,4,true
+PRS31006221,"Manufacturing, Durable Goods | All workers | Sectoral output price deflator | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS31006222,"Manufacturing, Durable Goods | All workers | Sectoral output price deflator | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS31006223,"Manufacturing, Durable Goods | All workers | Sectoral output price deflator | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS31006231,"Manufacturing, Durable Goods | All workers | Sectoral output | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS31006232,"Manufacturing, Durable Goods | All workers | Sectoral output | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS31006233,"Manufacturing, Durable Goods | All workers | Sectoral output | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS32006011,"Manufacturing, Nondurable Goods | All workers | Employment | % Change same quarter 1 year ago | Seasonal Adjusted",2022,16.900000,4,true
+PRS32006012,"Manufacturing, Nondurable Goods | All workers | Employment | % Change from previous quarter | Seasonal Adjusted",2021,12.200000,4,true
+PRS32006013,"Manufacturing, Nondurable Goods | All workers | Employment | Index (2017=100) | Seasonal Adjusted",1989,589.419000,4,true
+PRS32006021,"Manufacturing, Nondurable Goods | All workers | Average weekly hours | % Change same quarter 1 year ago | Seasonal Adjusted",2010,11.600000,4,true
+PRS32006022,"Manufacturing, Nondurable Goods | All workers | Average weekly hours | % Change from previous quarter | Seasonal Adjusted",2010,6.300000,4,true
+PRS32006023,"Manufacturing, Nondurable Goods | All workers | Average weekly hours | Index (2017=100) | Seasonal Adjusted",2012,402.534000,4,true
+PRS32006031,"Manufacturing, Nondurable Goods | All workers | Hours worked | % Change same quarter 1 year ago | Seasonal Adjusted",2021,14.900000,4,true
+PRS32006032,"Manufacturing, Nondurable Goods | All workers | Hours worked | % Change from previous quarter | Seasonal Adjusted",2021,14.400000,4,true
+PRS32006033,"Manufacturing, Nondurable Goods | All workers | Hours worked | Index (2017=100) | Seasonal Adjusted",1989,575.424000,4,true
+PRS32006061,"Manufacturing, Nondurable Goods | All workers | Labor compensation | % Change same quarter 1 year ago | Seasonal Adjusted",2022,32.400000,4,true
+PRS32006062,"Manufacturing, Nondurable Goods | All workers | Labor compensation | % Change from previous quarter | Seasonal Adjusted",1992,26.500000,4,true
+PRS32006063,"Manufacturing, Nondurable Goods | All workers | Labor compensation | Index (2017=100) | Seasonal Adjusted",2025,531.877000,4,true
+PRS32006081,"Manufacturing, Nondurable Goods | All workers | Nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS32006082,"Manufacturing, Nondurable Goods | All workers | Nonlabor payments | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS32006083,"Manufacturing, Nondurable Goods | All workers | Nonlabor payments | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS32006091,"Manufacturing, Nondurable Goods | All workers | Labor productivity (output per hour) | % Change same quarter 1 year ago | Seasonal Adjusted",2002,28.000000,4,true
+PRS32006092,"Manufacturing, Nondurable Goods | All workers | Labor productivity (output per hour) | % Change from previous quarter | Seasonal Adjusted",2004,27.200000,4,true
+PRS32006093,"Manufacturing, Nondurable Goods | All workers | Labor productivity (output per hour) | Index (2017=100) | Seasonal Adjusted",2014,411.105000,4,true
+PRS32006101,"Manufacturing, Nondurable Goods | All workers | Hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted",2020,27.000000,4,true
+PRS32006102,"Manufacturing, Nondurable Goods | All workers | Hourly compensation | % Change from previous quarter | Seasonal Adjusted",2003,28.600000,4,true
+PRS32006103,"Manufacturing, Nondurable Goods | All workers | Hourly compensation | Index (2017=100) | Seasonal Adjusted",2025,531.573000,4,true
+PRS32006111,"Manufacturing, Nondurable Goods | All workers | Unit labor costs | % Change same quarter 1 year ago | Seasonal Adjusted",2022,32.400000,4,true
+PRS32006112,"Manufacturing, Nondurable Goods | All workers | Unit labor costs | % Change from previous quarter | Seasonal Adjusted",2022,30.300000,4,true
+PRS32006113,"Manufacturing, Nondurable Goods | All workers | Unit labor costs | Index (2017=100) | Seasonal Adjusted",2025,533.289000,4,true
+PRS32006131,"Manufacturing, Nondurable Goods | All workers | Unit nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS32006132,"Manufacturing, Nondurable Goods | All workers | Unit nonlabor payments | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS32006133,"Manufacturing, Nondurable Goods | All workers | Unit nonlabor payments | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS32006151,"Manufacturing, Nondurable Goods | All workers | Real hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted",2020,21.500000,4,true
+PRS32006152,"Manufacturing, Nondurable Goods | All workers | Real hourly compensation | % Change from previous quarter | Seasonal Adjusted",2020,20.800000,4,true
+PRS32006153,"Manufacturing, Nondurable Goods | All workers | Real hourly compensation | Index (2017=100) | Seasonal Adjusted",2020,425.155000,4,true
+PRS32006161,"Manufacturing, Nondurable Goods | All workers | Output per worker | % Change same quarter 1 year ago | Seasonal Adjusted",2002,28.800000,4,true
+PRS32006162,"Manufacturing, Nondurable Goods | All workers | Output per worker | % Change from previous quarter | Seasonal Adjusted",2004,25.400000,4,true
+PRS32006163,"Manufacturing, Nondurable Goods | All workers | Output per worker | Index (2017=100) | Seasonal Adjusted",2013,413.410000,4,true
+PRS32006171,"Manufacturing, Nondurable Goods | All workers | Labor share | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS32006172,"Manufacturing, Nondurable Goods | All workers | Labor share | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS32006173,"Manufacturing, Nondurable Goods | All workers | Labor share | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS32006211,"Manufacturing, Nondurable Goods | All workers | Real sectoral output | % Change same quarter 1 year ago | Seasonal Adjusted",2021,18.600000,4,true
+PRS32006212,"Manufacturing, Nondurable Goods | All workers | Real sectoral output | % Change from previous quarter | Seasonal Adjusted",1987,18.700000,3,true
+PRS32006213,"Manufacturing, Nondurable Goods | All workers | Real sectoral output | Index (2017=100) | Seasonal Adjusted",2007,413.613000,4,true
+PRS32006221,"Manufacturing, Nondurable Goods | All workers | Sectoral output price deflator | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS32006222,"Manufacturing, Nondurable Goods | All workers | Sectoral output price deflator | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS32006223,"Manufacturing, Nondurable Goods | All workers | Sectoral output price deflator | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS32006231,"Manufacturing, Nondurable Goods | All workers | Sectoral output | % Change same quarter 1 year ago | Seasonal Adjusted",,,0,false
+PRS32006232,"Manufacturing, Nondurable Goods | All workers | Sectoral output | % Change from previous quarter | Seasonal Adjusted",,,0,false
+PRS32006233,"Manufacturing, Nondurable Goods | All workers | Sectoral output | Index (2017=100) | Seasonal Adjusted",,,0,false
+PRS84006011,Business | All workers | Employment | % Change same quarter 1 year ago | Seasonal Adjusted,1978,22.200000,4,true
+PRS84006012,Business | All workers | Employment | % Change from previous quarter | Seasonal Adjusted,1978,21.900000,4,true
+PRS84006013,Business | All workers | Employment | Index (2017=100) | Seasonal Adjusted,2025,430.182000,4,true
+PRS84006021,Business | All workers | Average weekly hours | % Change same quarter 1 year ago | Seasonal Adjusted,1964,4.900000,4,true
+PRS84006022,Business | All workers | Average weekly hours | % Change from previous quarter | Seasonal Adjusted,2010,5.900000,4,true
+PRS84006023,Business | All workers | Average weekly hours | Index (2017=100) | Seasonal Adjusted,1947,462.205000,4,true
+PRS84006031,Business | All workers | Hours worked | % Change same quarter 1 year ago | Seasonal Adjusted,1984,23.500000,4,true
+PRS84006032,Business | All workers | Hours worked | % Change from previous quarter | Seasonal Adjusted,1950,23.700000,4,true
+PRS84006033,Business | All workers | Hours worked | Index (2017=100) | Seasonal Adjusted,2025,420.779000,4,true
+PRS84006041,Business | All workers | Real value-added output | % Change same quarter 1 year ago | Seasonal Adjusted,1950,38.800000,4,true
+PRS84006042,Business | All workers | Real value-added output | % Change from previous quarter | Seasonal Adjusted,1950,57.400000,4,true
+PRS84006043,Business | All workers | Real value-added output | Index (2017=100) | Seasonal Adjusted,2025,497.650000,4,true
+PRS84006051,Business | All workers | Value-added output | % Change same quarter 1 year ago | Seasonal Adjusted,1951,59.000000,4,true
+PRS84006052,Business | All workers | Value-added output | % Change from previous quarter | Seasonal Adjusted,1950,79.300000,4,true
+PRS84006053,Business | All workers | Value-added output | Index (2017=100) | Seasonal Adjusted,2025,633.511000,4,true
+PRS84006061,Business | All workers | Labor compensation | % Change same quarter 1 year ago | Seasonal Adjusted,1978,55.800000,4,true
+PRS84006062,Business | All workers | Labor compensation | % Change from previous quarter | Seasonal Adjusted,1978,59.700000,4,true
+PRS84006063,Business | All workers | Labor compensation | Index (2017=100) | Seasonal Adjusted,2025,611.537000,4,true
+PRS84006081,Business | All workers | Nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,1951,70.300000,4,true
+PRS84006082,Business | All workers | Nonlabor payments | % Change from previous quarter | Seasonal Adjusted,1950,115.300000,4,true
+PRS84006083,Business | All workers | Nonlabor payments | Index (2017=100) | Seasonal Adjusted,2025,661.819000,4,true
+PRS84006091,Business | All workers | Labor productivity (output per hour) | % Change same quarter 1 year ago | Seasonal Adjusted,1950,32.700000,4,true
+PRS84006092,Business | All workers | Labor productivity (output per hour) | % Change from previous quarter | Seasonal Adjusted,1950,32.300000,4,true
+PRS84006093,Business | All workers | Labor productivity (output per hour) | Index (2017=100) | Seasonal Adjusted,2025,473.071000,4,true
+PRS84006101,Business | All workers | Hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,1980,42.800000,4,true
+PRS84006102,Business | All workers | Hourly compensation | % Change from previous quarter | Seasonal Adjusted,1974,44.100000,4,true
+PRS84006103,Business | All workers | Hourly compensation | Index (2017=100) | Seasonal Adjusted,2025,581.333000,4,true
+PRS84006111,Business | All workers | Unit labor costs | % Change same quarter 1 year ago | Seasonal Adjusted,1974,45.000000,4,true
+PRS84006112,Business | All workers | Unit labor costs | % Change from previous quarter | Seasonal Adjusted,1974,49.500000,4,true
+PRS84006113,Business | All workers | Unit labor costs | Index (2017=100) | Seasonal Adjusted,2025,491.541000,4,true
+PRS84006131,Business | All workers | Unit nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,1975,57.300000,4,true
+PRS84006132,Business | All workers | Unit nonlabor payments | % Change from previous quarter | Seasonal Adjusted,1950,50.900000,4,true
+PRS84006133,Business | All workers | Unit nonlabor payments | Index (2017=100) | Seasonal Adjusted,2025,531.849000,4,true
+PRS84006141,Business | All workers | Value-added output price deflator | % Change same quarter 1 year ago | Seasonal Adjusted,1974,39.200000,4,true
+PRS84006142,Business | All workers | Value-added output price deflator | % Change from previous quarter | Seasonal Adjusted,1974,46.100000,4,true
+PRS84006143,Business | All workers | Value-added output price deflator | Index (2017=100) | Seasonal Adjusted,2025,509.156000,4,true
+PRS84006151,Business | All workers | Real hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,2020,26.500000,4,true
+PRS84006152,Business | All workers | Real hourly compensation | % Change from previous quarter | Seasonal Adjusted,2020,35.200000,4,true
+PRS84006153,Business | All workers | Real hourly compensation | Index (2017=100) | Seasonal Adjusted,2025,440.905000,4,true
+PRS84006161,Business | All workers | Output per worker | % Change same quarter 1 year ago | Seasonal Adjusted,1950,34.500000,4,true
+PRS84006162,Business | All workers | Output per worker | % Change from previous quarter | Seasonal Adjusted,1950,37.500000,4,true
+PRS84006163,Business | All workers | Output per worker | Index (2017=100) | Seasonal Adjusted,2025,462.732000,4,true
+PRS84006171,Business | All workers | Labor share | % Change same quarter 1 year ago | Seasonal Adjusted,1956,11.700000,4,true
+PRS84006172,Business | All workers | Labor share | % Change from previous quarter | Seasonal Adjusted,2020,15.300000,4,true
+PRS84006173,Business | All workers | Labor share | Index (2017=100) | Seasonal Adjusted,1947,465.776000,4,true
+PRS85006011,Nonfarm Business | All workers | Employment | % Change same quarter 1 year ago | Seasonal Adjusted,1978,22.200000,4,true
+PRS85006012,Nonfarm Business | All workers | Employment | % Change from previous quarter | Seasonal Adjusted,1950,24.700000,4,true
+PRS85006013,Nonfarm Business | All workers | Employment | Index (2017=100) | Seasonal Adjusted,2025,431.282000,4,true
+PRS85006021,Nonfarm Business | All workers | Average weekly hours | % Change same quarter 1 year ago | Seasonal Adjusted,1964,5.700000,4,true
+PRS85006022,Nonfarm Business | All workers | Average weekly hours | % Change from previous quarter | Seasonal Adjusted,2010,6.000000,4,true
+PRS85006023,Nonfarm Business | All workers | Average weekly hours | Index (2017=100) | Seasonal Adjusted,1947,469.335000,4,true
+PRS85006031,Nonfarm Business | All workers | Hours worked | % Change same quarter 1 year ago | Seasonal Adjusted,1984,24.400000,4,true
+PRS85006032,Nonfarm Business | All workers | Hours worked | % Change from previous quarter | Seasonal Adjusted,1950,30.500000,4,true
+PRS85006033,Nonfarm Business | All workers | Hours worked | Index (2017=100) | Seasonal Adjusted,2025,422.299000,4,true
+PRS85006041,Nonfarm Business | All workers | Real value-added output | % Change same quarter 1 year ago | Seasonal Adjusted,1950,40.500000,4,true
+PRS85006042,Nonfarm Business | All workers | Real value-added output | % Change from previous quarter | Seasonal Adjusted,1950,61.700000,4,true
+PRS85006043,Nonfarm Business | All workers | Real value-added output | Index (2017=100) | Seasonal Adjusted,2025,498.113000,4,true
+PRS85006051,Nonfarm Business | All workers | Value-added output | % Change same quarter 1 year ago | Seasonal Adjusted,1951,58.500000,4,true
+PRS85006052,Nonfarm Business | All workers | Value-added output | % Change from previous quarter | Seasonal Adjusted,1950,79.300000,4,true
+PRS85006053,Nonfarm Business | All workers | Value-added output | Index (2017=100) | Seasonal Adjusted,2025,633.482000,4,true
+PRS85006061,Nonfarm Business | All workers | Labor compensation | % Change same quarter 1 year ago | Seasonal Adjusted,1978,56.900000,4,true
+PRS85006062,Nonfarm Business | All workers | Labor compensation | % Change from previous quarter | Seasonal Adjusted,1950,71.200000,4,true
+PRS85006063,Nonfarm Business | All workers | Labor compensation | Index (2017=100) | Seasonal Adjusted,2025,611.716000,4,true
+PRS85006081,Nonfarm Business | All workers | Nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,2021,64.600000,4,true
+PRS85006082,Nonfarm Business | All workers | Nonlabor payments | % Change from previous quarter | Seasonal Adjusted,1950,94.300000,4,true
+PRS85006083,Nonfarm Business | All workers | Nonlabor payments | Index (2017=100) | Seasonal Adjusted,2025,661.759000,4,true
+PRS85006091,Nonfarm Business | All workers | Labor productivity (output per hour) | % Change same quarter 1 year ago | Seasonal Adjusted,1950,26.600000,4,true
+PRS85006092,Nonfarm Business | All workers | Labor productivity (output per hour) | % Change from previous quarter | Seasonal Adjusted,1950,29.100000,4,true
+PRS85006093,Nonfarm Business | All workers | Labor productivity (output per hour) | Index (2017=100) | Seasonal Adjusted,2025,471.806000,4,true
+PRS85006101,Nonfarm Business | All workers | Hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,1980,42.900000,4,true
+PRS85006102,Nonfarm Business | All workers | Hourly compensation | % Change from previous quarter | Seasonal Adjusted,1980,44.500000,4,true
+PRS85006103,Nonfarm Business | All workers | Hourly compensation | Index (2017=100) | Seasonal Adjusted,2025,579.410000,4,true
+PRS85006111,Nonfarm Business | All workers | Unit labor costs | % Change same quarter 1 year ago | Seasonal Adjusted,1974,45.200000,4,true
+PRS85006112,Nonfarm Business | All workers | Unit labor costs | % Change from previous quarter | Seasonal Adjusted,1974,47.200000,4,true
+PRS85006113,Nonfarm Business | All workers | Unit labor costs | Index (2017=100) | Seasonal Adjusted,2025,491.226000,4,true
+PRS85006131,Nonfarm Business | All workers | Unit nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,1975,64.600000,4,true
+PRS85006132,Nonfarm Business | All workers | Unit nonlabor payments | % Change from previous quarter | Seasonal Adjusted,1974,57.400000,4,true
+PRS85006133,Nonfarm Business | All workers | Unit nonlabor payments | Index (2017=100) | Seasonal Adjusted,2025,531.299000,4,true
+PRS85006141,Nonfarm Business | All workers | Value-added output price deflator | % Change same quarter 1 year ago | Seasonal Adjusted,1975,42.800000,4,true
+PRS85006142,Nonfarm Business | All workers | Value-added output price deflator | % Change from previous quarter | Seasonal Adjusted,1974,50.500000,4,true
+PRS85006143,Nonfarm Business | All workers | Value-added output price deflator | Index (2017=100) | Seasonal Adjusted,2025,508.656000,4,true
+PRS85006151,Nonfarm Business | All workers | Real hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,2020,26.900000,4,true
+PRS85006152,Nonfarm Business | All workers | Real hourly compensation | % Change from previous quarter | Seasonal Adjusted,2020,35.800000,4,true
+PRS85006153,Nonfarm Business | All workers | Real hourly compensation | Index (2017=100) | Seasonal Adjusted,2021,439.817000,4,true
+PRS85006161,Nonfarm Business | All workers | Output per worker | % Change same quarter 1 year ago | Seasonal Adjusted,1950,29.700000,4,true
+PRS85006162,Nonfarm Business | All workers | Output per worker | % Change from previous quarter | Seasonal Adjusted,1950,35.100000,4,true
+PRS85006163,Nonfarm Business | All workers | Output per worker | Index (2017=100) | Seasonal Adjusted,2025,461.983000,4,true
+PRS85006171,Nonfarm Business | All workers | Labor share | % Change same quarter 1 year ago | Seasonal Adjusted,1956,12.300000,4,true
+PRS85006172,Nonfarm Business | All workers | Labor share | % Change from previous quarter | Seasonal Adjusted,2020,15.400000,4,true
+PRS85006173,Nonfarm Business | All workers | Labor share | Index (2017=100) | Seasonal Adjusted,1960,462.113000,4,true
+PRS88003011,Nonfinancial Corporations | Employees | Employment | % Change same quarter 1 year ago | Seasonal Adjusted,1951,25.500000,4,true
+PRS88003012,Nonfinancial Corporations | Employees | Employment | % Change from previous quarter | Seasonal Adjusted,1950,40.400000,4,true
+PRS88003013,Nonfinancial Corporations | Employees | Employment | Index (2017=100) | Seasonal Adjusted,2025,431.895000,4,true
+PRS88003021,Nonfinancial Corporations | Employees | Average weekly hours | % Change same quarter 1 year ago | Seasonal Adjusted,1964,7.400000,4,true
+PRS88003022,Nonfinancial Corporations | Employees | Average weekly hours | % Change from previous quarter | Seasonal Adjusted,1964,8.200000,4,true
+PRS88003023,Nonfinancial Corporations | Employees | Average weekly hours | Index (2017=100) | Seasonal Adjusted,1965,462.158000,4,true
+PRS88003031,Nonfinancial Corporations | Employees | Hours worked | % Change same quarter 1 year ago | Seasonal Adjusted,1951,26.700000,4,true
+PRS88003032,Nonfinancial Corporations | Employees | Hours worked | % Change from previous quarter | Seasonal Adjusted,1950,49.300000,4,true
+PRS88003033,Nonfinancial Corporations | Employees | Hours worked | Index (2017=100) | Seasonal Adjusted,2025,422.935000,4,true
+PRS88003041,Nonfinancial Corporations | Employees | Real value-added output | % Change same quarter 1 year ago | Seasonal Adjusted,1950,52.000000,4,true
+PRS88003042,Nonfinancial Corporations | Employees | Real value-added output | % Change from previous quarter | Seasonal Adjusted,1950,86.400000,4,true
+PRS88003043,Nonfinancial Corporations | Employees | Real value-added output | Index (2017=100) | Seasonal Adjusted,2025,500.590000,4,true
+PRS88003051,Nonfinancial Corporations | Employees | Value-added output | % Change same quarter 1 year ago | Seasonal Adjusted,2021,61.100000,4,true
+PRS88003052,Nonfinancial Corporations | Employees | Value-added output | % Change from previous quarter | Seasonal Adjusted,1950,111.400000,4,true
+PRS88003053,Nonfinancial Corporations | Employees | Value-added output | Index (2017=100) | Seasonal Adjusted,2025,638.678000,4,true
+PRS88003061,Nonfinancial Corporations | Employees | Labor compensation | % Change same quarter 1 year ago | Seasonal Adjusted,1951,66.800000,4,true
+PRS88003062,Nonfinancial Corporations | Employees | Labor compensation | % Change from previous quarter | Seasonal Adjusted,1950,92.600000,4,true
+PRS88003063,Nonfinancial Corporations | Employees | Labor compensation | Index (2017=100) | Seasonal Adjusted,2025,617.217000,4,true
+PRS88003081,Nonfinancial Corporations | Employees | Nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,2021,92.400000,4,true
+PRS88003082,Nonfinancial Corporations | Employees | Nonlabor payments | % Change from previous quarter | Seasonal Adjusted,1950,143.300000,4,true
+PRS88003083,Nonfinancial Corporations | Employees | Nonlabor payments | Index (2017=100) | Seasonal Adjusted,2025,669.075000,4,true
+PRS88003091,Nonfinancial Corporations | Employees | Labor productivity (output per hour) | % Change same quarter 1 year ago | Seasonal Adjusted,1950,29.600000,4,true
+PRS88003092,Nonfinancial Corporations | Employees | Labor productivity (output per hour) | % Change from previous quarter | Seasonal Adjusted,1954,34.600000,4,true
+PRS88003093,Nonfinancial Corporations | Employees | Labor productivity (output per hour) | Index (2017=100) | Seasonal Adjusted,2025,473.439000,4,true
+PRS88003101,Nonfinancial Corporations | Employees | Hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,1975,41.400000,4,true
+PRS88003102,Nonfinancial Corporations | Employees | Hourly compensation | % Change from previous quarter | Seasonal Adjusted,1974,44.300000,4,true
+PRS88003103,Nonfinancial Corporations | Employees | Hourly compensation | Index (2017=100) | Seasonal Adjusted,2025,583.741000,4,true
+PRS88003111,Nonfinancial Corporations | Employees | Unit labor costs | % Change same quarter 1 year ago | Seasonal Adjusted,1974,45.600000,4,true
+PRS88003112,Nonfinancial Corporations | Employees | Unit labor costs | % Change from previous quarter | Seasonal Adjusted,1974,52.900000,4,true
+PRS88003113,Nonfinancial Corporations | Employees | Unit labor costs | Index (2017=100) | Seasonal Adjusted,2025,493.199000,4,true
+PRS88003121,Nonfinancial Corporations | Employees | Unit nonlabor costs | % Change same quarter 1 year ago | Seasonal Adjusted,1980,61.700000,4,true
+PRS88003122,Nonfinancial Corporations | Employees | Unit nonlabor costs | % Change from previous quarter | Seasonal Adjusted,1974,74.200000,4,true
+PRS88003123,Nonfinancial Corporations | Employees | Unit nonlabor costs | Index (2017=100) | Seasonal Adjusted,2025,463.238000,4,true
+PRS88003131,Nonfinancial Corporations | Employees | Unit nonlabor payments | % Change same quarter 1 year ago | Seasonal Adjusted,1975,64.400000,4,true
+PRS88003132,Nonfinancial Corporations | Employees | Unit nonlabor payments | % Change from previous quarter | Seasonal Adjusted,1975,65.000000,4,true
+PRS88003133,Nonfinancial Corporations | Employees | Unit nonlabor payments | Index (2017=100) | Seasonal Adjusted,2025,534.529000,4,true
+PRS88003141,Nonfinancial Corporations | Employees | Value-added output price deflator | % Change same quarter 1 year ago | Seasonal Adjusted,1975,38.800000,4,true
+PRS88003142,Nonfinancial Corporations | Employees | Value-added output price deflator | % Change from previous quarter | Seasonal Adjusted,1974,46.000000,4,true
+PRS88003143,Nonfinancial Corporations | Employees | Value-added output price deflator | Index (2017=100) | Seasonal Adjusted,2025,510.303000,4,true
+PRS88003151,Nonfinancial Corporations | Employees | Real hourly compensation | % Change same quarter 1 year ago | Seasonal Adjusted,2020,26.100000,4,true
+PRS88003152,Nonfinancial Corporations | Employees | Real hourly compensation | % Change from previous quarter | Seasonal Adjusted,2020,34.500000,4,true
+PRS88003153,Nonfinancial Corporations | Employees | Real hourly compensation | Index (2017=100) | Seasonal Adjusted,2025,442.730000,4,true
+PRS88003161,Nonfinancial Corporations | Employees | Output per worker | % Change same quarter 1 year ago | Seasonal Adjusted,1950,34.800000,4,true
+PRS88003162,Nonfinancial Corporations | Employees | Output per worker | % Change from previous quarter | Seasonal Adjusted,1950,42.200000,4,true
+PRS88003163,Nonfinancial Corporations | Employees | Output per worker | Index (2017=100) | Seasonal Adjusted,2025,463.624000,4,true
+PRS88003171,Nonfinancial Corporations | Employees | Labor share | % Change same quarter 1 year ago | Seasonal Adjusted,2020,12.300000,4,true
+PRS88003172,Nonfinancial Corporations | Employees | Labor share | % Change from previous quarter | Seasonal Adjusted,1953,18.800000,4,true
+PRS88003173,Nonfinancial Corporations | Employees | Labor share | Index (2017=100) | Seasonal Adjusted,2001,446.900000,4,true
+PRS88003181,Nonfinancial Corporations | Employees | Profits | % Change same quarter 1 year ago | Seasonal Adjusted,2021,176.500000,4,true
+PRS88003182,Nonfinancial Corporations | Employees | Profits | % Change from previous quarter | Seasonal Adjusted,2020,313.500000,4,true
+PRS88003183,Nonfinancial Corporations | Employees | Profits | Index (2017=100) | Seasonal Adjusted,2025,865.346000,4,true
+PRS88003191,Nonfinancial Corporations | Employees | Unit profits | % Change same quarter 1 year ago | Seasonal Adjusted,2021,123.500000,4,true
+PRS88003192,Nonfinancial Corporations | Employees | Unit profits | % Change from previous quarter | Seasonal Adjusted,2002,259.900000,4,true
+PRS88003193,Nonfinancial Corporations | Employees | Unit profits | Index (2017=100) | Seasonal Adjusted,2025,691.379000,4,true
+PRS88003201,Nonfinancial Corporations | Employees | Unit combined input costs | % Change same quarter 1 year ago | Seasonal Adjusted,1974,49.200000,4,true
+PRS88003202,Nonfinancial Corporations | Employees | Unit combined input costs | % Change from previous quarter | Seasonal Adjusted,1974,58.400000,4,true
+PRS88003203,Nonfinancial Corporations | Employees | Unit combined input costs | Index (2017=100) | Seasonal Adjusted,2025,483.408000,4,true

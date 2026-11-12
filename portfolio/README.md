@@ -45,3 +45,9 @@ python portfolio/tools/verify_gold_snapshots.py /path/to/snapshot-directory
 The verifier fails closed on schema order, contract counts, duplicate business
 keys, Question 1 bounds, Question 3 match totals, or SHA-256 disagreement.
 
+The committed `portfolio/data/gold_snapshot/` directory contains the verified
+public presentation snapshot exported on November 12, 2026. The Streamlit app
+checks each CSV against its recorded SHA-256 digest and row count before showing
+the complete Question 1, Question 2, and Question 3 results. Databricks remains
+the authoritative system; the committed files are a versioned read-only export.
+
