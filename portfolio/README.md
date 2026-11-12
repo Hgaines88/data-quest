@@ -33,3 +33,15 @@ authoritative Databricks tables:
 Each export must be accompanied by a snapshot manifest containing its source
 table, row count, export time, validated revision, and SHA-256 digest.
 
+Run `notebooks/04_export_public_gold_snapshots.py` in the project Databricks
+Git folder. Download the four generated files from the displayed Volume path,
+keep them together in one snapshot directory, and verify them locally before
+use:
+
+```bash
+python portfolio/tools/verify_gold_snapshots.py /path/to/snapshot-directory
+```
+
+The verifier fails closed on schema order, contract counts, duplicate business
+keys, Question 1 bounds, Question 3 match totals, or SHA-256 disagreement.
+
