@@ -1,0 +1,121 @@
+# Spark Execution Baseline
+
+## Status and boundary
+
+**Status: Pending live validation in Databricks.**
+
+This is a post-submission portfolio extension. It does not modify the submitted assessment, its governed tables, or its recorded claims. The baseline notebook uses controlled in-memory records and does not read or mutate landing, Bronze, Silver, Gold, manifest, or ingestion-audit state.
+
+The repository's local source and contract tests require Python 3.10 or newer.
+The Spark workload itself must run in the authorized Databricks environment,
+where PySpark, the cluster runtime, the physical plan, and the Spark UI are
+available.
+
+## The baseline question
+
+What changes inside Spark when a DataFrame moves from a row-local filter to a
+keyed `groupBy` aggregation, and what evidence can distinguish planning from
+execution?
+
+The notebook deliberately separates three moments:
+
+1. Create a partitioned DataFrame from fixed records.
+2. Declare a filter and aggregation without requesting results.
+3. Call `collect()` on the tiny aggregate result to trigger execution.
+
+## Mental model
+
+- The **driver** runs the application control flow, creates the Spark context,
+  constructs the query plan, and coordinates work.
+- **Executors** are application processes that run tasks and can retain data in
+  memory or on disk.
+- Transformations are **lazy**: they describe a result without immediately
+  computing it.
+- An action such as `collect()` creates a **job**. In this controlled example,
+  collecting two aggregate rows is safe; collecting an unbounded dataset would
+  put unsafe pressure on the driver.
+- Spark divides a job into one or more **stages** separated by dependencies that
+  require data redistribution.
+- Each **task** processes one partition for its stage on an executor.
+- The filter is narrow because an output record depends only on its existing
+  input partition.
+- The keyed aggregation is wide because values for one `series_id` may begin in
+  different partitions. Spark requires a **shuffle** to bring like keys
+  together before producing the totals.
+
+Apache Spark's official cluster overview defines the driver, executor, job,
+stage, and task roles. Its programming guide documents lazy transformations,
+actions, and shuffle behavior:
+
+- [Apache Spark cluster overview](https://spark.apache.org/docs/latest/cluster-overview.html)
+- [Apache Spark RDD programming guide](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
+
+## How to run it
+
+1. Pull the `codex/spark-extension` branch into the Databricks Git folder.
+2. Open `notebooks/extensions/05_spark_groupby_baseline.py`.
+3. Attach the notebook to an available Databricks Spark runtime.
+4. Run all cells once.
+5. Confirm the final validation reports `passed` and the actual result matches:
+   - Series A: two retained observations, sum `3.0`
+   - Series B: three retained observations, sum `20.0`
+6. Save the extended plan output.
+7. Open the Spark UI and locate the job group
+   `data-quest-spark-baseline`.
+8. Record the observed jobs, stages, tasks, partition counts, shuffle exchange,
+   and any Adaptive Query Execution changes.
+
+The extended `explain()` output contains parsed, analyzed, optimized, and
+physical plan sections. The **physical plan** is the primary pre-execution
+evidence for locating exchanges and the selected operators. The Spark UI is the
+runtime evidence for the work that actually ran. Spark's official Web UI guide
+describes its Jobs, Stages, Executors, and SQL/DataFrame surfaces:
+
+- [Apache Spark Web UI](https://spark.apache.org/docs/latest/web-ui.html)
+
+## Evidence to capture
+
+| Evidence | Expected observation | Live result |
+| --- | --- | --- |
+| Spark version and master | Printed from the active runtime | Pending |
+| Source partitions | Four controlled input partitions | Pending |
+| Filtered partitions | Narrow filter preserves partition structure | Pending |
+| Physical plan | Keyed aggregation includes an exchange | Pending |
+| Final result | Matches the independent literal expectation | Pending |
+| Spark UI job | Label includes `data-quest-spark-baseline` | Pending |
+| Stages and tasks | Record observed counts; do not predict them as facts | Pending |
+| AQE | Record whether enabled and whether the final plan changed | Pending |
+
+Adaptive Query Execution can use runtime statistics to revise a Spark SQL
+physical plan while a query runs. It may coalesce post-shuffle partitions, but
+the actual behavior depends on runtime configuration and observed data. The
+baseline records the setting and requires inspection rather than assuming an
+outcome:
+
+- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html#adaptive-query-execution)
+
+## What this proves
+
+After successful live validation, this baseline will prove that the controlled
+DataFrame produces the expected aggregates, that the declared `groupBy`
+requires a keyed redistribution in the observed physical plan, and that the
+run can be traced through the active Databricks Spark UI.
+
+## What this does not prove
+
+The small experiment does not benchmark production performance, guarantee a
+fixed number of stages or tasks across runtimes, reproduce Data Quest's earlier
+out-of-memory failure, or prove that one partition strategy is universally
+optimal. Those claims require the later controlled experiments and their own
+recorded evidence.
+
+## Practice aloud
+
+> I first create four small input partitions. The filter is lazy and narrow, so
+> each existing partition can decide which of its own rows survive. The
+> `groupBy` is also declared lazily, but it introduces a wide dependency because
+> every value for a series must reach the same key group. `collect()` is the
+> action that starts the job. Spark divides that job into stages around the
+> shuffle and sends one task per participating partition to executors. I inspect
+> the physical plan before execution and the Spark UI afterward because those
+> are different kinds of evidence.
