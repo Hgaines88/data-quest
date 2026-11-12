@@ -310,8 +310,11 @@ def engineering(data: dict) -> None:
 
 
 def failure_lab() -> None:
-    st.title("Failure laboratory")
-    st.write("Choose a condition to see the contract-driven response. These are explanations of implemented behavior, not live mutations.")
+    st.subheader("Failure laboratory: What happens when something goes wrong?")
+    st.write(
+        "Choose a condition to see the contract-driven response. These scenarios explain "
+        "implemented behavior without mutating the published evidence."
+    )
     scenarios = {
         "Unchanged source digest": ("Discard staged bytes", "Record the successful run, publish no redundant manifest transition, and retain the existing immutable object."),
         "Duplicate business key": ("Block publication", "A uniqueness violation can fan out joins or misstate aggregates. The prior materialized result remains authoritative."),
@@ -345,6 +348,10 @@ def evidence(data: dict) -> None:
     for source in data["evidence_sources"]:
         st.code(source, language=None)
 
+    st.divider()
+    failure_lab()
+
+    st.divider()
     st.subheader("Selected Databricks evidence")
     gallery = [
         ("Published dashboard", "dq25_published_dashboard_overview.png"),
@@ -365,7 +372,7 @@ def main() -> None:
     data = load_manifest()
     page = st.sidebar.radio(
         "Data Quest",
-        ["Overview", "Explore results", "Engineering", "Failure laboratory", "Evidence room"],
+        ["Overview", "Explore results", "Engineering", "Evidence room"],
     )
     st.sidebar.caption(data["snapshot_label"])
     st.sidebar.markdown("[View source repository](https://github.com/Hgaines88/data-quest)")
@@ -376,8 +383,6 @@ def main() -> None:
         results(data)
     elif page == "Engineering":
         engineering(data)
-    elif page == "Failure laboratory":
-        failure_lab()
     else:
         evidence(data)
 
