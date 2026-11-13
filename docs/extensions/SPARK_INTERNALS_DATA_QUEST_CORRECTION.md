@@ -41,6 +41,13 @@ The repartition plan makes the data movement explicit:
 
 ![Live repartition physical plan](../screenshots/spark_repartition_plan_live.png)
 
+This privacy-safe crop preserves the live Databricks parsed, analyzed,
+optimized, and physical plan while removing browser chrome, the workspace
+hostname, account imagery, and unrelated navigation. It proves that this
+controlled `repartition(2, "group_key")` experiment introduced a physical
+hash-partitioning exchange; it is execution-shape evidence, not a throughput
+benchmark or a reproduction of the original production-scale failure.
+
 The original corrected Bronze path is supported by the successful live validation evidence:
 
 ![Completed Bronze pipeline run](../screenshots/dq11_bronze_run_completed.png)

@@ -35,6 +35,19 @@ SHA-256 digests for the curated files:
 | `dq21_question_2_status.png` | `5169b9d742b92493f5a2482e2faf3c548ddb24791d51ae09c1e767fba42a6f92` |
 | `dq21_question_3_values.png` | `e77a709905b88f0f06e8c71d0f27c23f920558a9ee167da4291df7cc04a79e14` |
 
+## Post-submission Spark execution evidence
+
+- `spark_repartition_plan_live.png` — privacy-safe crop of the live
+  Databricks serverless execution for the controlled repartition experiment.
+  - **Evidence:** preserves the parsed, analyzed, optimized, and physical
+    plans, including the `hashpartitioning(group_key, 2)` shuffle exchange.
+  - **Sanitization:** browser chrome, workspace hostname, account imagery,
+    and unrelated navigation were removed; no result pixels were synthesized.
+  - **Boundary:** generated records only. This demonstrates execution shape,
+    not production data access, a performance benchmark, or reproduction of
+    the original failure.
+  - **SHA-256:** `c174de3a54a935506cd5c04c1d11ca449017f047954a9bf2e4effafbca7be377`
+
 ## Detailed implementation evidence
 
 The remaining screenshots preserve the chronological implementation and review
