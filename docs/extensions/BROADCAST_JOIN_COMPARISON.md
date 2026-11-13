@@ -2,7 +2,7 @@
 
 ## Status and boundary
 
-**Status: Pending live validation in Databricks serverless.**
+**Status: Live validated in Databricks serverless on November 12, 2026.**
 
 This is a post-submission portfolio extension. It does not modify the submitted
 assessment, its governed tables, or its recorded claims. The notebook uses two
@@ -60,21 +60,45 @@ size, reliable statistics, expected growth, executor capacity, and concurrency.
 
 ## Evidence to capture
 
-| Evidence | Expected boundary | Live result |
+| Evidence | Expected boundary | Live result on Databricks serverless |
 | --- | --- | --- |
-| Fact input | 120 rows; four requested partitions | Pending |
-| Dimension input | Three rows; two requested partitions | Pending |
-| Standard strategy | Selected by this runtime | Pending |
-| Broadcast strategy | Inspect for a broadcast exchange and hash join | Pending |
-| Result parity | Both paths match the literal expected summaries | Pending |
-| Runtime work | Record observed evidence; do not predict fixed counts | Pending |
+| Runtime | Record the environment used for the observation | Spark 4.2.0 with Photon; both queries were fully supported by Photon |
+| Fact input | 120 rows; four requested partitions | 120 rows; four observed partitions with 30 rows each |
+| Dimension input | Three rows; two requested partitions | Three rows; observed partition occupancy of one and two rows |
+| Standard strategy | Selected by this runtime | `PhotonBroadcastHashJoin`, left outer, `BuildRight`; Spark automatically broadcast the dimension |
+| Broadcast strategy | Inspect the effect of the explicit hint | The analyzed plan contained `ResolvedHint (strategy=broadcast)` and the optimized plan contained `rightHint=(strategy=broadcast)`; the physical operator was the same `PhotonBroadcastHashJoin` |
+| Exchanges | Identify which side moved | The right side used `EXECUTOR_BROADCAST` and a `SinglePartition` exchange; the four-way fact range remained the streamed side |
+| Result parity | Both paths match the literal expected summaries | Passed: A = 40 / 2380.0, B = 40 / 2420.0, C = 40 / 2460.0 for both paths |
+| Adaptive plan state | Distinguish initial evidence from a final adaptive plan | Both captures reported `AdaptiveSparkPlan isFinalPlan=false`; these are initial physical plans |
+
+## Reading the live plans
+
+The standard join is the most important observation. Although the code supplied
+no broadcast hint, Spark recognized that the three-row dimension was small and
+selected a right-side `PhotonBroadcastHashJoin`. Its physical plan prepared the
+dimension through an `EXECUTOR_BROADCAST` stage and a `SinglePartition`
+exchange. The 120-row fact input remained the streamed side with four range
+splits; the plan did not repartition that larger side by the join key.
+
+The explicit path made the request visible earlier in planning. Its parsed plan
+contained an unresolved broadcast hint, the analyzed plan resolved that hint,
+and the optimized plan retained it as a right-side strategy hint. The final
+physical operator was nevertheless the same one Spark had already chosen for
+the ordinary path.
+
+This is not evidence that the hint made the query faster. It shows that the
+optimizer already made the appropriate decision for these controlled sizes,
+while the explicit call documented an engineering choice. Both plan captures
+reported `isFinalPlan=false`, so they record the initial adaptive plan rather
+than claiming what every future execution will finalize.
 
 ## What this proves
 
-After successful live validation, the experiment will prove that both observed
-join paths preserve the required results for these controlled inputs. The plans
-will show which physical strategies and exchanges this Databricks runtime chose
-for ordinary optimizer selection and explicit broadcast.
+The experiment proves that both observed join paths preserve the required
+results for these controlled inputs. In this Databricks runtime, both paths used
+a right-side Photon broadcast hash join, and only the explicit path carried a
+broadcast hint through logical optimization. The evidence also shows the input
+partition occupancy and the exchange used to prepare the small relation.
 
 ## What this does not prove
 

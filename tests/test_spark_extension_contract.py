@@ -118,7 +118,10 @@ class SparkExtensionContractTests(unittest.TestCase):
             "environment-specific",
             "what this proves",
             "what this does not prove",
-            "pending live validation",
+            "live validated",
+            "photonbroadcasthashjoin",
+            "resolvedhint",
+            "isfinalplan=false",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, guide)
