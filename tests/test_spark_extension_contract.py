@@ -9,6 +9,8 @@ BROADCAST_NOTEBOOK = (
     ROOT / "notebooks" / "extensions" / "06_broadcast_join_comparison.py"
 )
 BROADCAST_GUIDE = ROOT / "docs" / "extensions" / "BROADCAST_JOIN_COMPARISON.md"
+SKEW_NOTEBOOK = ROOT / "notebooks" / "extensions" / "07_partition_skew_diagnosis.py"
+SKEW_GUIDE = ROOT / "docs" / "extensions" / "PARTITION_SKEW_DIAGNOSIS.md"
 
 
 class SparkExtensionContractTests(unittest.TestCase):
@@ -122,6 +124,77 @@ class SparkExtensionContractTests(unittest.TestCase):
             "photonbroadcasthashjoin",
             "resolvedhint",
             "isfinalplan=false",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
+    def test_skew_experiment_defines_balanced_and_skewed_distributions(self):
+        notebook = SKEW_NOTEBOOK.read_text(encoding="utf-8")
+
+        for required in [
+            "BALANCED_EXPECTED_COUNTS",
+            "SKEWED_EXPECTED_COUNTS",
+            "balanced_counts",
+            "skewed_counts",
+            "assert balanced_counts == BALANCED_EXPECTED_COUNTS",
+            "assert skewed_counts == SKEWED_EXPECTED_COUNTS",
+            "F.spark_partition_id()",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, notebook)
+
+        self.assertNotIn("spark.read.table", notebook)
+
+    def test_skew_mitigation_recombines_to_the_unsalted_result(self):
+        notebook = SKEW_NOTEBOOK.read_text(encoding="utf-8")
+
+        for required in [
+            "salt_bucket",
+            "HOT_KEY_SALT_EXPECTED_COUNTS",
+            "partition_profile",
+            "skewed_by_key",
+            "salted_by_key_and_bucket",
+            "unsalted_summary",
+            "mitigated_summary",
+            "assert hot_key_salt_counts == HOT_KEY_SALT_EXPECTED_COUNTS",
+            "assert mitigated_summary == unsalted_summary",
+            '.explain(mode="extended")',
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, notebook)
+
+        for forbidden in [
+            "spark.sparkContext",
+            "spark.conf.get",
+            "spark.conf.set",
+            ".rdd",
+            "_jdf",
+        ]:
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, notebook)
+
+    def test_skew_guide_explains_evidence_limits_and_operational_tradeoffs(self):
+        guide = SKEW_GUIDE.read_text(encoding="utf-8").lower()
+
+        for required in [
+            "post-submission",
+            "balanced",
+            "skewed",
+            "partition occupancy",
+            "spark performance profile",
+            "concentrated executor pressure",
+            "total cluster capacity",
+            "salting",
+            "extra shuffle",
+            "cardinality",
+            "complexity",
+            "whole-file parsing",
+            "distributed line-oriented reading",
+            "observed",
+            "environment-specific",
+            "what this proves",
+            "what this does not prove",
+            "live validation",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, guide)
