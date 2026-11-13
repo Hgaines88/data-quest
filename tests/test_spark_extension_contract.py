@@ -13,6 +13,12 @@ SKEW_NOTEBOOK = ROOT / "notebooks" / "extensions" / "07_partition_skew_diagnosis
 SKEW_GUIDE = ROOT / "docs" / "extensions" / "PARTITION_SKEW_DIAGNOSIS.md"
 CACHE_NOTEBOOK = ROOT / "notebooks" / "extensions" / "08_cache_reuse_comparison.py"
 CACHE_GUIDE = ROOT / "docs" / "extensions" / "CACHE_REUSE_COMPARISON.md"
+PARTITION_NOTEBOOK = (
+    ROOT / "notebooks" / "extensions" / "09_repartition_coalesce_comparison.py"
+)
+PARTITION_GUIDE = (
+    ROOT / "docs" / "extensions" / "REPARTITION_COALESCE_COMPARISON.md"
+)
 
 
 class SparkExtensionContractTests(unittest.TestCase):
@@ -303,6 +309,62 @@ class SparkExtensionContractTests(unittest.TestCase):
             "not a benchmark",
             "serverless-specific",
             "isfinalplan=false",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
+    def test_partition_comparison_reconciles_both_paths_and_records_occupancy(self):
+        notebook = PARTITION_NOTEBOOK.read_text(encoding="utf-8")
+
+        for required in [
+            "spark.range",
+            "numPartitions=4",
+            'repartition(2, "group_key")',
+            "coalesce(2)",
+            "partition_profile(source)",
+            "partition_profile(repartitioned)",
+            "partition_profile(coalesced)",
+            'repartitioned.explain(mode="extended")',
+            'coalesced.explain(mode="extended")',
+            "EXPECTED_RESULTS",
+            "repartitioned_results == EXPECTED_RESULTS",
+            "coalesced_results == EXPECTED_RESULTS",
+            "source_results == repartitioned_results == coalesced_results",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, notebook)
+
+        for forbidden in [
+            "spark.sparkContext",
+            "spark.conf.get",
+            "spark.conf.set",
+            ".rdd",
+            "_jdf",
+            "spark.read.table",
+        ]:
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, notebook)
+
+    def test_partition_guide_defines_shuffle_shape_and_safety_boundaries(self):
+        guide = PARTITION_GUIDE.read_text(encoding="utf-8").lower()
+
+        for required in [
+            "post-submission",
+            "same controlled baseline",
+            "repartition",
+            "coalesce",
+            "full shuffle",
+            "narrow",
+            "partition occupancy",
+            "reducing partitions",
+            "rebalancing data",
+            "small files",
+            "parallelism",
+            "skew",
+            "result parity",
+            "what this proves",
+            "what this does not prove",
+            "live validation",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, guide)
