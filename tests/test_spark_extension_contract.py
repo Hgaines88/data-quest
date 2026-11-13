@@ -199,6 +199,25 @@ class SparkExtensionContractTests(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, guide)
 
+    def test_skew_guide_records_live_databricks_evidence_without_overclaiming(self):
+        guide = SKEW_GUIDE.read_text(encoding="utf-8").lower()
+
+        for required in [
+            "november 12, 2026",
+            "108 to 58",
+            "54, 58, and 8",
+            "four equal 27-record salt buckets",
+            "hash placement",
+            "did not guarantee equal physical partition occupancy",
+            "hashpartitioning(group_key, salt_bucket, 4)",
+            "hashpartitioning(group_key, 16)",
+            "result_parity",
+            "photon",
+            "isfinalplan=false",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
 
 if __name__ == "__main__":
     unittest.main()

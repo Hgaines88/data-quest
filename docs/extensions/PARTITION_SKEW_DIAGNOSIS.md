@@ -7,8 +7,9 @@ submitted assessment's landing, Bronze, Silver, Gold, manifest, or audit state.
 It uses controlled in-memory records so the cause of each execution shape is
 known before Spark runs.
 
-Live validation is still required in Databricks before runtime-specific claims
-are promoted from expected behavior to observed evidence.
+The controlled notebook was live validated on Databricks serverless compute on
+November 12, 2026. Runtime-specific claims below are limited to the captured
+partition profiles, extended plans, and reconciliation output from that run.
 
 ## Controlled distributions
 
@@ -52,6 +53,35 @@ aggregation stage, higher intermediate key **cardinality**, and additional code
 and operational **complexity**. It should be applied to measured hot keys—not
 used as a universal default.
 
+## Observed Databricks evidence
+
+The live run reconciled the controlled inputs exactly:
+
+- balanced key counts were `30 / 30 / 30 / 30`;
+- the unsalted skewed partition profile was `4 / 4 / 4 / 108`; and
+- the hot key divided into four equal 27-record salt buckets.
+
+After salting, the non-empty physical partitions held 54, 58, and 8 records;
+one of the four requested partitions was empty. The maximum observed partition
+occupancy therefore fell from 108 to 58, a reduction of about 46 percent. This
+is a meaningful improvement, but the salt buckets' downstream hash placement
+did not guarantee equal physical partition occupancy. Salting increases the
+number of partitioning keys; it does not promise that each salted key lands in
+a different physical partition.
+
+The unsalted physical plan contained a shuffle exchange using
+`hashpartitioning(group_key, 4)`. The mitigated path first used
+`hashpartitioning(group_key, salt_bucket, 4)` for partial aggregation and then
+used `hashpartitioning(group_key, 16)` to recombine the partials. This confirms
+the expected trade-off: lower concentrated pressure in exchange for an extra
+shuffle and aggregation phase. Both plans were fully supported by Photon.
+
+The observed plan was an adaptive initial plan (`isFinalPlan=false`), so it is
+evidence of the planned execution shape rather than a claim that Adaptive Query
+Execution could not revise the final runtime plan. The notebook's independent
+assertions passed, `result_parity` was `True`, and both paths returned the same
+counts and sums for every key.
+
 ## Connection to the Data Quest correction
 
 Data Quest previously exposed a related concentration problem in a different
@@ -78,16 +108,16 @@ pressure.
 - It does not prove that salting is preferable to Adaptive Query Execution,
   source-side correction, different partitioning, or isolating hot keys in
   every workload.
-- It does not turn local expectations into observed Databricks evidence until
-  the notebook completes live validation and its performance output is reviewed.
+- It does not establish how the same mitigation will behave at production scale
+  or under a different Databricks runtime, partition count, or key distribution.
 
-## Live validation checklist
+## Live validation record
 
-1. Run `notebooks/extensions/07_partition_skew_diagnosis.py` on Databricks
-   serverless compute.
-2. Confirm every assertion passes and `result_parity` is `True`.
-3. Record balanced, skewed, and salted partition occupancy.
-4. Inspect the physical plans for exchanges and partial/final aggregation.
-5. Open each **Spark performance profile** and compare task-level evidence.
-6. Add the observed runtime version and evidence to this guide; preserve any
-   environment-specific qualification.
+1. `notebooks/extensions/07_partition_skew_diagnosis.py` completed on
+   Databricks serverless compute.
+2. Every assertion passed and `result_parity` was `True`.
+3. Balanced, skewed, and salted partition occupancy was recorded above.
+4. Extended plans confirmed the exchanges and partial/final aggregation phases.
+5. The Spark performance profiles were exposed for follow-up task-level review.
+6. Environment-specific qualifications and the adaptive-plan boundary are
+   preserved in this guide.
