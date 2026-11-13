@@ -196,6 +196,24 @@ BLS history as the left side of the join so missing population context never
 removes a valid observation. Cross-implementation reconciliation is preserved
 in the [DQ-19 validation record](docs/evidence/dq19_gold_cross_implementation_validation.md).
 
+## Post-submission Spark internals extension
+
+The submitted assessment remains unchanged. These controlled notebooks extend
+the portfolio with live, serverless Spark evidence that explains the original
+whole-file parsing correction and the execution concepts behind it.
+
+| Topic | Notebook | Evidence produced |
+| --- | --- | --- |
+| Narrow and wide transformations | [`05_spark_groupby_baseline.py`](notebooks/extensions/05_spark_groupby_baseline.py) | Filter lineage, group-by shuffle, partial/final aggregation, and AQE wrapper. |
+| Join strategy | [`06_broadcast_join_comparison.py`](notebooks/extensions/06_broadcast_join_comparison.py) | Ordinary and explicit broadcast plans with result parity. |
+| Skew mitigation | [`07_partition_skew_diagnosis.py`](notebooks/extensions/07_partition_skew_diagnosis.py) | Balanced, hot-key, and salted partition profiles. |
+| Cache reuse | [`08_cache_reuse_comparison.py`](notebooks/extensions/08_cache_reuse_comparison.py) | Materialization evidence, repeated actions, and bounded timing observations. |
+| Partition operations | [`09_repartition_coalesce_comparison.py`](notebooks/extensions/09_repartition_coalesce_comparison.py) | Repartition shuffle, coalesce narrow reduction, observed occupancy, and parity. |
+
+The consolidated correction narrative, annotated plan, evidence boundaries,
+AQE limits, and interview practice answer are in [Spark Internals: Data Quest
+Correction Walkthrough](docs/extensions/SPARK_INTERNALS_DATA_QUEST_CORRECTION.md).
+
 ## Verification and reviewer map
 
 Run the local deterministic checks from the repository root:

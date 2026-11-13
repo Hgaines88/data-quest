@@ -19,6 +19,19 @@ PARTITION_NOTEBOOK = (
 PARTITION_GUIDE = (
     ROOT / "docs" / "extensions" / "REPARTITION_COALESCE_COMPARISON.md"
 )
+SYNTHESIS_GUIDE = (
+    ROOT / "docs" / "extensions" / "SPARK_INTERNALS_DATA_QUEST_CORRECTION.md"
+)
+SPARK_PLAN_SCREENSHOT = (
+    ROOT / "docs" / "screenshots" / "spark_repartition_plan_live.png"
+)
+BRONZE_RUN_SCREENSHOT = (
+    ROOT / "docs" / "screenshots" / "dq11_bronze_run_completed.png"
+)
+BRONZE_EXPECTATIONS_SCREENSHOT = (
+    ROOT / "docs" / "screenshots" / "dq11_bronze_tables_expectations.png"
+)
+README = ROOT / "README.md"
 
 
 class SparkExtensionContractTests(unittest.TestCase):
@@ -387,6 +400,67 @@ class SparkExtensionContractTests(unittest.TestCase):
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, guide)
+
+
+    def test_synthesis_guide_connects_live_evidence_to_original_correction(self):
+        text = SYNTHESIS_GUIDE.read_text(encoding="utf-8").lower()
+        for required in (
+            "whole-file",
+            "unsaferow.copy",
+            "jvm_out_of_memory",
+            "distributed line-oriented",
+            "narrow",
+            "wide",
+            "broadcast",
+            "skew",
+            "salting",
+            "cache",
+            "repartition",
+            "coalesce",
+            "adaptive query execution",
+            "aqe",
+            "observed environment evidence",
+            "general spark guidance",
+            "what this does not prove",
+            "90-second",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, text)
+
+    def test_synthesis_guide_links_live_evidence_artifacts(self):
+        text = SYNTHESIS_GUIDE.read_text(encoding="utf-8")
+        for relative_path in (
+            "../screenshots/spark_repartition_plan_live.png",
+            "../screenshots/dq11_bronze_run_completed.png",
+            "../screenshots/dq11_bronze_tables_expectations.png",
+        ):
+            with self.subTest(relative_path=relative_path):
+                self.assertIn(relative_path, text)
+
+        for screenshot in (
+            SPARK_PLAN_SCREENSHOT,
+            BRONZE_RUN_SCREENSHOT,
+            BRONZE_EXPECTATIONS_SCREENSHOT,
+        ):
+            with self.subTest(screenshot=screenshot.name):
+                self.assertTrue(screenshot.exists(), screenshot)
+                self.assertEqual(screenshot.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
+
+    def test_readme_maps_all_spark_extension_notebooks(self):
+        text = README.read_text(encoding="utf-8")
+        self.assertIn(
+            "docs/extensions/SPARK_INTERNALS_DATA_QUEST_CORRECTION.md",
+            text,
+        )
+        for notebook_name in (
+            "05_spark_groupby_baseline.py",
+            "06_broadcast_join_comparison.py",
+            "07_partition_skew_diagnosis.py",
+            "08_cache_reuse_comparison.py",
+            "09_repartition_coalesce_comparison.py",
+        ):
+            with self.subTest(notebook_name=notebook_name):
+                self.assertIn(f"notebooks/extensions/{notebook_name}", text)
 
 
 if __name__ == "__main__":
