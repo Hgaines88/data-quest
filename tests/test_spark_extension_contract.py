@@ -286,6 +286,27 @@ class SparkExtensionContractTests(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, guide)
 
+    def test_cache_guide_records_live_serverless_evidence_without_overclaiming(self):
+        guide = CACHE_GUIDE.read_text(encoding="utf-8").lower()
+
+        for required in [
+            "november 12, 2026",
+            "disk serialized 1x replicated",
+            "prepareddeltafileindex",
+            "photonscan parquet",
+            "60",
+            "result parity",
+            "2.531449",
+            "0.742856",
+            "0.989433",
+            "1.034268",
+            "not a benchmark",
+            "serverless-specific",
+            "isfinalplan=false",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
 
 if __name__ == "__main__":
     unittest.main()
