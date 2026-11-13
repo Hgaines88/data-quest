@@ -64,7 +64,8 @@ actions, and shuffle behavior:
 7. Open the query profile and locate the aggregate command by notebook name and
    execution timestamp. Serverless does not expose `SparkContext.setJobGroup`.
 8. Record the observed jobs, stages, tasks, partition counts, shuffle exchange,
-   and any Adaptive Query Execution changes.
+   and any visible Adaptive Query Execution changes. Do not query restricted
+   serverless configuration keys to infer them.
 
 The extended `explain()` output contains parsed, analyzed, optimized, and
 physical plan sections. The **physical plan** is the primary pre-execution
@@ -85,13 +86,14 @@ describes its Jobs, Stages, Executors, and SQL/DataFrame surfaces:
 | Final result | Matches the independent literal expectation | Pending |
 | Query profile | Aggregate command identified by notebook and timestamp | Pending |
 | Stages and tasks | Record observed counts; do not predict them as facts | Pending |
-| AQE | Record whether enabled and whether the final plan changed | Pending |
+| AQE | Record only evidence visible in the plan or query profile | Pending |
 
 Adaptive Query Execution can use runtime statistics to revise a Spark SQL
 physical plan while a query runs. It may coalesce post-shuffle partitions, but
 the actual behavior depends on runtime configuration and observed data. The
-baseline records the setting and requires inspection rather than assuming an
-outcome:
+baseline requires inspection rather than assuming an outcome. Free Edition
+serverless may not expose the underlying configuration key through
+`spark.conf.get`, so the notebook does not depend on that access:
 
 - [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html#adaptive-query-execution)
 
@@ -117,9 +119,9 @@ Databricks serverless rejected direct `SparkContext` access. The corrected
 notebook uses `spark.range(..., numPartitions=4)` to create the controlled
 source, `spark_partition_id()` to observe non-empty partition occupancy, and
 the query profile to inspect execution. It contains no direct `SparkContext`,
-RDD, or JVM access. This correction preserves the experiment while treating the
-live runtime as evidence instead of assuming dedicated-compute APIs were
-available.
+RDD, JVM, or restricted configuration access. This correction preserves the
+experiment while treating the live runtime as evidence instead of assuming
+dedicated-compute APIs were available.
 
 ## Practice aloud
 

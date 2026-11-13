@@ -24,7 +24,12 @@ class SparkExtensionContractTests(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, notebook)
 
-        for forbidden in ["spark.sparkContext", ".rdd", "_jdf"]:
+        for forbidden in [
+            "spark.sparkContext",
+            "spark.conf.get",
+            ".rdd",
+            "_jdf",
+        ]:
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, notebook)
 

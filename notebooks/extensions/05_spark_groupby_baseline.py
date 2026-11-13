@@ -64,11 +64,9 @@ source = row_index.select(
 print({
     "spark_version": spark.version,
     "compute_interface": "serverless-compatible DataFrame API",
-    "adaptive_execution_enabled": spark.conf.get(
-        "spark.sql.adaptive.enabled", "not-set"
-    ),
-    "shuffle_partitions": spark.conf.get(
-        "spark.sql.shuffle.partitions", "not-set"
+    "configuration_note": (
+        "Managed serverless settings are inferred from the physical plan and "
+        "query profile; restricted configuration keys are not queried."
     ),
 })
 
