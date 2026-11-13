@@ -2,7 +2,7 @@
 
 ## Status and boundary
 
-**Status: Pending live validation in Databricks.**
+**Status: Pending live validation after the Databricks serverless correction.**
 
 This is a post-submission portfolio extension. It does not modify the submitted assessment, its governed tables, or its recorded claims. The baseline notebook uses controlled in-memory records and does not read or mutate landing, Bronze, Silver, Gold, manifest, or ingestion-audit state.
 
@@ -19,14 +19,15 @@ execution?
 
 The notebook deliberately separates three moments:
 
-1. Create a partitioned DataFrame from fixed records.
+1. Create a partitioned DataFrame from fixed records through `spark.range`.
 2. Declare a filter and aggregation without requesting results.
 3. Call `collect()` on the tiny aggregate result to trigger execution.
 
 ## Mental model
 
-- The **driver** runs the application control flow, creates the Spark context,
-  constructs the query plan, and coordinates work.
+- The **driver** runs the application control flow, constructs the query plan,
+  and coordinates work. Databricks serverless exposes the supported DataFrame
+  session boundary without permitting direct `SparkContext` or RDD access.
 - **Executors** are application processes that run tasks and can retain data in
   memory or on disk.
 - Transformations are **lazy**: they describe a result without immediately
@@ -54,14 +55,14 @@ actions, and shuffle behavior:
 
 1. Pull the `codex/spark-extension` branch into the Databricks Git folder.
 2. Open `notebooks/extensions/05_spark_groupby_baseline.py`.
-3. Attach the notebook to an available Databricks Spark runtime.
+3. Attach the notebook to Databricks serverless compute.
 4. Run all cells once.
 5. Confirm the final validation reports `passed` and the actual result matches:
    - Series A: two retained observations, sum `3.0`
    - Series B: three retained observations, sum `20.0`
 6. Save the extended plan output.
-7. Open the Spark UI and locate the job group
-   `data-quest-spark-baseline`.
+7. Open the query profile and locate the aggregate command by notebook name and
+   execution timestamp. Serverless does not expose `SparkContext.setJobGroup`.
 8. Record the observed jobs, stages, tasks, partition counts, shuffle exchange,
    and any Adaptive Query Execution changes.
 
@@ -77,12 +78,12 @@ describes its Jobs, Stages, Executors, and SQL/DataFrame surfaces:
 
 | Evidence | Expected observation | Live result |
 | --- | --- | --- |
-| Spark version and master | Printed from the active runtime | Pending |
-| Source partitions | Four controlled input partitions | Pending |
-| Filtered partitions | Narrow filter preserves partition structure | Pending |
+| Spark version and interface | Printed from the active serverless runtime | Pending |
+| Source partitions | Four requested input partitions; record observed non-empty occupancy | Pending |
+| Filtered partitions | Record observed occupancy after the narrow filter | Pending |
 | Physical plan | Keyed aggregation includes an exchange | Pending |
 | Final result | Matches the independent literal expectation | Pending |
-| Spark UI job | Label includes `data-quest-spark-baseline` | Pending |
+| Query profile | Aggregate command identified by notebook and timestamp | Pending |
 | Stages and tasks | Record observed counts; do not predict them as facts | Pending |
 | AQE | Record whether enabled and whether the final plan changed | Pending |
 
@@ -109,13 +110,26 @@ out-of-memory failure, or prove that one partition strategy is universally
 optimal. Those claims require the later controlled experiments and their own
 recorded evidence.
 
+## Serverless compatibility correction
+
+The first live run exposed a platform boundary before the aggregation executed:
+Databricks serverless rejected direct `SparkContext` access. The corrected
+notebook uses `spark.range(..., numPartitions=4)` to create the controlled
+source, `spark_partition_id()` to observe non-empty partition occupancy, and
+the query profile to inspect execution. It contains no direct `SparkContext`,
+RDD, or JVM access. This correction preserves the experiment while treating the
+live runtime as evidence instead of assuming dedicated-compute APIs were
+available.
+
 ## Practice aloud
 
-> I first create four small input partitions. The filter is lazy and narrow, so
+> I request four small input partitions through the serverless-compatible
+> DataFrame API. The filter is lazy and narrow, so
 > each existing partition can decide which of its own rows survive. The
 > `groupBy` is also declared lazily, but it introduces a wide dependency because
 > every value for a series must reach the same key group. `collect()` is the
 > action that starts the job. Spark divides that job into stages around the
 > shuffle and sends one task per participating partition to executors. I inspect
-> the physical plan before execution and the Spark UI afterward because those
-> are different kinds of evidence.
+> the physical plan before execution and the serverless query profile afterward
+> because those are different kinds of evidence. Separate partition-profile
+> actions then record actual non-empty occupancy without using RDD internals.

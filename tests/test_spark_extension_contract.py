@@ -13,18 +13,25 @@ class SparkExtensionContractTests(unittest.TestCase):
 
         self.assertTrue(notebook.startswith("# Databricks notebook source"))
         for required in [
-            "spark.createDataFrame",
+            "spark.range",
+            "numPartitions=4",
+            "F.spark_partition_id()",
             ".groupBy(",
             ".agg(",
             '.explain(mode="extended")',
-            ".rdd.getNumPartitions()",
-            "spark.sparkContext.setJobGroup",
-            ".collect()",
+            "result_rows = grouped.collect()",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, notebook)
 
-        self.assertLess(notebook.index(".groupBy("), notebook.index(".collect()"))
+        for forbidden in ["spark.sparkContext", ".rdd", "_jdf"]:
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, notebook)
+
+        self.assertLess(
+            notebook.index("grouped = filtered.groupBy("),
+            notebook.index("result_rows = grouped.collect()"),
+        )
 
     def test_baseline_uses_controlled_data_and_independent_expected_results(self):
         notebook = NOTEBOOK.read_text(encoding="utf-8")
