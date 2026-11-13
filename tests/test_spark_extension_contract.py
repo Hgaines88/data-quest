@@ -66,7 +66,7 @@ class SparkExtensionContractTests(unittest.TestCase):
             "spark ui",
             "what this proves",
             "what this does not prove",
-            "pending live validation",
+            "live validation",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, guide)

@@ -2,7 +2,7 @@
 
 ## Status and boundary
 
-**Status: Pending live validation after the Databricks serverless correction.**
+**Status: Live validation passed on Databricks serverless on November 12, 2026.**
 
 This is a post-submission portfolio extension. It does not modify the submitted assessment, its governed tables, or its recorded claims. The baseline notebook uses controlled in-memory records and does not read or mutate landing, Bronze, Silver, Gold, manifest, or ingestion-audit state.
 
@@ -79,14 +79,29 @@ describes its Jobs, Stages, Executors, and SQL/DataFrame surfaces:
 
 | Evidence | Expected observation | Live result |
 | --- | --- | --- |
-| Spark version and interface | Printed from the active serverless runtime | Pending |
-| Source partitions | Four requested input partitions; record observed non-empty occupancy | Pending |
-| Filtered partitions | Record observed occupancy after the narrow filter | Pending |
-| Physical plan | Keyed aggregation includes an exchange | Pending |
-| Final result | Matches the independent literal expectation | Pending |
-| Query profile | Aggregate command identified by notebook and timestamp | Pending |
-| Stages and tasks | Record observed counts; do not predict them as facts | Pending |
-| AQE | Record only evidence visible in the plan or query profile | Pending |
+| Spark version and interface | Printed from the active serverless runtime | Spark 4.2.0 through the serverless DataFrame API |
+| Source partitions | Four requested input partitions; record observed non-empty occupancy | Four: row counts `1, 2, 2, 2` |
+| Filtered partitions | Record observed occupancy after the narrow filter | Four: row counts `1, 1, 2, 1` |
+| Physical plan | Keyed aggregation includes an exchange | `PhotonShuffleExchangeSink hashpartitioning(series_id, 16)` |
+| Final result | Matches the independent literal expectation | Passed: A = `(2, 3.0)`; B = `(3, 20.0)` |
+| Query profile | Aggregate command identified by notebook and timestamp | Available from the command's **See performance** link |
+| Stages and tasks | Record observed counts; do not predict them as facts | Exact counts intentionally not asserted across runtimes |
+| AQE | Record only evidence visible in the plan or query profile | Initial plan reported `AdaptiveSparkPlan isFinalPlan=false` |
+
+## Annotated live plan
+
+The captured physical plan provides the following evidence:
+
+- `PhotonRange ... splits=4` confirms the four requested source partitions.
+- `PhotonFilter` performs the row-local nonnegative-value filter before any
+  redistribution.
+- `PhotonGroupingAgg` appears on both sides of the exchange: Spark performs a
+  partial aggregation before the shuffle and a final aggregation afterward.
+- `PhotonShuffleExchangeSink hashpartitioning(series_id, 16)` is the direct
+  evidence that the keyed `groupBy` introduces a shuffle boundary.
+- `AdaptiveSparkPlan isFinalPlan=false` identifies the captured output as the
+  initial adaptive plan; it does not prove what the final runtime plan became.
+- The Photon explanation reported that the full query was supported by Photon.
 
 Adaptive Query Execution can use runtime statistics to revise a Spark SQL
 physical plan while a query runs. It may coalesce post-shuffle partitions, but
@@ -99,10 +114,10 @@ serverless may not expose the underlying configuration key through
 
 ## What this proves
 
-After successful live validation, this baseline will prove that the controlled
-DataFrame produces the expected aggregates, that the declared `groupBy`
-requires a keyed redistribution in the observed physical plan, and that the
-run can be traced through the active Databricks Spark UI.
+The successful live validation proves that the controlled DataFrame produces
+the expected aggregates, that the declared `groupBy` requires a keyed
+redistribution in the observed physical plan, and that the run exposes
+performance evidence through the Databricks serverless command interface.
 
 ## What this does not prove
 
