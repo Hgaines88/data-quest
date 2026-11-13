@@ -23,6 +23,21 @@ The notebook deliberately separates three moments:
 2. Declare a filter and aggregation without requesting results.
 3. Call `collect()` on the tiny aggregate result to trigger execution.
 
+## Issue #93 acceptance map
+
+This baseline is also the canonical narrow-versus-wide comparison for Issue
+#93. Reusing the live-validated workload avoids creating a second experiment
+that would teach the same execution boundary with different fixtures.
+
+| Acceptance concern | Evidence in this experiment |
+| --- | --- |
+| Controlled input and verified result | Seven literal source rows are filtered and aggregated; an assertion reconciles the output to independent expected values for Series A and B. |
+| Source and filtered partition occupancy | Separate instrumentation actions record four non-empty source partitions (`1, 2, 2, 2`) and four non-empty filtered partitions (`1, 1, 2, 1`). |
+| Shuffle boundary | The physical plan places `PhotonFilter` before `PhotonShuffleExchangeSink hashpartitioning(series_id, 16)` and performs partial and final aggregation on opposite sides of that exchange. |
+| Transformation versus action | `where` and `groupBy(...).agg(...)` declare lazy transformations; the small `grouped.collect()` is the action that requests execution. |
+| Jobs, stages, and tasks | The action creates a job; Spark separates stages at the shuffle dependency; tasks process the participating partitions within each stage. Exact runtime counts must be read from the query profile. |
+| Evidence limit | The run proves the observed controlled plan and results. It does not establish production performance, fixed stage or task counts, or a universally optimal partition strategy. |
+
 ## Mental model
 
 - The **driver** runs the application control flow, constructs the query plan,

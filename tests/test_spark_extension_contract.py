@@ -77,6 +77,21 @@ class SparkExtensionContractTests(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, guide)
 
+    def test_baseline_guide_maps_the_narrow_wide_acceptance_evidence(self):
+        guide = GUIDE.read_text(encoding="utf-8").lower()
+
+        for required in [
+            "issue #93 acceptance map",
+            "controlled input and verified result",
+            "source and filtered partition occupancy",
+            "shuffle boundary",
+            "transformation versus action",
+            "jobs, stages, and tasks",
+            "evidence limit",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
     def test_broadcast_experiment_compares_and_reconciles_both_join_paths(self):
         notebook = BROADCAST_NOTEBOOK.read_text(encoding="utf-8")
 
