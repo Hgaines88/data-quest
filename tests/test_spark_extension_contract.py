@@ -11,6 +11,8 @@ BROADCAST_NOTEBOOK = (
 BROADCAST_GUIDE = ROOT / "docs" / "extensions" / "BROADCAST_JOIN_COMPARISON.md"
 SKEW_NOTEBOOK = ROOT / "notebooks" / "extensions" / "07_partition_skew_diagnosis.py"
 SKEW_GUIDE = ROOT / "docs" / "extensions" / "PARTITION_SKEW_DIAGNOSIS.md"
+CACHE_NOTEBOOK = ROOT / "notebooks" / "extensions" / "08_cache_reuse_comparison.py"
+CACHE_GUIDE = ROOT / "docs" / "extensions" / "CACHE_REUSE_COMPARISON.md"
 
 
 class SparkExtensionContractTests(unittest.TestCase):
@@ -229,6 +231,57 @@ class SparkExtensionContractTests(unittest.TestCase):
             "result_parity",
             "photon",
             "isfinalplan=false",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
+    def test_cache_experiment_reconciles_uncached_and_persisted_paths(self):
+        notebook = CACHE_NOTEBOOK.read_text(encoding="utf-8")
+
+        for required in [
+            "spark.range",
+            "EXPECTED_RESULTS",
+            "uncached_run_1",
+            "uncached_run_2",
+            "StorageLevel.MEMORY_AND_DISK",
+            "cached_source.count()",
+            "cached_run_1",
+            "cached_run_2",
+            "uncached_run_1 == EXPECTED_RESULTS",
+            "cached_run_1 == EXPECTED_RESULTS",
+            "cached_source.unpersist(blocking=True)",
+            '.explain(mode="extended")',
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, notebook)
+
+        for forbidden in [
+            "spark.sparkContext",
+            "spark.conf.get",
+            "spark.conf.set",
+            ".rdd",
+            "_jdf",
+        ]:
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, notebook)
+
+    def test_cache_guide_defines_lifecycle_tradeoffs_and_evidence_limits(self):
+        guide = CACHE_GUIDE.read_text(encoding="utf-8").lower()
+
+        for required in [
+            "post-submission",
+            "same deterministic computation",
+            "uncached",
+            "memory_and_disk",
+            "materialization action",
+            "unpersist",
+            "memory pressure",
+            "eviction",
+            "stale",
+            "not an automatic optimization",
+            "what this proves",
+            "what this does not prove",
+            "live validation",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, guide)
