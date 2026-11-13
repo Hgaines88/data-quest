@@ -1,6 +1,6 @@
 # Repartition and coalesce comparison
 
-**Status:** Awaiting live validation in Databricks.
+**Status:** Live-validated in Databricks serverless on November 12, 2026.
 
 This is a post-submission Spark extension. It uses generated records and does
 not read or mutate the submitted landing, Bronze, Silver, Gold, manifest, or
@@ -40,8 +40,8 @@ expensive for modest reductions, but it also preserves more of the prior data
 shape. It is not a rebalancing operation and can leave uneven or oversized
 partitions.
 
-The live run should confirm these expectations from the actual physical plans.
-The plan evidence is authoritative for that runtime; the prose is not a
+The November 12 live run confirmed these expectations from the actual physical
+plans. The plan evidence is authoritative for that runtime; the prose is not a
 substitute for inspection.
 
 ## Operational guidance
@@ -62,18 +62,41 @@ Neither operation should be selected from row count alone. Data volume, key
 cardinality, skew, target file size, available parallelism, downstream access
 patterns, and observed task behavior all belong in the decision.
 
-## Evidence to capture during live validation
+## Live validation evidence
 
-- source, repartitioned, and coalesced partition occupancy;
-- the shuffle exchange in the repartition physical plan;
-- the narrow coalesce operator without a corresponding full shuffle;
-- exact row-count and value parity across all three paths;
-- Photon and Adaptive Query Execution details shown by the runtime;
-- any difference between requested partitions and observed non-empty ones.
+The notebook was live-validated in Databricks serverless on November 12, 2026.
+All three paths preserved 120 rows, returned the independently expected grouped
+counts and sums, and finished with exact result parity.
+
+Observed non-empty partition occupancy was:
+
+- source: 30, 30, 30, and 30;
+- repartitioned: 40 and 80;
+- coalesced: 60 and 60.
+
+The repartition logical plan contained `RepartitionByExpression [group_key]`.
+Its physical plan contained `PhotonShuffleMapStage REPARTITION_BY_NUM` and
+`PhotonShuffleExchangeSink hashpartitioning(group_key, 2)`, demonstrating the
+full keyed shuffle. Databricks reported that path as fully supported by Photon.
+
+The coalesce logical plan contained `Repartition 2, false`. Its physical plan
+contained `Coalesce 2` with no shuffle exchange. Databricks reported that path
+as not fully supported by Photon specifically because `Coalesce 2` was an
+unsupported node; the upstream projection and range still executed through
+Photon.
+
+The observed 40 and 80 repartitioned occupancy does not mean that repartition
+inherently creates skew. This controlled dataset has three group keys hashed
+into two partitions, so requesting two keyed partitions did not imply equal row
+counts. The observed 60 and 60 coalesced occupancy occurred because the
+balanced source partitions happened to collapse evenly; `coalesce()` provides
+no general rebalance guarantee.
+
+This is runtime inspection, not a performance benchmark.
 
 ## What this proves
 
-After live validation, this experiment can prove how one Databricks runtime
+This live-validated experiment proves how this Databricks serverless runtime
 executed these two controlled partition changes and that both preserved the
 expected analytical result.
 
@@ -92,6 +115,8 @@ Both produced the same verified result, but they solve different physical
 problems. Repartition performs a full shuffle to redistribute data and is the
 choice when I need rebalancing or key-based organization. Coalesce narrowly
 reduces partitions with less movement, which is useful for reducing small files
-when the existing shape is acceptable. It can preserve skew and reduce
-parallelism, so I inspect partition occupancy and the physical plan rather than
-assuming the requested count created a balanced layout.”
+when the existing shape is acceptable. In this run, repartition produced a
+40-and-80 layout and coalesce produced a 60-and-60 layout, but those are runtime
+observations rather than guarantees. I inspect partition occupancy and the
+physical plan instead of assuming the requested count created a balanced
+layout.”

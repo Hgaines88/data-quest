@@ -369,6 +369,25 @@ class SparkExtensionContractTests(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, guide)
 
+    def test_partition_guide_records_live_serverless_evidence_without_overclaiming(self):
+        guide = PARTITION_GUIDE.read_text(encoding="utf-8").lower()
+
+        for required in [
+            "november 12, 2026",
+            "30, 30, 30, and 30",
+            "40 and 80",
+            "60 and 60",
+            "repartition_by_num",
+            "hashpartitioning(group_key",
+            "coalesce 2",
+            "no shuffle exchange",
+            "not fully supported by photon",
+            "result parity",
+            "not a performance benchmark",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
 
 if __name__ == "__main__":
     unittest.main()
